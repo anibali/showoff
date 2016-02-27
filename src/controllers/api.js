@@ -12,12 +12,28 @@ const errorResponse = (res, err) => {
   }
 };
 
+const frameParams = (req) => {
+  return _.pick(req.body.frame, ['content', 'title']);
+};
+
 router.put('/frame/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const newAttrs = _.pick(req.body.frame, ['content', 'title']);
+  const attrs = frameParams(req);
 
   models('Frame').where({ id }).fetch({ require: true })
-    .then((frame) => frame.save(newAttrs))
+    .then((frame) => frame.save(attrs))
+    .then((frame) => res.json(frame))
+    .catch((err) => errorResponse(res, err));
+});
+
+router.post('/frame', (req, res) => {
+  const notebookId = req.body.frame.notebookId;
+  // TODO: Verify notebookId is valid
+  const attrs = _.assign({},
+    frameParams(req),
+    { notebookId });
+
+  models('Frame').forge(attrs).save()
     .then((frame) => res.json(frame))
     .catch((err) => errorResponse(res, err));
 });

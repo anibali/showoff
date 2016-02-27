@@ -3,7 +3,7 @@ exports.up = function(knex) {
     table.increments('id').primary();
     table.string('title');
     table.text('content');
-    table.integer('notebook_id').unsigned().references('id').inTable('notebooks');
+    table.integer('notebookId').unsigned().references('id').inTable('notebooks');
   });
 };
 

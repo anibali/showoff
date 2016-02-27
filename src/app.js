@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const models = require('./models');
 const serverState = require('./server-state');
 
 // Create a new Express app

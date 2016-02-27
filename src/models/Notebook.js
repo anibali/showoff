@@ -1,4 +1,7 @@
 module.exports = (bookshelf) =>
   bookshelf.model('Notebook', {
-    tableName: 'notebooks'
+    tableName: 'notebooks',
+    frames: function() {
+      return this.hasMany('Frame');
+    }
   });

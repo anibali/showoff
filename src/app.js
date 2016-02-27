@@ -3,7 +3,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const models = require('./models');
-const serverState = require('./server-state');
 
 // Create a new Express app
 const app = express();
@@ -23,26 +22,28 @@ require('./config/routes').connect(app);
 
 // Set up the root route
 app.get('/', (req, res) => {
-  const initalState = serverState;
+  models('Notebook').where({ id: 1 }).fetch({ withRelated: ['frames'] }).then((notebook) => {
+    const initalState = { notebooks: [notebook.toJSON()] };
 
-  // The HTML is pretty barebones, it just provides a mount point
-  // for React and links to our styles and scripts.
-  const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <link rel="stylesheet" type="text/css" href="/assets/css/app.css">
-      </head>
-      <body>
-        <div class="fill-space" id="root"></div>
-        <script src="/assets/js/vendor.js"></script>
-        <script src="/assets/js/app.js"></script>
-        <script>main(${JSON.stringify(initalState)})</script>
-      </body>
-    </html>`;
+    // The HTML is pretty barebones, it just provides a mount point
+    // for React and links to our styles and scripts.
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <link rel="stylesheet" type="text/css" href="/assets/css/app.css">
+        </head>
+        <body>
+          <div class="fill-space" id="root"></div>
+          <script src="/assets/js/vendor.js"></script>
+          <script src="/assets/js/app.js"></script>
+          <script>main(${JSON.stringify(initalState)})</script>
+        </body>
+      </html>`;
 
-  // Respond with the HTML
-  res.send(htmlContent);
+    // Respond with the HTML
+    res.send(htmlContent);
+  });
 });
 
 // Export the Express app

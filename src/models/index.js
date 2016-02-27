@@ -5,9 +5,8 @@ const bookshelf = require('bookshelf')(knex);
 bookshelf.plugin('registry');
 
 require('./Notebook')(bookshelf);
+require('./Frame')(bookshelf);
 
-bookshelf.model('Notebook').fetchAll().then((notebooks) => {
-  console.log(notebooks.toJSON());
-});
-
-module.exports = bookshelf;
+module.exports = (modelName) => {
+  return bookshelf.model(modelName);
+};

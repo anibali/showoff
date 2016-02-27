@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+  web:
+    build: .
+    volumes:
+      - ".:/app"
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - ./env/mysql.env
+    links:
+      - db
+  db:
+    image: mysql:5.7
+    environment:
+      - MYSQL_DATABASE=showoff_db
+    env_file:
+      - ./env/mysql.env
+    volumes:
+      - "db-data:/var/lib/mysql"
+
+volumes:
+  db-data:
+    external:
+      name: showoff-db-data

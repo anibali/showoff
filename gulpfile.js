@@ -3,6 +3,7 @@ const gutil = require('gulp-util');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
 const browserify = require('browserify');
+const envify = require('envify/custom');
 const watchify = require('watchify');
 const clean = require('gulp-clean');
 const concat = require('gulp-concat');
@@ -12,13 +13,16 @@ const merge = require('ordered-merge-stream');
 
 // List of npm modules to bundle separately from our application code
 const libs = [
-  'whatwg-fetch',
+  'lodash',
   'react',
   'react-dom',
-  'redux',
   'react-draggable',
   'react-redux',
-  'lodash'
+  'react-router',
+  'react-router-redux',
+  'redux',
+  'redux-thunk',
+  'whatwg-fetch',
 ];
 
 // Information about where project files are located
@@ -99,6 +103,7 @@ function bundleScripts(shouldWatch) {
 
   // Create the bundler
   const bundler = browserify(opts)
+    .transform(envify({ NODE_ENV: process.env.NODE_ENV, IN_BROWSER: true }))
     .transform([babelify, { sourceMap: true }])
     .external(libs);
 

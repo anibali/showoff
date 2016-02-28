@@ -1,9 +1,19 @@
 const React = require('react');
-const ReactRedux = require('react-redux');
+const reactRedux = require('react-redux');
 
-const Provider = ReactRedux.Provider;
+const Provider = reactRedux.Provider;
+const { Router, Route, IndexRoute } = require('react-router');
 
-const Notebook = require('./Notebook.js');
+const App = require('./App');
+const Home = require('./Home');
+const Notebook = require('./Notebook');
+
+let history;
+if(process.env.IN_BROWSER) {
+  history = require('react-router').browserHistory;
+} else {
+  history = require('react-router').createMemoryHistory();
+}
 
 /**
  * The root React component from which all other components
@@ -17,7 +27,12 @@ const Root = React.createClass({
   render: function() {
     return (
       <Provider store={this.props.store}>
-        <Notebook />
+        <Router history={history}>
+          <Route path="/" component={App}>
+            <IndexRoute component={Home}/>
+            <Route path="notebooks/:id" component={Notebook} />
+          </Route>
+        </Router>
       </Provider>
     );
   }

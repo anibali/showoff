@@ -49,9 +49,11 @@ const Notebook = React.createClass({
 
 module.exports = ReactRedux.connect(
   // Map store state to props
-  (state) => ({
-    frames: state.notebooks[0].frames
-  }),
+  (state, ownProps) => {
+    const id = parseInt(ownProps.params.id, 10);
+    const notebook = _.find(state.notebooks, { id });
+    return { frames: notebook.frames };
+  },
 
   (dispatch) => ({
     refreshNotebook: _.flow(notebooksActionCreators.refreshNotebook, dispatch),

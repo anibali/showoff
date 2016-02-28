@@ -1,8 +1,12 @@
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
+const reactRouter = require('react-router');
+const { syncHistoryWithStore } = require('react-router-redux');
 
 const models = require('./models');
+const routes = require('./routes');
+const createStore = require('./helpers/createStore');
 
 // Create a new Express app
 const app = express();
@@ -20,29 +24,42 @@ app.use('/assets/fonts', express.static(path.join(__dirname,
 
 require('./config/routes').connect(app);
 
-// Set up the root route
-app.get('/', (req, res) => {
-  models('Notebook').where({ id: 1 }).fetch({ withRelated: ['frames'] }).then((notebook) => {
-    const initalState = { notebooks: [notebook.toJSON()] };
+app.use((req, res) => {
+  // TODO: Don't fetch everything all of the time
+  models('Notebook').fetchAll({ withRelated: ['frames'] }).then((notebooks) => {
+    const initialState = { notebooks: notebooks.toJSON() };
+    const store = createStore(initialState);
+    const history = syncHistoryWithStore(reactRouter.createMemoryHistory(), store);
 
-    // The HTML is pretty barebones, it just provides a mount point
-    // for React and links to our styles and scripts.
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <link rel="stylesheet" type="text/css" href="/assets/css/app.css">
-        </head>
-        <body>
-          <div class="fill-space" id="root"></div>
-          <script src="/assets/js/vendor.js"></script>
-          <script src="/assets/js/app.js"></script>
-          <script>main(${JSON.stringify(initalState)})</script>
-        </body>
-      </html>`;
+    const matchOpts = { history, routes, location: req.url };
+    reactRouter.match(matchOpts, (error, redirectLocation, renderProps) => {
+      if(error) {
+        res.status(500).send(error.message);
+      } else if(redirectLocation) {
+        res.redirect(302, redirectLocation.pathname + redirectLocation.search);
+      } else if(!renderProps) {
+        res.status(404).send('Not found');
+      } else {
+        // The HTML is pretty barebones, it just provides a mount point
+        // for React and links to our styles and scripts.
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <link rel="stylesheet" type="text/css" href="/assets/css/app.css">
+            </head>
+            <body>
+              <div class="fill-space" id="root"></div>
+              <script src="/assets/js/vendor.js"></script>
+              <script src="/assets/js/app.js"></script>
+              <script>main(${JSON.stringify(initialState)})</script>
+            </body>
+          </html>`;
 
-    // Respond with the HTML
-    res.send(htmlContent);
+        // Respond with the HTML
+        res.send(htmlContent);
+      }
+    });
   });
 });
 

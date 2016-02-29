@@ -7,6 +7,9 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
+RUN apt-get update \
+ && apt-get install -y libcairo2-dev libjpeg62-turbo-dev libpango1.0-dev libgif-dev build-essential g++
+
 # Give unknown non-root users a place to call home.
 # This is required for npm/bower install during development.
 RUN mkdir -p /home/default && chmod 777 /home/default

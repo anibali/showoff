@@ -7,6 +7,4 @@ bookshelf.plugin('registry');
 require('./Notebook')(bookshelf);
 require('./Frame')(bookshelf);
 
-module.exports = (modelName) => {
-  return bookshelf.model(modelName);
-};
+module.exports = (modelName) => bookshelf.model(modelName);

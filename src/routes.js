@@ -7,7 +7,7 @@ const Notebook = require('./components/Notebook');
 
 const routes = (
   <Route path="/" component={App}>
-    <IndexRoute component={Home}/>
+    <IndexRoute component={Home} />
     <Route path="notebooks/:id" component={Notebook} />
   </Route>
 );

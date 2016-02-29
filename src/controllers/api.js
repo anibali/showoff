@@ -12,9 +12,7 @@ const errorResponse = (res, err) => {
   }
 };
 
-const frameParams = (req) => {
-  return _.pick(req.body.frame, ['content', 'title']);
-};
+const frameParams = (req) => _.pick(req.body.frame, ['content', 'title']);
 
 router.put('/frame/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);

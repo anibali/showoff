@@ -21,6 +21,7 @@
     "new-cap": 0,
     "func-names": 0,
     "space-after-keywords": 0,
+    "keyword-spacing": 0,
     "space-before-function-paren": [2, "never"],
     "object-shorthand": [2, "properties"],
     "quote-props": [2, "consistent"],

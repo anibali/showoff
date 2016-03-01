@@ -1,6 +1,5 @@
 body {
   background: #363330;
-  color: white;
 }
 
 .fill-space {
@@ -15,11 +14,8 @@ body {
   width: 480px;
   height: 360px;
   position: absolute;
-
-  background-color: #43403D;
+  background-color: white;
   border: 1px solid #A9A6A3;
-  color: white;
-
   border-radius: 4px;
 }
 
@@ -41,4 +37,10 @@ body {
 
 .frame-content {
   padding: 6px;
+  overflow: auto;
+  position: absolute;
+  top: 26px;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
 }

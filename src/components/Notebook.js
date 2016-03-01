@@ -28,7 +28,7 @@ const Frame = (frame, i) => (
   >
     <div className="frame">
       <div className="frame-handle">{frame.title || '<untitled frame>'}</div>
-      <div className="frame-content">{frame.content}</div>
+      <div className="frame-content" dangerouslySetInnerHTML={{ __html: frame.content }} />
     </div>
   </Draggable>
 );

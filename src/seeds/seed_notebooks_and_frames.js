@@ -10,13 +10,19 @@ const frames = [
     id: 1,
     notebookId: 1,
     title: 'A frame',
-    content: 'Enough content to keep you content.'
+    content: {
+      type: 'text',
+      body: 'Enough content to keep you content.'
+    }
   },
   {
     id: 2,
     notebookId: 1,
     title: 'Another frame',
-    content: 'Why so many frames?'
+    content: {
+      type: 'text',
+      body: 'Why so many frames?'
+    }
   }
 ];
 

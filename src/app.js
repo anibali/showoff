@@ -1,4 +1,5 @@
 const path = require('path');
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const reactRouter = require('react-router');
@@ -27,7 +28,12 @@ require('./config/routes').connect(app);
 app.use((req, res) => {
   // TODO: Don't fetch everything all of the time
   models('Notebook').fetchAll({ withRelated: ['frames'] }).then((notebooks) => {
-    const initialState = { notebooks: notebooks.toJSON() };
+    const initialState = {};
+    initialState.notebooks = notebooks.toJSON().map((notebook) => {
+      const frames = notebook.frames.map((frame) =>
+        _.assign({}, frame, { content: frame.content.body }));
+      return _.assign({}, notebook, { frames });
+    });
     const store = createStore(initialState);
     const history = syncHistoryWithStore(reactRouter.createMemoryHistory(), store);
 
@@ -60,7 +66,7 @@ app.use((req, res) => {
         res.send(htmlContent);
       }
     });
-  });
+  }).catch((error) => res.status(500).send(error.message));
 });
 
 // Export the Express app

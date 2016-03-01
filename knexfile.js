@@ -2,11 +2,11 @@ const path = require('path');
 
 module.exports = {
   development: {
-    client: 'mysql',
+    client: 'postgres',
     connection: {
       host: 'db',
-      user: process.env.MYSQL_USER,
-      password: process.env.MYSQL_PASSWORD,
+      user: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
       database: 'showoff_db',
       charset: 'utf8'
     },

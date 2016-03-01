@@ -13,7 +13,7 @@ const Frame = React.createClass({
   },
 
   onResize: function(event, data) {
-    this.setState(_.pick(data.size, 'width', 'height'));
+    this.setState(_.pick(data.size, ['width', 'height']));
   },
 
   onMouseDown: function(event) {

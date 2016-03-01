@@ -12,6 +12,24 @@ const errorResponse = (res, err) => {
   }
 };
 
+const notebookParams = (req) => _.pick(req.body.notebook, ['title']);
+
+router.post('/notebook', (req, res) => {
+  const attrs = notebookParams(req);
+
+  models('Notebook').forge(attrs).save()
+    .then((notebook) => res.json(notebook))
+    .catch((err) => errorResponse(res, err));
+});
+
+router.delete('/notebook/:id/frames', (req, res) => {
+  const notebookId = parseInt(req.params.id, 10);
+
+  models('Frame').where({ notebookId }).destroy()
+    .then(() => res.json({}))
+    .catch((err) => errorResponse(res, err));
+});
+
 const frameParams = (req) => _.pick(req.body.frame, ['content', 'title']);
 
 router.put('/frame/:id', (req, res) => {

@@ -1,13 +1,11 @@
 const notebooks = [
   {
-    id: 1,
     title: 'My notebook'
   }
 ];
 
 const frames = [
   {
-    id: 1,
     notebookId: 1,
     title: 'A frame',
     content: {
@@ -16,7 +14,6 @@ const frames = [
     }
   },
   {
-    id: 2,
     notebookId: 1,
     title: 'Another frame',
     content: {
@@ -25,64 +22,63 @@ const frames = [
     }
   },
   {
-    id: 3,
     notebookId: 1,
     title: 'A Vega graph',
     content: {
       type: 'vega',
       body: {
-        "width": 400,
-        "height": 270,
-        "data": [
+        width: 400,
+        height: 270,
+        data: [
           {
-            "name": "table",
-            "values": [
-              {"x": 1,  "y": 28}, {"x": 2,  "y": 55},
-              {"x": 3,  "y": 43}, {"x": 4,  "y": 91},
-              {"x": 5,  "y": 81}, {"x": 6,  "y": 53}
+            name: 'table',
+            values: [
+              { x: 1, y: 28 }, { x: 2, y: 55 },
+              { x: 3, y: 43 }, { x: 4, y: 91 },
+              { x: 5, y: 81 }, { x: 6, y: 53 }
             ]
           }
         ],
-        "scales": [
+        scales: [
           {
-            "name": "x",
-            "type": "linear",
-            "range": "width",
-            "domain": {"data": "table", "field": "x"},
-            "nice": true
+            name: 'x',
+            type: 'linear',
+            range: 'width',
+            domain: { data: 'table', field: 'x' },
+            nice: true
           },
           {
-            "name": "y",
-            "type": "linear",
-            "range": "height",
-            "domain": {"data": "table", "field": "y"},
-            "nice": true
+            name: 'y',
+            type: 'linear',
+            range: 'height',
+            domain: { data: 'table', field: 'y' },
+            nice: true
           }
         ],
-        "axes": [
-          {"type": "x", "scale": "x"},
-          {"type": "y", "scale": "y"}
+        axes: [
+          { type: 'x', scale: 'x' },
+          { type: 'y', scale: 'y' }
         ],
-        "marks": [
+        marks: [
           {
-            "type": "line",
-            "from": {"data": "table"},
-            "properties": {
-              "enter": {
-                "x": {"scale": "x", "field": "x"},
-                "y": {"scale": "y", "field": "y"},
-                "stroke": {"value": "steelblue"}
+            type: 'line',
+            from: { data: 'table' },
+            properties: {
+              enter: {
+                x: { scale: 'x', field: 'x' },
+                y: { scale: 'y', field: 'y' },
+                stroke: { value: 'steelblue' }
               }
             }
           },
           {
-            "type": "symbol",
-            "from": {"data": "table"},
-            "properties": {
-              "enter": {
-                "x": {"scale": "x", "field": "x"},
-                "y": {"scale": "y", "field": "y"},
-                "fill": {"value": "steelblue"}
+            type: 'symbol',
+            from: { data: 'table' },
+            properties: {
+              enter: {
+                x: { scale: 'x', field: 'x' },
+                y: { scale: 'y', field: 'y' },
+                fill: { value: 'steelblue' }
               }
             }
           }

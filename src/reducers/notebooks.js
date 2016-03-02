@@ -1,4 +1,7 @@
-const REFRESH_NOTEBOOK = Symbol('sconce/cellList/CHANGE_CODE');
+const _ = require('lodash');
+
+const UPDATE_FRAME = Symbol('sconce/notebooks/UPDATE_FRAME');
+
 
 // The initial state is filled with some dummy data for debugging purposes
 const initialState = [
@@ -12,16 +15,29 @@ function reducer(state, action) {
   action = action || {};
 
   switch(action.type) {
-    case REFRESH_NOTEBOOK: {
-      console.log('TODO: Refresh notebook');
-      return state;
+    case UPDATE_FRAME: {
+      // TODO: Make this work across multiple notebooks
+      let updatedFrame = false;
+      const frames = state[0].frames.map((frame) => {
+        if(frame.id === action.frame.id) {
+          updatedFrame = true;
+          return _.assign({}, frame, action.frame);
+        }
+        return frame;
+      });
+      if(!updatedFrame) {
+        frames.push(action.frame);
+      }
+      const newState = _.clone(state);
+      newState[0] = _.assign({}, state[0], { frames });
+      return newState;
     }
 
     default: return state;
   }
 }
 
-reducer.refreshNotebook = (notebookId) =>
-  ({ type: REFRESH_NOTEBOOK, notebookId });
+reducer.updateFrame = (frame) =>
+  ({ type: UPDATE_FRAME, frame });
 
 module.exports = reducer;

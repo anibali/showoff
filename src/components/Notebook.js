@@ -77,9 +77,5 @@ module.exports = ReactRedux.connect(
     const id = parseInt(ownProps.params.id, 10);
     const notebook = _.find(state.notebooks, { id });
     return { frames: notebook.frames };
-  },
-
-  (dispatch) => ({
-    refreshNotebook: _.flow(notebooksActionCreators.refreshNotebook, dispatch),
-  })
+  }
 )(Notebook);

@@ -1,6 +1,8 @@
 const express = require('express');
 const _ = require('lodash');
 const models = require('../models');
+const wss = require('../websocket-server');
+const frameViews = require('../frameViews');
 
 const router = express.Router();
 
@@ -38,8 +40,22 @@ router.put('/frame/:id', (req, res) => {
 
   models('Frame').where({ id }).fetch({ require: true })
     .then((frame) => frame.save(attrs))
+    .then((frame) => {
+      const newFrame = _.clone(frame.toJSON());
+      const promise = frameViews.render(newFrame.content)
+        .then((content) => {
+          newFrame.content = content;
+        })
+        .then(() => newFrame);
+      return promise;
+    })
+    .then((frame) => {
+      wss.broadcast(JSON.stringify(frame));
+    })
     .then((frame) => res.json(frame))
-    .catch((err) => errorResponse(res, err));
+    .catch((err) => {
+      errorResponse(res, err);
+    });
 });
 
 router.post('/frame', (req, res) => {

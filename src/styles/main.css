@@ -17,15 +17,17 @@ body {
 .frame {
   position: absolute;
   background-color: white;
-  border: 1px solid #A9A6A3;
+  border: 1px solid #012;
   border-radius: 4px;
+  box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
 }
 
 .frame-handle {
   height: 22px;
   line-height: 22px;
-  background-color: #A9A6A3;
-  color: #363330;
+  background-color: black;
+  background: linear-gradient(#012, #001);
+  color: white;
   overflow: hidden;
   cursor: move;
   padding-left: 8px;

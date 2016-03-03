@@ -14,9 +14,15 @@ body {
   right: 0;
 }
 
+.img-scalable {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .frame {
   position: absolute;
-  background-color: white;
+  background: white;
   border: 1px solid #012;
   border-radius: 4px;
   box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
@@ -25,7 +31,7 @@ body {
 .frame-handle {
   height: 22px;
   line-height: 22px;
-  background-color: black;
+  background: black;
   background: linear-gradient(#012, #001);
   color: white;
   overflow: hidden;
@@ -52,6 +58,7 @@ body {
 .react-resizable {
   position: absolute;
 }
+
 .react-resizable-handle {
   position: absolute;
   width: 20px;

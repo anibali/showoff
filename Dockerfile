@@ -16,6 +16,7 @@ RUN mkdir -p /home/default && chmod 777 /home/default
 
 # Create a working directory for our application.
 RUN mkdir -p /app
+COPY . /app
 WORKDIR /app
 
 # Put npm executables in the system path

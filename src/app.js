@@ -13,7 +13,7 @@ const frameViews = require('./frameViews');
 // Create a new Express app
 const app = express();
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
 
 // Serve up our static assets from 'dist' (this includes our client-side
 // bundle of JavaScript). These assets are referred to in the HTML using

@@ -15,7 +15,7 @@ const createStore = require('./helpers/createStore');
 const routes = require('./routes');
 const notebookActionCreators = require('./reducers/notebooks');
 
-let ws = new WebSocket('ws://localhost:3000/');
+let ws = new WebSocket(`ws://${location.host}/`);
 
 ws.onclose = function(event) {
   console.log('WebSocket connection closed', event.code, event.reason);

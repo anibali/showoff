@@ -1,6 +1,9 @@
 const notebooks = [
   {
     title: 'My notebook'
+  },
+  {
+    title: 'My other notebook'
   }
 ];
 

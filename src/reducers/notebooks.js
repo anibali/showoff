@@ -2,11 +2,7 @@ const _ = require('lodash');
 
 const UPDATE_FRAME = Symbol('sconce/notebooks/UPDATE_FRAME');
 
-
-// The initial state is filled with some dummy data for debugging purposes
-const initialState = [
-  { frames: [] }
-];
+const initialState = [];
 
 // The reducer function takes the current state and an action, and returns
 // the new state after applying the action.
@@ -16,9 +12,10 @@ function reducer(state, action) {
 
   switch(action.type) {
     case UPDATE_FRAME: {
-      // TODO: Make this work across multiple notebooks
+      const notebookIndex = _.findIndex(state, { id: action.frame.notebookId });
+
       let updatedFrame = false;
-      const frames = state[0].frames.map((frame) => {
+      const frames = state[notebookIndex].frames.map((frame) => {
         if(frame.id === action.frame.id) {
           updatedFrame = true;
           return _.assign({}, frame, action.frame);
@@ -29,7 +26,7 @@ function reducer(state, action) {
         frames.push(action.frame);
       }
       const newState = _.clone(state);
-      newState[0] = _.assign({}, state[0], { frames });
+      newState[notebookIndex] = _.assign({}, state[notebookIndex], { frames });
       return newState;
     }
 

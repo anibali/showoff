@@ -5,8 +5,6 @@ const ReactRedux = require('react-redux');
 const Draggable = require('react-draggable');
 const Resizable = require('react-resizable').Resizable;
 
-const notebooksActionCreators = require('../reducers/notebooks');
-
 const Frame = React.createClass({
   getInitialState: function() {
     return { width: 480, height: 360 };

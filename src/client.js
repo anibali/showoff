@@ -15,17 +15,21 @@ const createStore = require('./helpers/createStore');
 const routes = require('./routes');
 const notebookActionCreators = require('./reducers/notebooks');
 
-let ws = new WebSocket(`ws://${location.host}/`);
-
-ws.onclose = function(event) {
-  console.log('WebSocket connection closed', event.code, event.reason);
-  ws = null;
-};
-
 window.main = (initialState) => {
   // Create a Redux store
   const store = createStore(initialState);
   const history = syncHistoryWithStore(browserHistory, store);
+
+  let ws = new WebSocket(`ws://${location.host}/`);
+
+  ws.onopen = function() {
+    console.log('WebSocket connection opened');
+  };
+
+  ws.onclose = function(event) {
+    console.log('WebSocket connection closed', event.code, event.reason);
+    ws = null;
+  };
 
   ws.onmessage = function(event) {
     store.dispatch(notebookActionCreators.updateFrame(JSON.parse(event.data)));

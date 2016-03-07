@@ -51,6 +51,7 @@ router.put('/frame/:id', (req, res) => {
     })
     .then((frame) => {
       wss.broadcast(JSON.stringify(frame));
+      return frame;
     })
     .then((frame) => res.json(frame))
     .catch((err) => {

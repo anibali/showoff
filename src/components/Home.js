@@ -12,14 +12,12 @@ const NotebookListItem = ({ notebook, deleteNotebook }) => {
   };
 
   return (
-    <li className="list-group-item">
-      <Link to={`/notebooks/${notebook.id}`}>
-        {notebook.title}
-      </Link>
+    <Link className="list-group-item" to={`/notebooks/${notebook.id}`}>
+      {notebook.title}
       <button className="btn-xs btn-danger pull-right" onClick={onClickDelete}>
         <span className="fa fa-trash-o" />
       </button>
-    </li>
+    </Link>
   );
 };
 
@@ -30,9 +28,9 @@ const Home = ({ notebooks, deleteNotebook }) => {
   return (
     <div className="container">
       <h1>Notebooks</h1>
-      <ul className="list-group">
+      <div className="list-group">
         {notebooks.map(createListItem)}
-      </ul>
+      </div>
     </div>
   );
 };

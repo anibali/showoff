@@ -7,6 +7,7 @@ const frameViews = require('../frameViews');
 const router = express.Router();
 
 const errorResponse = (res, err) => {
+  console.error(err.stack);
   if(err.message === 'EmptyResponse') {
     res.status(404).json({});
   } else {
@@ -21,6 +22,14 @@ router.post('/notebook', (req, res) => {
 
   models('Notebook').forge(attrs).save()
     .then((notebook) => res.json(notebook))
+    .catch((err) => errorResponse(res, err));
+});
+
+router.delete('/notebook/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  models('Notebook').where({ id }).destroy()
+    .then(() => res.json({}))
     .catch((err) => errorResponse(res, err));
 });
 

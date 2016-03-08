@@ -62,7 +62,7 @@ const Notebook = React.createClass({
   // Describe how to render the component
   render: function() {
     return (
-      <div className="fill-space">
+      <div className="fill-space notebook">
         {_.map(this.props.frames, createFrame)}
       </div>
     );

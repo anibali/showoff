@@ -18,6 +18,7 @@ const libs = [
   'react-dom',
   'react-draggable',
   'react-redux',
+  'react-resizable',
   'react-router',
   'react-router-redux',
   'redux',

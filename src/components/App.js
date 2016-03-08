@@ -1,7 +1,7 @@
 const React = require('react');
 
 const App = (props) => (
-  <div>
+  <div className="fill-space">
     {props.children}
   </div>
 );

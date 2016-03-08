@@ -1,6 +1,7 @@
 const _ = require('lodash');
 
 const UPDATE_FRAME = Symbol('sconce/notebooks/UPDATE_FRAME');
+const REMOVE_NOTEBOOK = Symbol('sconce/notebooks/REMOVE_NOTEBOOK');
 
 const initialState = [];
 
@@ -30,11 +31,26 @@ function reducer(state, action) {
       return newState;
     }
 
+    case REMOVE_NOTEBOOK: {
+      return _.reject(state, { id: action.notebookId });
+    }
+
     default: return state;
   }
 }
 
 reducer.updateFrame = (frame) =>
   ({ type: UPDATE_FRAME, frame });
+
+reducer.removeNotebook = (notebookId) =>
+  ({ type: REMOVE_NOTEBOOK, notebookId });
+
+reducer.deleteNotebook = (notebookId) => (dispatch) =>
+  fetch(`/api/notebook/${notebookId}`, { method: 'delete' }).then(() => {
+    dispatch(reducer.removeNotebook(notebookId));
+  }).catch((err) => {
+    console.error(err);
+    alert('Failed to delete notebook');
+  });
 
 module.exports = reducer;

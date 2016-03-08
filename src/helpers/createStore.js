@@ -1,11 +1,10 @@
 const Redux = require('redux');
-const reduxThunk = require('redux-thunk');
+const ReduxThunk = require('redux-thunk').default;
 
 const combinedReducers = require('../reducers');
 
-const finalCreateStore = Redux.compose(
-  // Enable middleware
-  Redux.applyMiddleware(reduxThunk)
-)(Redux.createStore);
-
-module.exports = initialState => finalCreateStore(combinedReducers, initialState);
+module.exports = (initialState) =>
+  Redux.createStore(
+    combinedReducers,
+    initialState,
+    Redux.applyMiddleware(ReduxThunk));

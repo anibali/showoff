@@ -11,24 +11,24 @@ const frames = [
   {
     notebookId: 1,
     title: 'A frame',
+    type: 'text',
     content: {
-      type: 'text',
       body: 'Enough content to keep you content.'
     }
   },
   {
     notebookId: 1,
     title: 'Another frame',
+    type: 'text',
     content: {
-      type: 'text',
       body: 'Why so many frames?'
     }
   },
   {
     notebookId: 1,
     title: 'A Vega graph',
+    type: 'vega',
     content: {
-      type: 'vega',
       body: {
         width: 400,
         height: 270,
@@ -92,8 +92,11 @@ const frames = [
 ];
 
 exports.seed = function(knex, Promise) {
-  return (knex('frames').del()
+  return (Promise.resolve()
+    .then(() => knex('frames').del())
+    .then(() => knex.raw('ALTER SEQUENCE frames_id_seq RESTART WITH 1;'))
     .then(() => knex('notebooks').del())
+    .then(() => knex.raw('ALTER SEQUENCE notebooks_id_seq RESTART WITH 1;'))
     .then(() => Promise.all(notebooks.map((notebook) => knex('notebooks').insert(notebook))))
     .then(() => Promise.all(frames.map((frame) => knex('frames').insert(frame))))
   );

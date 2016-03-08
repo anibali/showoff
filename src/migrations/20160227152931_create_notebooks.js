@@ -1,6 +1,8 @@
 exports.up = function(knex) {
   return knex.schema.createTable('notebooks', (table) => {
     table.increments('id').primary();
+    table.dateTime('createdAt').notNullable().defaultTo(knex.raw('now()'));
+    table.dateTime('updatedAt').notNullable().defaultTo(knex.raw('now()'));
     table.string('title');
   });
 };

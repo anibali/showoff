@@ -36,7 +36,7 @@ app.use((req, res) => {
       const frames = notebook.frames.map((frame) => {
         const newFrame = _.clone(frame);
         promises.push(
-          frameViews.render(frame.content).then((content) => {
+          frameViews.render(frame).then((content) => {
             newFrame.content = content;
           })
         );

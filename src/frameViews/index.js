@@ -6,6 +6,14 @@ const renderers = {
   vega: require('./vega')
 };
 
-frameViews.render = (frameContent) => renderers[frameContent.type](frameContent);
+frameViews.render = (frame) => {
+  const frameView = renderers[frame.type];
+  if(!frameView) {
+    return new Promise((resolve) => {
+      resolve('');
+    });
+  }
+  return renderers[frame.type](frame.content);
+};
 
 module.exports = frameViews;

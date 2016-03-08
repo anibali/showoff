@@ -15,7 +15,8 @@ const errorResponse = (res, err) => {
   }
 };
 
-const notebookParams = (req) => _.pick(req.body.notebook, ['title']);
+const notebookParams = (req) =>
+  _.pick(req.body.notebook, 'title');
 
 router.post('/notebook', (req, res) => {
   const attrs = notebookParams(req);
@@ -41,7 +42,8 @@ router.delete('/notebook/:id/frames', (req, res) => {
     .catch((err) => errorResponse(res, err));
 });
 
-const frameParams = (req) => _.pick(req.body.frame, ['content', 'title']);
+const frameParams = (req) =>
+  _.pick(req.body.frame, 'title', 'type', 'content');
 
 router.put('/frame/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
@@ -51,7 +53,7 @@ router.put('/frame/:id', (req, res) => {
     .then((frame) => frame.save(attrs))
     .then((frame) => {
       const newFrame = _.clone(frame.toJSON());
-      const promise = frameViews.render(newFrame.content)
+      const promise = frameViews.render(newFrame)
         .then((content) => {
           newFrame.content = content;
         })

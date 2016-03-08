@@ -14,6 +14,7 @@ const NotebookListItem = ({ notebook, deleteNotebook }) => {
   return (
     <Link className="list-group-item" to={`/notebooks/${notebook.id}`}>
       {notebook.title}
+      <small style={{ paddingLeft: 8 }} className="text-muted">{notebook.createdAt}</small>
       <button className="btn-xs btn-danger pull-right" onClick={onClickDelete}>
         <span className="fa fa-trash-o" />
       </button>

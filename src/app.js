@@ -2,6 +2,7 @@ const path = require('path');
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
+const compress = require('compression');
 const reactRouter = require('react-router');
 const { syncHistoryWithStore } = require('react-router-redux');
 
@@ -13,6 +14,7 @@ const frameViews = require('./frameViews');
 // Create a new Express app
 const app = express();
 
+app.use(compress());
 app.use(bodyParser.json({ limit: '50mb' }));
 
 // Serve up our static assets from 'dist' (this includes our client-side

@@ -10,6 +10,7 @@ const concat = require('gulp-concat');
 const babelify = require('babelify');
 const concatCss = require('gulp-concat-css');
 const merge = require('ordered-merge-stream');
+const uglifyify = require('uglifyify');
 
 // List of npm modules to bundle separately from our application code
 const libs = [
@@ -43,43 +44,37 @@ function onError(error) {
 }
 
 // Task to remove all build outputs
-gulp.task('clean', () => {
-  return gulp.src('dist', { read: false })
-    .pipe(clean());
-});
+gulp.task('clean', () =>
+  gulp.src('dist', { read: false }).pipe(clean()));
 
 // Task to remove style outputs
-gulp.task('cleanStyles', () => {
-  return gulp.src('dist/css', { read: false })
-    .pipe(clean());
-});
+gulp.task('cleanStyles', () =>
+  gulp.src('dist/css', { read: false }).pipe(clean()));
 
 // Task to remove script outputs
-gulp.task('cleanScripts', () => {
-  return gulp.src('dist/js/app.*', { read: false })
-    .pipe(clean());
-});
+gulp.task('cleanScripts', () =>
+  gulp.src('dist/js/app.*', { read: false }).pipe(clean()));
 
 // Task to remove vendor script outputs
-gulp.task('cleanVendorScripts', () => {
-  return gulp.src('dist/js/vendor.*', { read: false })
-    .pipe(clean());
-});
+gulp.task('cleanVendorScripts', () =>
+  gulp.src('dist/js/vendor.*', { read: false }).pipe(clean()));
 
 // Task to bundle up styles
-gulp.task('styles', ['cleanStyles'], () => {
-  return merge([gulp.src(paths.vendorStyles), gulp.src(paths.styles)])
+gulp.task('styles', ['cleanStyles'], () =>
+  merge([gulp.src(paths.vendorStyles), gulp.src(paths.styles)])
     .pipe(concatCss('app.css'))
     .on('error', onError)
-    .pipe(gulp.dest('dist/css/'));
-});
+    .pipe(gulp.dest('dist/css/')));
 
 // Task to bundle up vendor scripts (dependencies)
 gulp.task('vendorScripts', ['cleanVendorScripts'], () => {
-  // Stream for processing npm dependencies
-  return browserify({ debug: true })
-    .require(libs)
-    .bundle()
+  let bundler = browserify({ debug: true }).require(libs);
+  // Minify the vendor scripts when not in development mode
+  if(process.env.NODE_ENV !== 'development') {
+    bundler = bundler.transform({ global: true }, uglifyify);
+  }
+  // Stream for processing client-side JavaScript dependencies
+  return bundler.bundle()
     .on('error', onError)
     .pipe(source('vendor.js'))
     .pipe(buffer())
@@ -110,13 +105,12 @@ function bundleScripts(shouldWatch) {
 
   // This function returns a stream which produces the final bundled output
   // from the bundler object
-  const rebundle = () => {
-    return bundler.bundle()
+  const rebundle = () =>
+    bundler.bundle()
       .on('error', onError)
       .pipe(source('app.js'))
       .pipe(buffer())
       .pipe(gulp.dest('dist/js'));
-  };
 
   // Rebundle when watchify detects a change
   bundler.on('update', () => {
@@ -129,9 +123,8 @@ function bundleScripts(shouldWatch) {
 }
 
 // Task to bundle up application scripts
-gulp.task('scripts', ['cleanScripts'], () => {
-  return bundleScripts(false);
-});
+gulp.task('scripts', ['cleanScripts'], () =>
+  bundleScripts(false));
 
 // Task to watch files and automatically bundle when changes occur
 gulp.task('watch', () => {

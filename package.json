@@ -16,6 +16,7 @@
     "bookshelf": "0.9.2",
     "bookshelf-json-columns": "0.1.0",
     "bootstrap": "3.3.6",
+    "compression": "1.6.1",
     "express": "4.13.4",
     "knex": "0.10.0",
     "lodash": "4.5.0",
@@ -48,6 +49,7 @@
     "gulp-util": "3.0.7",
     "nodemon": "1.9.1",
     "through2": "2.0.0",
+    "uglifyify": "3.0.1",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0",
     "watchify": "3.6.0"

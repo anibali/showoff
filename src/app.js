@@ -2,7 +2,7 @@ const path = require('path');
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
-const compress = require('compression');
+const compression = require('compression');
 const reactRouter = require('react-router');
 const { syncHistoryWithStore } = require('react-router-redux');
 
@@ -18,7 +18,10 @@ const createStore = require('./helpers/createStore');
 // Create a new Express app
 const app = express();
 
-app.use(compress());
+const shouldCompress = (req, res) =>
+  req.headers['x-no-compression'] ? false : compression.filter(req, res);
+
+app.use(compression({ filter: shouldCompress }));
 app.use(bodyParser.json({ limit: '50mb' }));
 
 // Serve up our static assets from 'dist' (this includes our client-side

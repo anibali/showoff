@@ -5,6 +5,8 @@ const ReactRedux = require('react-redux');
 const Draggable = require('react-draggable');
 const Resizable = require('react-resizable').Resizable;
 
+const notebookActionCreators = require('../reducers/notebooks');
+
 const Frame = React.createClass({
   getInitialState: function() {
     return { width: 480, height: 360 };
@@ -59,11 +61,21 @@ const Notebook = React.createClass({
   // Display name for the component (useful for debugging)
   displayName: 'Notebook',
 
+  componentDidMount: function() {
+    if(!this.props.frames) {
+      this.props.loadNotebook(this.props.id);
+    }
+  },
+
   // Describe how to render the component
   render: function() {
+    const children = this.props.frames
+      ? this.props.frames.map(createFrame)
+      : <div style={{ color: 'white', fontSize: 128, position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}><span className="fa fa-spinner fa-pulse" /></div>;
+
     return (
       <div className="fill-space notebook">
-        {_.map(this.props.frames, createFrame)}
+        {children}
       </div>
     );
   }
@@ -73,7 +85,10 @@ module.exports = ReactRedux.connect(
   // Map store state to props
   (state, ownProps) => {
     const id = parseInt(ownProps.params.id, 10);
-    const notebook = _.find(state.notebooks, { id });
-    return { frames: notebook.frames };
-  }
+    const notebook = _.find(state.notebooks, { id }) || {};
+    return { id, frames: notebook.frames };
+  },
+  (dispatch) => ({
+    loadNotebook: _.flow(notebookActionCreators.loadNotebook, dispatch)
+  })
 )(Notebook);

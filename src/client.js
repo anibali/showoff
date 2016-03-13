@@ -3,8 +3,6 @@
  * When the web page is loaded, this code will run on the client.
  */
 
-require('whatwg-fetch');
-
 const React = require('react');
 const ReactDOM = require('react-dom');
 const { Provider } = require('react-redux');

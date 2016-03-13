@@ -1,6 +1,8 @@
 const _ = require('lodash');
+const fetch = require('../helpers/fetch');
 
 const UPDATE_FRAME = Symbol('sconce/notebooks/UPDATE_FRAME');
+const ADD_NOTEBOOK = Symbol('sconce/notebooks/ADD_NOTEBOOK');
 const REMOVE_NOTEBOOK = Symbol('sconce/notebooks/REMOVE_NOTEBOOK');
 
 const initialState = [];
@@ -31,6 +33,20 @@ function reducer(state, action) {
       return newState;
     }
 
+    case ADD_NOTEBOOK: {
+      const notebookIndex = _.findIndex(state, { id: action.notebook.id });
+
+      let newState;
+      if(notebookIndex < 0) {
+        newState = state.concat(action.notebook);
+      } else {
+        newState = _.clone(state);
+        newState[notebookIndex] = _.assign({}, newState[notebookIndex], action.notebook);
+      }
+
+      return newState;
+    }
+
     case REMOVE_NOTEBOOK: {
       return _.reject(state, { id: action.notebookId });
     }
@@ -42,11 +58,39 @@ function reducer(state, action) {
 reducer.updateFrame = (frame) =>
   ({ type: UPDATE_FRAME, frame });
 
+reducer.addNotebook = (notebook) =>
+  ({ type: ADD_NOTEBOOK, notebook });
+
 reducer.removeNotebook = (notebookId) =>
   ({ type: REMOVE_NOTEBOOK, notebookId });
 
+reducer.loadNotebook = (notebookId) => (dispatch) =>
+  fetch(`/api/notebook/${notebookId}`).then((res) => {
+    if(!res.ok) throw new Error(res.statusText);
+    res.json().then((data) => {
+      dispatch(reducer.addNotebook(data.notebook));
+    });
+  }).catch((err) => {
+    console.error(err);
+    alert('Failed to load notebook');
+  });
+
+reducer.loadNotebooksShallow = () => (dispatch) =>
+  fetch('/api/notebooks').then((res) => {
+    if(!res.ok) throw new Error(res.statusText);
+    res.json().then((data) => {
+      data.notebooks.forEach((notebook) => {
+        dispatch(reducer.addNotebook(notebook));
+      });
+    });
+  }).catch((err) => {
+    console.error(err);
+    alert('Failed to load notebook');
+  });
+
 reducer.deleteNotebook = (notebookId) => (dispatch) =>
-  fetch(`/api/notebook/${notebookId}`, { method: 'delete' }).then(() => {
+  fetch(`/api/notebook/${notebookId}`, { method: 'delete' }).then((res) => {
+    if(!res.ok) throw new Error(res.statusText);
     dispatch(reducer.removeNotebook(notebookId));
   }).catch((err) => {
     console.error(err);

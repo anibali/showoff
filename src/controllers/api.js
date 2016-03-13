@@ -18,11 +18,42 @@ const errorResponse = (res, err) => {
 const notebookParams = (req) =>
   _.pick(req.body.notebook, 'title');
 
+router.get('/notebooks', (req, res) => {
+  models('Notebook').fetchAll().then((notebooks) => {
+    res.json({ notebooks: notebooks.toJSON() });
+  }).catch((err) => errorResponse(res, err));
+});
+
 router.post('/notebook', (req, res) => {
   const attrs = notebookParams(req);
 
   models('Notebook').forge(attrs).save()
     .then((notebook) => res.json(notebook))
+    .catch((err) => errorResponse(res, err));
+});
+
+router.get('/notebook/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  models('Notebook').where({ id }).fetch({ require: true, withRelated: ['frames'] })
+    .then((notebook) => {
+      notebook = notebook.toJSON();
+      const promises = [];
+
+      const frames = notebook.frames.map((frame) => {
+        const newFrame = _.clone(frame);
+        promises.push(
+          frameViews.render(frame).then((content) => {
+            newFrame.content = content;
+          })
+        );
+        return newFrame;
+      });
+
+      Promise.all(promises).then(() => {
+        res.json({ notebook: _.assign({}, notebook, { frames }) });
+      });
+    })
     .catch((err) => errorResponse(res, err));
 });
 

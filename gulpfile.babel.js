@@ -14,6 +14,7 @@ const uglifyify = require('uglifyify');
 
 // List of npm modules to bundle separately from our application code
 const libs = [
+  'isomorphic-fetch',
   'lodash',
   'react',
   'react-dom',
@@ -24,7 +25,6 @@ const libs = [
   'react-router-redux',
   'redux',
   'redux-thunk',
-  'whatwg-fetch',
 ];
 
 // Information about where project files are located

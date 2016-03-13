@@ -88,7 +88,15 @@ const frames = [
         ]
       }
     }
-  }
+  },
+  {
+    notebookId: 2,
+    title: 'A frame in the second notebook',
+    type: 'text',
+    content: {
+      body: 'Yup, just hanging around.'
+    }
+  },
 ];
 
 exports.seed = function(knex, Promise) {

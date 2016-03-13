@@ -36,10 +36,14 @@ const Home = React.createClass({
 
   // Describe how to render the component
   render: function() {
-    const { notebooks, deleteNotebook } = this.props;
+    const notebooks = _.reverse(_.sortBy(this.props.notebooks, (notebook) => notebook.createdAt));
 
     const createListItem = (notebook) =>
-      (<NotebookListItem key={notebook.id} notebook={notebook} deleteNotebook={deleteNotebook} />);
+      <NotebookListItem
+        key={notebook.id}
+        notebook={notebook}
+        deleteNotebook={this.props.deleteNotebook}
+      />;
 
     return (
       <div className="container">

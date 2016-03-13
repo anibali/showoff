@@ -11,7 +11,7 @@ const reactDomServer = require('react-dom/server');
 const { Provider } = require('react-redux');
 const { RouterContext } = require('react-router');
 
-const models = require('./models');
+const reactAsync = require('./helpers/reactAsync');
 const routes = require('./routes');
 const createStore = require('./helpers/createStore');
 
@@ -51,30 +51,41 @@ app.use((req, res) => {
         </Provider>
       );
 
-      // TODO: Find a way of packing data in here so that the client doesn't
-      // need to make an immediate AJAX request on page load.
-      const reactHtml = reactDomServer.renderToString(<Root />);
+      // First render will kick off asynchronous calls
+      reactDomServer.renderToString(<Root />);
 
-      // The HTML is pretty barebones, it just provides a mount point
-      // for React and links to our styles and scripts.
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <link rel="stylesheet" type="text/css" href="/assets/css/app.css">
-          </head>
-          <body>
-            <div class="fill-space" id="root">${reactHtml}</div>
-            <script src="/assets/js/vendor.js"></script>
-            <script src="/assets/js/app.js"></script>
-            <script>
-              main(${JSON.stringify(_.omit(store.getState(), 'routing'))})
-            </script>
-          </body>
-        </html>`;
+      // Try to complete all asynchronous calls on the server
+      Promise.race([
+        Promise.all(reactAsync.promises),
+        new Promise((resolve) => setTimeout(resolve, 200)) // Timeout after 200ms
+      ]).then(() => {
+        // Render a second time, but hopefully this time including the data
+        // returned from asynchronous calls
+        const reactHtml = reactDomServer.renderToString(<Root />);
 
-      // Respond with the HTML
-      res.send(htmlContent);
+        // The HTML is pretty barebones, it just provides a mount point
+        // for React and links to our styles and scripts.
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <link rel="stylesheet" type="text/css" href="/assets/css/app.css">
+            </head>
+            <body>
+              <div class="fill-space" id="root">${reactHtml}</div>
+              <script src="/assets/js/vendor.js"></script>
+              <script src="/assets/js/app.js"></script>
+              <script>
+                main(${JSON.stringify(_.omit(store.getState(), 'routing'))})
+              </script>
+            </body>
+          </html>`;
+
+        // Respond with the HTML
+        res.send(htmlContent);
+      }).catch((error) => {
+        res.status(500).send(error.message);
+      });
     }
   });
 });

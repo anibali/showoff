@@ -6,6 +6,7 @@ const Draggable = require('react-draggable');
 const Resizable = require('react-resizable').Resizable;
 
 const notebookActionCreators = require('../reducers/notebooks');
+const reactAsync = require('../helpers/reactAsync');
 
 const Frame = React.createClass({
   getInitialState: function() {
@@ -61,9 +62,9 @@ const Notebook = React.createClass({
   // Display name for the component (useful for debugging)
   displayName: 'Notebook',
 
-  componentDidMount: function() {
+  componentWillMount: function() {
     if(!this.props.frames) {
-      this.props.loadNotebook(this.props.id);
+      reactAsync.addPromise(this.props.loadNotebook(this.props.id));
     }
   },
 

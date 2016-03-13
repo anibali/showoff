@@ -4,6 +4,7 @@ const { Link } = require('react-router');
 const _ = require('lodash');
 
 const notebookActionCreators = require('../reducers/notebooks');
+const reactAsync = require('../helpers/reactAsync');
 
 const NotebookListItem = ({ notebook, deleteNotebook }) => {
   const onClickDelete = (event) => {
@@ -27,10 +28,10 @@ const NotebookListItem = ({ notebook, deleteNotebook }) => {
 const Home = React.createClass({
   displayName: 'Home',
 
-  componentDidMount: function() {
-    if(this.props.notebooks.length === 0) {
-      this.props.loadNotebooksShallow();
-    }
+  componentWillMount: function() {
+    // TODO: Skip doing this if it has already been done (probably
+    // requires a boolean flag in the store or something)
+    reactAsync.addPromise(this.props.loadNotebooksShallow());
   },
 
   // Describe how to render the component

@@ -65,27 +65,35 @@ reducer.removeNotebook = (notebookId) =>
   ({ type: REMOVE_NOTEBOOK, notebookId });
 
 reducer.loadNotebook = (notebookId) => (dispatch) =>
-  fetch(`/api/notebook/${notebookId}`).then((res) => {
-    if(!res.ok) throw new Error(res.statusText);
-    res.json().then((data) => {
-      dispatch(reducer.addNotebook(data.notebook));
+  new Promise((resolve, reject) => {
+    fetch(`/api/notebook/${notebookId}`).then((res) => {
+      if(!res.ok) throw new Error(res.statusText);
+      res.json().then((data) => {
+        dispatch(reducer.addNotebook(data.notebook));
+        resolve(data.notebook);
+      }).catch(reject);
+    }).catch((err) => {
+      console.error(err);
+      alert('Failed to load notebook');
+      reject(err);
     });
-  }).catch((err) => {
-    console.error(err);
-    alert('Failed to load notebook');
   });
 
 reducer.loadNotebooksShallow = () => (dispatch) =>
-  fetch('/api/notebooks').then((res) => {
-    if(!res.ok) throw new Error(res.statusText);
-    res.json().then((data) => {
-      data.notebooks.forEach((notebook) => {
-        dispatch(reducer.addNotebook(notebook));
-      });
+  new Promise((resolve, reject) => {
+    fetch('/api/notebooks').then((res) => {
+      if(!res.ok) throw new Error(res.statusText);
+      res.json().then((data) => {
+        data.notebooks.forEach((notebook) => {
+          dispatch(reducer.addNotebook(notebook));
+        });
+        resolve(data.notebooks);
+      }).catch(reject);
+    }).catch((err) => {
+      console.error(err);
+      alert('Failed to load notebook');
+      reject(err);
     });
-  }).catch((err) => {
-    console.error(err);
-    alert('Failed to load notebook');
   });
 
 reducer.deleteNotebook = (notebookId) => (dispatch) =>

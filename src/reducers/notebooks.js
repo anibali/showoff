@@ -64,6 +64,25 @@ reducer.addNotebook = (notebook) =>
 reducer.removeNotebook = (notebookId) =>
   ({ type: REMOVE_NOTEBOOK, notebookId });
 
+reducer.updateNotebook = (notebook) => (dispatch) =>
+  new Promise((resolve, reject) => {
+    fetch(`/api/notebook/${notebook.id}`, {
+      method: 'put',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notebook })
+    }).then((res) => {
+      if(!res.ok) throw new Error(res.statusText);
+      res.json().then((data) => {
+        dispatch(reducer.addNotebook(data.notebook));
+        resolve(data.notebook);
+      }).catch(reject);
+    }).catch((err) => {
+      console.error(err);
+      alert('Failed to update notebook');
+      reject(err);
+    });
+  });
+
 reducer.loadNotebook = (notebookId) => (dispatch) =>
   new Promise((resolve, reject) => {
     fetch(`/api/notebook/${notebookId}`).then((res) => {

@@ -32,6 +32,18 @@ router.post('/notebook', (req, res) => {
     .catch((err) => errorResponse(res, err));
 });
 
+router.put('/notebook/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const attrs = notebookParams(req);
+
+  models('Notebook').where({ id }).fetch({ require: true })
+    .then((notebook) => notebook.save(attrs))
+    .then((notebook) => res.json({ notebook }))
+    .catch((err) => {
+      errorResponse(res, err);
+    });
+});
+
 router.get('/notebook/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
 

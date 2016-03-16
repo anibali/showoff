@@ -23,15 +23,23 @@ const NotebookListItem = React.createClass({
         this.setState({ title: event.target.value });
       };
 
-      const onClickConfirmEdit = (event) => {
+      const confirmEdit = (event) => {
         event.preventDefault();
         this.setState({ editing: !this.state.editing });
         updateNotebook(_.assign({}, notebook, { title: this.state.title }));
       };
 
-      const onClickCancelEdit = (event) => {
+      const cancelEdit = (event) => {
         event.preventDefault();
         this.setState({ editing: !this.state.editing, title: this.props.notebook.title });
+      };
+
+      const onKeyDownTitle = (event) => {
+        if(event.keyCode === 13) { // Enter key
+          confirmEdit(event);
+        } else if(event.keyCode === 27) { // Escape key
+          cancelEdit(event);
+        }
       };
 
       return (
@@ -39,14 +47,16 @@ const NotebookListItem = React.createClass({
           <div className="input-group">
             <input type="text"
               className="form-control"
+              autoFocus
               value={this.state.title}
               onChange={onChangeTitle}
+              onKeyDown={onKeyDownTitle}
             />
             <span className="input-group-btn">
-              <button className="btn btn-success" type="button" onClick={onClickConfirmEdit}>
+              <button className="btn btn-success" type="button" onClick={confirmEdit}>
                 <span className="fa fa-check" />
               </button>
-              <button className="btn btn-default" type="button" onClick={onClickCancelEdit}>
+              <button className="btn btn-default" type="button" onClick={cancelEdit}>
                 <span className="fa fa-times" />
               </button>
             </span>

@@ -18,7 +18,7 @@ function reducer(state, action) {
       const notebookIndex = _.findIndex(state, { id: action.frame.notebookId });
 
       // Ignore update if the frame's notebook hasn't been loaded
-      if(!state[notebookIndex].frames) {
+      if(!state[notebookIndex] || !state[notebookIndex].frames) {
         return state;
       }
 

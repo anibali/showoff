@@ -22,6 +22,9 @@ WORKDIR /app
 # Put npm executables in the system path
 ENV PATH=/app/node_modules/.bin:$PATH
 
+# Bundle client-side stuff
+RUN gulp build
+
 # Expose the debugging port.
 EXPOSE 5858
 

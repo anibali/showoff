@@ -17,6 +17,11 @@ function reducer(state, action) {
     case UPDATE_FRAME: {
       const notebookIndex = _.findIndex(state, { id: action.frame.notebookId });
 
+      // Ignore update if the frame's notebook hasn't been loaded
+      if(!state[notebookIndex].frames) {
+        return state;
+      }
+
       let updatedFrame = false;
       const frames = state[notebookIndex].frames.map((frame) => {
         if(frame.id === action.frame.id) {

@@ -16,17 +16,21 @@ RUN mkdir -p /home/default && chmod 777 /home/default
 
 # Create a working directory for our application.
 RUN mkdir -p /app
-COPY . /app
 WORKDIR /app
 
-# Put npm executables in the system path
+# Install NPM modules.
+COPY package.json .
+RUN npm install --quiet
+VOLUME /app/node_modules
+
+# Put NPM executables in the system path.
 ENV PATH=/app/node_modules/.bin:$PATH
 
-# Bundle client-side stuff
-RUN gulp build
+# Copy application into the container.
+COPY . /app
 
-# Expose the debugging port.
-EXPOSE 5858
+# Bundle client-side stuff.
+RUN NODE_ENV=production gulp build
 
 EXPOSE 3000
 CMD [ "npm", "start" ]

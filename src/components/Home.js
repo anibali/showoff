@@ -75,17 +75,39 @@ const NotebookListItem = React.createClass({
       this.setState({ editing: !this.state.editing });
     };
 
+    const onChangePinned = (event) => {
+      event.preventDefault();
+      updateNotebook(_.assign({}, notebook, { pinned: !notebook.pinned }));
+    };
+
+    const preventDefault = (event) => {
+      event.preventDefault();
+    };
+
     return (
       <Link className="list-group-item" to={`/notebooks/${notebook.id}`}>
+        <div
+          style={{ display: 'inline-block',
+            color: notebook.pinned ? '#369' : '#aaa',
+            paddingRight: 8 }}
+          onClick={onChangePinned}
+        >
+          <span className="fa-stack fa-lg" style={{ fontSize: '0.9em' }}>
+            <i className="fa fa-square-o fa-stack-2x"></i>
+            <i className="fa fa-thumb-tack fa-stack-1x"></i>
+          </span>
+        </div>
         <span>
           {notebook.title}
           <small style={{ paddingLeft: 8 }} className="text-muted">
             {new Date(notebook.createdAt).toUTCString()}
           </small>
         </span>
-        <button className="btn-xs btn-danger pull-right" onClick={onClickDelete}>
-          <span className="fa fa-trash-o" />
-        </button>
+        <span onClick={preventDefault}>
+          <button className="btn-xs btn-danger pull-right" onClick={onClickDelete} disabled={ notebook.pinned }>
+            <span className="fa fa-trash-o" />
+          </button>
+        </span>
         <button className="btn-xs btn-warning pull-right" onClick={onClickEdit}>
           <span className="fa fa-edit" />
         </button>

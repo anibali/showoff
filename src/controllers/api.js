@@ -16,7 +16,7 @@ const errorResponse = (res, err) => {
 };
 
 const notebookParams = (req) =>
-  _.pick(req.body.notebook, 'title');
+  _.pick(req.body.notebook, 'title', 'pinned');
 
 router.get('/notebooks', (req, res) => {
   models('Notebook').fetchAll().then((notebooks) => {

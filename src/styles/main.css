@@ -73,3 +73,17 @@
   box-sizing: border-box;
   cursor: se-resize;
 }
+
+.btn-xs[disabled] {
+  cursor: default;
+  color: #999;
+  background-color: #ccc;
+  border-color: #ccc;
+}
+
+.btn-xs[disabled]:hover {
+  cursor: default;
+  color: #999;
+  background-color: #ccc;
+  border-color: #ccc;
+}

@@ -72,7 +72,7 @@ router.get('/notebook/:id', (req, res) => {
 router.delete('/notebook/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
 
-  models('Notebook').where({ id }).destroy()
+  models('Notebook').where({ pinned: false, id }).destroy({ require: true })
     .then(() => res.json({}))
     .catch((err) => errorResponse(res, err));
 });

@@ -1,19 +1,27 @@
-**WORK IN PROGRESS** (unless your name is Zhen, in which case nothing
-is going on here).
+# Showoff
 
 ## Setup
 
 Requires Docker Engine and Docker Compose.
 
 ```sh
-cp env/postgres.env.example env/postgres.env
-docker volume create --name=showoff-db-data
-docker-compose run --rm web knex migrate:latest
-docker-compose up
+$ sed "s/\(POSTGRES_PASSWORD=\).*/\1$(openssl rand -hex 32)/" \
+  env/postgres.env.example > env/postgres.env
+$ docker-compose build
+$ docker-compose up
 ```
 
 You can also seed the database with some example notebooks.
 
 ```sh
-docker-compose run --rm web knex seed:run
+$ docker-compose run --rm web knex seed:run
+```
+
+## Upgrading
+
+```sh
+$ docker-compose stop
+$ git pull
+$ docker-compose build
+$ docker-compose up
 ```

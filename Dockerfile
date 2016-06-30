@@ -14,23 +14,22 @@ RUN apt-get update \
 # This is required for npm/bower install during development.
 RUN mkdir -p /home/default && chmod 777 /home/default
 
-# Create a working directory for our application.
-RUN mkdir -p /app
-WORKDIR /app
-
 # Install NPM modules.
+RUN mkdir /deps
+WORKDIR /deps
 COPY package.json .
 RUN npm install --quiet
-VOLUME /app/node_modules
-
-# Put NPM executables in the system path.
-ENV PATH=/app/node_modules/.bin:$PATH
+ENV NODE_PATH=/deps/node_modules
+ENV PATH=$NODE_PATH/.bin:$PATH
 
 # Copy application into the container.
+RUN mkdir /app
+WORKDIR /app
 COPY . /app
 
 # Bundle client-side stuff.
-RUN NODE_ENV=production gulp build
+RUN rm -rf dist \
+ && NODE_ENV=production gulp build
 
 EXPOSE 3000
 CMD [ "npm", "start" ]

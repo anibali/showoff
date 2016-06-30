@@ -5,6 +5,7 @@ services:
     build: .
     volumes:
       - ".:/app"
+      - "./node_modules:/deps/node_modules"
     ports:
       - "3001:3000"
     environment:

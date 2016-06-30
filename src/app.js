@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const reactRouter = require('react-router');
 const { syncHistoryWithStore } = require('react-router-redux');
+const DocumentTitle = require('react-document-title');
 
 const React = require('react');
 const reactDomServer = require('react-dom/server');
@@ -66,12 +67,15 @@ app.use((req, res) => {
         // returned from asynchronous calls
         const reactHtml = reactDomServer.renderToString(<Root />);
 
+        const title = DocumentTitle.rewind();
+
         // The HTML is pretty barebones, it just provides a mount point
         // for React and links to our styles and scripts.
         const htmlContent = `
           <!DOCTYPE html>
           <html>
             <head>
+              <title>${title}</title>
               <link rel="stylesheet" type="text/css" href="/assets/css/app.css">
             </head>
             <body>

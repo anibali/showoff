@@ -42,4 +42,9 @@ window.main = (initialState) => {
   // Mount our React root component in the DOM
   const mountPoint = document.getElementById('root');
   ReactDOM.render(<Root />, mountPoint);
+
+  if(process.env.NODE_ENV === 'development') {
+    window.Perf = require('react-addons-perf');
+    window.Perf.start();
+  }
 };

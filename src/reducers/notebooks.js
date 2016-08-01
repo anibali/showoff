@@ -2,7 +2,7 @@ const _ = require('lodash');
 const fetch = require('../helpers/fetch');
 
 const UPDATE_FRAME = Symbol('sconce/notebooks/UPDATE_FRAME');
-const ADD_NOTEBOOK = Symbol('sconce/notebooks/ADD_NOTEBOOK');
+const ADD_NOTEBOOKS = Symbol('sconce/notebooks/ADD_NOTEBOOKS');
 const REMOVE_NOTEBOOK = Symbol('sconce/notebooks/REMOVE_NOTEBOOK');
 
 const initialState = [];
@@ -38,16 +38,18 @@ function reducer(state, action) {
       return newState;
     }
 
-    case ADD_NOTEBOOK: {
-      const notebookIndex = _.findIndex(state, { id: action.notebook.id });
+    case ADD_NOTEBOOKS: {
+      const newState = _.clone(state);
 
-      let newState;
-      if(notebookIndex < 0) {
-        newState = state.concat(action.notebook);
-      } else {
-        newState = _.clone(state);
-        newState[notebookIndex] = _.assign({}, newState[notebookIndex], action.notebook);
-      }
+      _.forEach(action.notebooks, (notebook) => {
+        const notebookIndex = _.findIndex(state, { id: notebook.id });
+
+        if(notebookIndex < 0) {
+          newState.push(notebook);
+        } else {
+          newState[notebookIndex] = _.assign({}, newState[notebookIndex], notebook);
+        }
+      });
 
       return newState;
     }
@@ -63,8 +65,13 @@ function reducer(state, action) {
 reducer.updateFrame = (frame) =>
   ({ type: UPDATE_FRAME, frame });
 
-reducer.addNotebook = (notebook) =>
-  ({ type: ADD_NOTEBOOK, notebook });
+reducer.addNotebook = (notebook) => {
+  let notebooks = notebook;
+  if(!_.isArray(notebooks)) {
+    notebooks = [notebooks];
+  }
+  return { type: ADD_NOTEBOOKS, notebooks };
+};
 
 reducer.removeNotebook = (notebookId) =>
   ({ type: REMOVE_NOTEBOOK, notebookId });
@@ -108,9 +115,7 @@ reducer.loadNotebooksShallow = () => (dispatch) =>
     fetch('/api/notebooks').then((res) => {
       if(!res.ok) throw new Error(res.statusText);
       res.json().then((data) => {
-        data.notebooks.forEach((notebook) => {
-          dispatch(reducer.addNotebook(notebook));
-        });
+        dispatch(reducer.addNotebook(data.notebooks));
         resolve(data.notebooks);
       }).catch(reject);
     }).catch((err) => {

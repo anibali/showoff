@@ -1,6 +1,7 @@
 const React = require('react');
 const ReactRedux = require('react-redux');
 const { Link } = require('react-router');
+const PureRenderMixin = require('react-addons-pure-render-mixin');
 const _ = require('lodash');
 
 const notebookActionCreators = require('../reducers/notebooks');
@@ -8,6 +9,7 @@ const reactAsync = require('../helpers/reactAsync');
 
 const NotebookListItem = React.createClass({
   displayName: 'NotebookListItem',
+  mixins: [PureRenderMixin],
 
   getInitialState: function() {
     return { editing: false, title: this.props.notebook.title };
@@ -118,6 +120,7 @@ const NotebookListItem = React.createClass({
 
 const Home = React.createClass({
   displayName: 'Home',
+  mixins: [PureRenderMixin],
 
   componentWillMount: function() {
     // TODO: Skip doing this if it has already been done (probably

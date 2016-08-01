@@ -7,6 +7,10 @@ const notebooks = [
   }
 ];
 
+for(var i = 0; i < 100; ++i) {
+  notebooks.push({ title: 'Spam' });
+}
+
 const frames = [
   {
     notebookId: 1,

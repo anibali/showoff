@@ -17,6 +17,7 @@ const libs = [
   'isomorphic-fetch',
   'lodash',
   'react',
+  'react-addons-pure-render-mixin',
   'react-dom',
   'react-draggable',
   'react-redux',
@@ -26,6 +27,12 @@ const libs = [
   'redux',
   'redux-thunk',
 ];
+
+const devLibs = [
+  'react-addons-perf'
+];
+
+const nodeEnv = process.env.NODE_ENV || 'development';
 
 // Information about where project files are located
 const paths = {
@@ -70,8 +77,10 @@ gulp.task('styles', ['cleanStyles'], () =>
 gulp.task('vendorScripts', ['cleanVendorScripts'], () => {
   let bundler = browserify({ debug: true }).require(libs);
   // Minify the vendor scripts when not in development mode
-  if(process.env.NODE_ENV !== 'development') {
+  if(nodeEnv !== 'development') {
     bundler = bundler.transform({ global: true }, uglifyify);
+  } else {
+    bundler = bundler.require(devLibs);
   }
   // Stream for processing client-side JavaScript dependencies
   return bundler.bundle()
@@ -99,9 +108,10 @@ function bundleScripts(shouldWatch) {
 
   // Create the bundler
   const bundler = browserify(opts)
-    .transform(envify({ NODE_ENV: process.env.NODE_ENV, IN_BROWSER: true }))
+    .transform(envify({ NODE_ENV: nodeEnv, IN_BROWSER: true }))
     .transform([babelify, { sourceMap: true }])
-    .external(libs);
+    .external(libs)
+    .external(devLibs);
 
   // This function returns a stream which produces the final bundled output
   // from the bundler object

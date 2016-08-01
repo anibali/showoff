@@ -40,7 +40,7 @@ const Frame = React.createClass({
       <Draggable
         bounds="parent"
         cancel=".react-resizable-handle"
-        start={{ x: i * 30, y: i * 30 }}
+        defaultPosition={{ x: i * 30, y: i * 30 }}
         handle=".frame-handle"
         onMouseDown={this.onMouseDown}
       >

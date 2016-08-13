@@ -8,7 +8,7 @@ do
 done
 
 # Start the server
-if [[ "$NODE_ENV" -eq "production" ]]
+if [ "$NODE_ENV" == "production" ]
 then
   node src/server.js
 else

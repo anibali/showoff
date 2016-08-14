@@ -58,11 +58,18 @@ router.get('/notebook/:id', (req, res) => {
           frameViews.render(frame).then((content) => {
             newFrame.content = content;
           })
+          .catch(err => {
+            newFrame.content =
+              `<p style="color: red;">
+                Error rendering frame content (type = "${frame.type}")
+              </p>
+              <pre>${err}</pre>`;
+          })
         );
         return newFrame;
       });
 
-      Promise.all(promises).then(() => {
+      return Promise.all(promises).then(() => {
         res.json({ notebook: _.assign({}, notebook, { frames }) });
       });
     })

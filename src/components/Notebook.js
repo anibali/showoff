@@ -8,17 +8,6 @@ const reactAsync = require('../helpers/reactAsync');
 
 const Frame = require('./Frame');
 
-const createFrame = (frame, i) => (
-  <Frame
-    key={frame.id}
-    frame={frame}
-    initialX={i * 30}
-    initialY={i * 30}
-    initialWidth={480}
-    initialHeight={360}
-  />
-);
-
 const Notebook = React.createClass({
   // Display name for the component (useful for debugging)
   displayName: 'Notebook',
@@ -29,10 +18,26 @@ const Notebook = React.createClass({
     }
   },
 
+  onFrameDimensionChange: function(frame, x, y, width, height) {
+    this.props.updateFrame(_.assign({}, frame, { x, y, width, height }));
+  },
+
   // Describe how to render the component
   render: function() {
     let children = null;
     if(this.props.frames) {
+      const createFrame = frame => (
+        <Frame
+          key={frame.id}
+          frame={frame}
+          initialX={frame.x}
+          initialY={frame.y}
+          initialWidth={frame.width}
+          initialHeight={frame.height}
+          onDimensionChange={_.partial(this.onFrameDimensionChange, frame)}
+        />
+      );
+
       children = this.props.frames.map(createFrame);
     } else {
       const style = {
@@ -65,6 +70,7 @@ module.exports = ReactRedux.connect(
     return { id, title: notebook.title, frames: notebook.frames };
   },
   (dispatch) => ({
-    loadNotebook: _.flow(notebookActionCreators.loadNotebook, dispatch)
+    loadNotebook: _.flow(notebookActionCreators.loadNotebook, dispatch),
+    updateFrame: _.flow(notebookActionCreators.updateFrame, dispatch)
   })
 )(Notebook);

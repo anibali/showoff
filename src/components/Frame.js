@@ -15,11 +15,24 @@ const Frame = React.createClass({
   },
 
   getInitialState: function() {
-    return { width: this.props.initialWidth, height: this.props.initialHeight };
+    return {
+      x: this.props.initialX,
+      y: this.props.initialY,
+      width: this.props.initialWidth,
+      height: this.props.initialHeight
+    };
   },
 
   onResize: function(event, data) {
     this.setState(_.pick(data.size, ['width', 'height']));
+  },
+
+  onDrag: function(event, data) {
+    this.setState(_.pick(data, ['x', 'y']));
+  },
+
+  triggerDimensionChange: function() {
+    this.props.onDimensionChange(this.state.x, this.state.y, this.state.width, this.state.height);
   },
 
   onMouseDown: function(event) {
@@ -46,8 +59,15 @@ const Frame = React.createClass({
         defaultPosition={{ x: this.props.initialX, y: this.props.initialY }}
         handle=".frame-handle"
         onMouseDown={this.onMouseDown}
+        onDrag={this.onDrag}
+        onStop={this.triggerDimensionChange}
       >
-        <Resizable width={this.state.width} height={this.state.height} onResize={this.onResize}>
+        <Resizable
+          width={this.state.width}
+          height={this.state.height}
+          onResize={this.onResize}
+          onResizeStop={this.triggerDimensionChange}
+        >
           <div className="frame" style={{ width: this.state.width, height: this.state.height }}>
             <div className="frame-handle">{frame.title || '<untitled frame>'}</div>
             <div className="frame-content" dangerouslySetInnerHTML={{ __html: frame.content }} />

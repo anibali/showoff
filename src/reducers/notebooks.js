@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const fetch = require('../helpers/fetch');
 
-const UPDATE_FRAME = Symbol('sconce/notebooks/UPDATE_FRAME');
+const MODIFY_FRAME = Symbol('sconce/notebooks/MODIFY_FRAME');
 const ADD_NOTEBOOKS = Symbol('sconce/notebooks/ADD_NOTEBOOKS');
 const REMOVE_NOTEBOOK = Symbol('sconce/notebooks/REMOVE_NOTEBOOK');
 
@@ -14,7 +14,7 @@ function reducer(state, action) {
   action = action || {};
 
   switch(action.type) {
-    case UPDATE_FRAME: {
+    case MODIFY_FRAME: {
       const notebookIndex = _.findIndex(state, { id: action.frame.notebookId });
 
       // Ignore update if the frame's notebook hasn't been loaded
@@ -62,8 +62,27 @@ function reducer(state, action) {
   }
 }
 
-reducer.updateFrame = (frame) =>
-  ({ type: UPDATE_FRAME, frame });
+reducer.modifyFrame = (frame) =>
+  ({ type: MODIFY_FRAME, frame });
+
+reducer.updateFrame = (frame) => (dispatch) =>
+  new Promise((resolve, reject) => {
+    fetch(`/api/frame/${frame.id}`, {
+      method: 'put',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ frame: _.pick(frame, ['x', 'y', 'width', 'height']) })
+    }).then((res) => {
+      if(!res.ok) throw new Error(res.statusText);
+      res.json().then((data) => {
+        dispatch(reducer.modifyFrame(data));
+        resolve(data.frame);
+      }).catch(reject);
+    }).catch((err) => {
+      console.error(err);
+      alert('Failed to update frame');
+      reject(err);
+    });
+  });
 
 reducer.addNotebook = (notebook) => {
   let notebooks = notebook;

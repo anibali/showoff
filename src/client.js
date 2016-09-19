@@ -30,7 +30,7 @@ window.main = (initialState) => {
   };
 
   ws.onmessage = function(event) {
-    store.dispatch(notebookActionCreators.updateFrame(JSON.parse(event.data)));
+    store.dispatch(notebookActionCreators.modifyFrame(JSON.parse(event.data)));
   };
 
   const Root = () => (

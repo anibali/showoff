@@ -93,7 +93,7 @@ router.delete('/notebook/:id/frames', (req, res) => {
 });
 
 const frameParams = (req) =>
-  _.pick(req.body.frame, 'title', 'type', 'content');
+  _.pick(req.body.frame, 'title', 'type', 'content', 'x', 'y', 'width', 'height');
 
 router.put('/frame/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);

@@ -82,10 +82,6 @@ const NotebookListItem = React.createClass({
       updateNotebook(_.assign({}, notebook, { pinned: !notebook.pinned }));
     };
 
-    const preventDefault = (event) => {
-      event.preventDefault();
-    };
-
     return (
       <Link className="list-group-item" to={`/notebooks/${notebook.id}`}>
         <div
@@ -105,14 +101,20 @@ const NotebookListItem = React.createClass({
             {new Date(notebook.createdAt).toUTCString()}
           </small>
         </span>
-        <span onClick={preventDefault}>
-          <button className="btn-xs btn-danger pull-right" onClick={onClickDelete} disabled={ notebook.pinned }>
+        <div className="btn-group pull-right" role="group">
+          <button className="btn btn-xs btn-warning btn-notebook-list"
+            title="Edit notebook title"
+            onClick={onClickEdit}
+          >
+            <span className="fa fa-edit" />
+          </button>
+          <button className="btn btn-xs btn-danger btn-notebook-list"
+            title="Delete notebook"
+            onClick={onClickDelete} disabled={ notebook.pinned }
+          >
             <span className="fa fa-trash-o" />
           </button>
-        </span>
-        <button className="btn-xs btn-warning pull-right" onClick={onClickEdit}>
-          <span className="fa fa-edit" />
-        </button>
+        </div>
       </Link>
     );
   }

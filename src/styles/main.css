@@ -74,16 +74,23 @@
   cursor: se-resize;
 }
 
-.btn-xs[disabled] {
-  cursor: default;
-  color: #999;
+.btn-notebook-list[disabled] {
+  cursor: not-allowed;
+  color: #666;
   background-color: #ccc;
   border-color: #ccc;
 }
 
-.btn-xs[disabled]:hover {
-  cursor: default;
-  color: #999;
+.btn-notebook-list[disabled]:hover {
+  cursor: not-allowed;
+  color: #666;
   background-color: #ccc;
   border-color: #ccc;
+}
+
+.btn-notebook-list {
+  width: 32px;
+  line-height: 28px;
+  margin-top: -3px;
+  font-size: 16px;
 }

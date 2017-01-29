@@ -101,6 +101,33 @@ const frames = [
       body: 'Yup, just hanging around.'
     }
   },
+  {
+    notebookId: 2,
+    title: 'Vega-lite',
+    type: 'vegalite',
+    content: {
+      body: {
+        data: {
+          values: [
+            { target: 1, actual: 1, frequency: 0.4 },
+            { target: 10, actual: 8, frequency: 0.1 },
+            { target: 10, actual: 10, frequency: 0.1 }
+          ]
+        },
+        mark: 'text',
+        encoding: {
+          row: { field: 'target', type: 'ordinal' },
+          column: { field: 'actual', type: 'ordinal' },
+          color: { field: 'frequency', scale: { domain: [0, 1] } },
+          text: { field: 'frequency' }
+        },
+        config: {
+          mark: { applyColorToBackground: true },
+          scale: { textBandWidth: 50 }
+        }
+      }
+    }
+  },
 ];
 
 exports.seed = function(knex, Promise) {

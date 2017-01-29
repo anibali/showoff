@@ -3,7 +3,8 @@ const frameViews = {};
 const renderers = {
   html: require('./html'),
   text: require('./text'),
-  vega: require('./vega')
+  vega: require('./vega'),
+  vegalite: require('./vegalite')
 };
 
 frameViews.render = (frame) => {

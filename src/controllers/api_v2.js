@@ -1,3 +1,8 @@
+/**
+ * This version of the API makes an attempt at following the specifications
+ * at http://jsonapi.org/ (v1.0).
+ */
+
 const express = require('express');
 const _ = require('lodash');
 const models = require('../models');
@@ -255,7 +260,7 @@ Example request:
         "type": "frames",
         "attributes": {"title": "A frame"},
         "relationships": {
-          "notebook": {"id": 1}
+          "notebook": {"id": "1"}
         }
       }
     }

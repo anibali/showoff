@@ -75,7 +75,7 @@ gulp.task('styles', ['cleanStyles'], () =>
 
 // Task to bundle up vendor scripts (dependencies)
 gulp.task('vendorScripts', ['cleanVendorScripts'], () => {
-  let bundler = browserify({ debug: true }).require(libs);
+  var bundler = browserify({ debug: true }).require(libs);
   // Minify the vendor scripts when not in development mode
   if(nodeEnv !== 'development') {
     bundler = bundler.transform({ global: true }, uglifyify);

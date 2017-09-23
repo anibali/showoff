@@ -1,22 +1,19 @@
 const React = require('react');
 const ReactRedux = require('react-redux');
 const { Link } = require('react-router');
-const PureRenderMixin = require('react-addons-pure-render-mixin');
 const _ = require('lodash');
 
 const notebookActionCreators = require('../reducers/notebooks');
 const reactAsync = require('../helpers/reactAsync');
 
-const NotebookListItem = React.createClass({
-  displayName: 'NotebookListItem',
-  mixins: [PureRenderMixin],
-
-  getInitialState: function() {
-    return { editing: false, title: this.props.notebook.title };
-  },
+class NotebookListItem extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = { editing: false, title: this.props.notebook.title };
+  }
 
   // Describe how to render the component
-  render: function() {
+  render() {
     const { notebook, deleteNotebook, updateNotebook } = this.props;
 
     if(this.state.editing) {
@@ -118,20 +115,17 @@ const NotebookListItem = React.createClass({
       </Link>
     );
   }
-});
+}
 
-const Home = React.createClass({
-  displayName: 'Home',
-  mixins: [PureRenderMixin],
-
-  componentWillMount: function() {
+class Home extends React.PureComponent {
+  componentWillMount() {
     // TODO: Skip doing this if it has already been done (probably
     // requires a boolean flag in the store or something)
     reactAsync.addPromise(this.props.loadNotebooksShallow());
-  },
+  }
 
   // Describe how to render the component
-  render: function() {
+  render() {
     const notebooks = _.reverse(_.sortBy(this.props.notebooks, (notebook) => notebook.createdAt));
 
     const createListItem = (notebook) =>
@@ -151,7 +145,7 @@ const Home = React.createClass({
       </div>
     );
   }
-});
+}
 
 module.exports = ReactRedux.connect(
   // Map store state to props

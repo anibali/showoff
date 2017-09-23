@@ -2,71 +2,74 @@ const React = require('react');
 
 const _ = require('lodash');
 const Draggable = require('react-draggable');
-const Resizable = require('react-resizable').Resizable;
+const { Resizable } = require('react-resizable');
 
-const Frame = React.createClass({
-  getDefaultProps: function() {
+class Frame extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      x: this.props.initialX,
+      y: this.props.initialY,
+      width: this.props.initialWidth,
+      height: this.props.initialHeight
+    };
+  }
+
+  static get defaultProps() {
     return {
       initialX: 0,
       initialY: 0,
       initialWidth: 480,
       initialHeight: 360
     };
-  },
+  }
 
-  getInitialState: function() {
-    return {
-      x: this.props.initialX,
-      y: this.props.initialY,
-      width: this.props.initialWidth,
-      height: this.props.initialHeight
+  render() {
+    const onResize = (event, data) => {
+      this.setState(_.pick(data.size, ['width', 'height']));
     };
-  },
 
-  onResize: function(event, data) {
-    this.setState(_.pick(data.size, ['width', 'height']));
-  },
+    const onDrag = (event, data) => {
+      this.setState(_.pick(data, ['x', 'y']));
+    };
 
-  onDrag: function(event, data) {
-    this.setState(_.pick(data, ['x', 'y']));
-  },
+    const triggerDimensionChange = () => {
+      this.props.onDimensionChange(this.state.x, this.state.y, this.state.width, this.state.height);
+    };
 
-  triggerDimensionChange: function() {
-    this.props.onDimensionChange(this.state.x, this.state.y, this.state.width, this.state.height);
-  },
+    const onMouseDown = (event) => {
+      // Bring frame to front
+      const draggables = document.getElementsByClassName('react-draggable');
+      const maxZ = _.reduce(draggables, (runningMax, element) => {
+        const z = parseInt(
+          document.defaultView.getComputedStyle(element, null).getPropertyValue('z-index'), 10);
+        return _.max([z, runningMax]);
+      }, 0);
+      let draggableElement = event.target;
+      while(!draggableElement.classList.contains('react-draggable')) {
+        draggableElement = draggableElement.parentElement;
+      }
+      draggableElement.style.zIndex = maxZ + 1;
+    };
 
-  onMouseDown: function(event) {
-    // Bring frame to front
-    const draggables = document.getElementsByClassName('react-draggable');
-    const maxZ = _.reduce(draggables, (runningMax, element) => {
-      const z = parseInt(
-        document.defaultView.getComputedStyle(element, null).getPropertyValue('z-index'), 10);
-      return _.max([z, runningMax]);
-    }, 0);
-    let draggableElement = event.target;
-    while(!draggableElement.classList.contains('react-draggable')) {
-      draggableElement = draggableElement.parentElement;
-    }
-    draggableElement.style.zIndex = maxZ + 1;
-  },
-
-  render: function() {
     const frame = this.props.frame;
+
     return (
       <Draggable
         bounds="parent"
         cancel=".react-resizable-handle"
         defaultPosition={{ x: this.props.initialX, y: this.props.initialY }}
         handle=".frame-handle"
-        onMouseDown={this.onMouseDown}
-        onDrag={this.onDrag}
-        onStop={this.triggerDimensionChange}
+        onMouseDown={onMouseDown}
+        onDrag={onDrag}
+        onStop={triggerDimensionChange}
       >
         <Resizable
           width={this.state.width}
           height={this.state.height}
-          onResize={this.onResize}
-          onResizeStop={this.triggerDimensionChange}
+          onResize={onResize}
+          onResizeStop={triggerDimensionChange}
         >
           <div className="frame" style={{ width: this.state.width, height: this.state.height }}>
             <div className="frame-handle">{frame.title || '<untitled frame>'}</div>
@@ -76,6 +79,6 @@ const Frame = React.createClass({
       </Draggable>
     );
   }
-});
+}
 
 module.exports = Frame;

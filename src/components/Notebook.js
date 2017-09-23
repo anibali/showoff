@@ -8,22 +8,19 @@ const reactAsync = require('../helpers/reactAsync');
 
 const Frame = require('./Frame');
 
-const Notebook = React.createClass({
-  // Display name for the component (useful for debugging)
-  displayName: 'Notebook',
-
-  componentWillMount: function() {
+class Notebook extends React.Component {
+  componentWillMount() {
     if(!this.props.frames) {
       reactAsync.addPromise(this.props.loadNotebook(this.props.id));
     }
-  },
-
-  onFrameDimensionChange: function(frame, x, y, width, height) {
-    this.props.updateFrame(_.assign({}, frame, { x, y, width, height }));
-  },
+  }
 
   // Describe how to render the component
-  render: function() {
+  render() {
+    const onFrameDimensionChange = (frame, x, y, width, height) => {
+      this.props.updateFrame(_.assign({}, frame, { x, y, width, height }));
+    };
+
     let children = null;
     if(this.props.frames) {
       const createFrame = frame => (
@@ -34,7 +31,7 @@ const Notebook = React.createClass({
           initialY={frame.y}
           initialWidth={frame.width}
           initialHeight={frame.height}
-          onDimensionChange={_.partial(this.onFrameDimensionChange, frame)}
+          onDimensionChange={_.partial(onFrameDimensionChange, frame)}
         />
       );
 
@@ -60,7 +57,7 @@ const Notebook = React.createClass({
       </DocumentTitle>
     );
   }
-});
+}
 
 module.exports = ReactRedux.connect(
   // Map store state to props

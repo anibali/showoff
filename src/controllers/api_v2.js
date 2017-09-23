@@ -27,7 +27,7 @@ const singleNotebookToJson = notebook => ({
   type: 'notebooks',
   id: notebook.id.toString(),
   attributes: _.pick(notebook.toJSON ? notebook.toJSON() : notebook,
-    'pinned', 'title', 'createdAt', 'updatedAt')
+    'pinned', 'title', 'createdAt', 'updatedAt'),
 });
 
 const singleFrameToJson = frame => ({
@@ -160,8 +160,8 @@ router.get('/notebooks/:id', (req, res) => {
         for(let i = 1; i < renderedContentArray.length; ++i) {
           framesJson[i].attributes.renderedContent = renderedContentArray[i];
         }
-        notebookJson.relationships = { frames: framesJson };
-        res.json(notebookJson);
+        notebookJson.relationships = { frames: { data: framesJson } };
+        res.json({ data: notebookJson });
       });
     })
     .catch((err) => errorResponse(res, err));

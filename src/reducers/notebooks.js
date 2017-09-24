@@ -43,6 +43,7 @@ function reducer(state, action) {
       const newState = _.clone(state);
 
       _.forEach(action.notebooks, (notebook) => {
+        notebook = _.pick(notebook, 'id', 'title', 'pinned', 'createdAt', 'updatedAt', 'frames');
         const notebookIndex = _.findIndex(state, { id: notebook.id });
 
         if(notebookIndex < 0) {
@@ -110,6 +111,7 @@ reducer.updateNotebook = (notebook) => (dispatch) =>
       if(!res.ok) throw new Error(res.statusText);
       res.json().then((data) => {
         dispatch(reducer.addNotebook(data.notebook));
+        dispatch(tagActionCreators.removeTagsFromNotebook(data.notebook.id));
         dispatch(tagActionCreators.addTags(data.notebook.tags));
         resolve(data.notebook);
       }).catch(reject);

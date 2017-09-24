@@ -2,6 +2,7 @@ const _ = require('lodash');
 const fetch = require('../helpers/fetch');
 
 const ADD_TAGS = Symbol('showoff/tags/ADD_TAGS');
+const REMOVE_TAGS_FROM_NOTEBOOK = Symbol('showoff/tags/REMOVE_TAGS_FROM_NOTEBOOK');
 
 const initialState = [];
 
@@ -28,6 +29,10 @@ function reducer(state, action) {
       return newState;
     }
 
+    case REMOVE_TAGS_FROM_NOTEBOOK: {
+      return _.reject(state, { notebookId: action.notebookId });
+    }
+
     default: return state;
   }
 }
@@ -42,6 +47,10 @@ reducer.addTags = (tag) => {
     tags = [tags];
   }
   return { type: ADD_TAGS, tags };
+};
+
+reducer.removeTagsFromNotebook = (notebookId) => {
+  return { type: REMOVE_TAGS_FROM_NOTEBOOK, notebookId }
 };
 
 reducer.loadTagsShallow = () => (dispatch) =>

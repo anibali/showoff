@@ -17,7 +17,7 @@ const libs = [
   'isomorphic-fetch',
   'lodash',
   'react',
-  'react-addons-pure-render-mixin',
+  'react-bootstrap-typeahead',
   'react-dom',
   'react-draggable',
   'react-redux',
@@ -40,7 +40,8 @@ const paths = {
   styles: 'src/styles/**/*.css',
   vendorStyles: [
     'vendor/font-awesome/css/font-awesome.css',
-    require.resolve('bootstrap/dist/css/bootstrap.css')
+    require.resolve('bootstrap/dist/css/bootstrap.css'),
+    require.resolve('react-bootstrap-typeahead/css/Typeahead.css'),
   ]
 };
 

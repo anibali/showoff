@@ -5,10 +5,13 @@ module.exports = (bookshelf) => {
       hasTimestamps: ['createdAt', 'updatedAt'],
       frames: function() {
         return this.hasMany('Frame', 'notebookId');
-      }
+      },
+      tags: function() {
+        return this.hasMany('Tag', 'notebookId');
+      },
     },
     {
-      dependents: ['frames']
+      dependents: ['frames', 'tags'],
     }
   );
 

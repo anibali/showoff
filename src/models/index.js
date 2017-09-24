@@ -12,5 +12,6 @@ bookshelf.plugin(jsonColumns);
 
 require('./Notebook')(bookshelf);
 require('./Frame')(bookshelf);
+require('./Tag')(bookshelf);
 
 module.exports = (modelName) => bookshelf.model(modelName);

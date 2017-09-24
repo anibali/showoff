@@ -32,16 +32,31 @@ router.post('/notebook', (req, res) => {
     .catch((err) => errorResponse(res, err));
 });
 
+// TODO: Update as a transaction?
 router.put('/notebook/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const attrs = notebookParams(req);
 
-  models('Notebook').where({ id }).fetch({ require: true })
-    .then((notebook) => notebook.save(attrs))
-    .then((notebook) => res.json({ notebook }))
-    .catch((err) => {
-      errorResponse(res, err);
+  let promise = models('Notebook').where({ id }).fetch({ require: true })
+    .then((notebook) => notebook.save(attrs));
+
+  if(Array.isArray(req.body.notebook.tags)) {
+    const tags = req.body.notebook.tags
+      .map(tag => _.assign({ notebookId: id }, _.pick(tag, 'name')));
+    promise = promise.then(notebook => {
+      return models('Tag').where({ notebookId: notebook.id }).destroy()
+        .then(() => Promise.all(tags.map(tag => models('Tag').forge(tag).save())))
+        .then((savedTags) => {
+          const notebookJson = notebook.toJSON();
+          notebookJson.tags = savedTags.map(tag => tag.toJSON());
+          return notebookJson;
+        });
     });
+  }
+
+  promise
+    .then((notebook) => res.json({ notebook }))
+    .catch((err) => { errorResponse(res, err); });
 });
 
 router.get('/notebook/:id', (req, res) => {

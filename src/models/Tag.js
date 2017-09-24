@@ -1,8 +1,7 @@
 module.exports = (bookshelf) =>
-  bookshelf.model('Frame', {
-    tableName: 'frames',
+  bookshelf.model('Tag', {
+    tableName: 'tags',
     hasTimestamps: ['createdAt', 'updatedAt'],
-    jsonColumns: ['content'],
     notebook: function() {
       return this.belongsTo('Notebook', 'notebookId');
     },

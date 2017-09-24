@@ -38,6 +38,13 @@ const singleFrameToJson = frame => ({
     'updatedAt', 'renderedContent')
 });
 
+const singleTagToJson = tag => ({
+  type: 'tags',
+  id: tag.id.toString(),
+  attributes: _.pick(tag.toJSON ? tag.toJSON() : tag,
+    'name', 'createdAt', 'updatedAt', 'notebookId')
+});
+
 const notebookParams = (rawAttrs) =>
   _.pick(rawAttrs, 'title', 'pinned');
 
@@ -45,7 +52,9 @@ const notebookParams = (rawAttrs) =>
 GET /api/v2/notebooks
 */
 router.get('/notebooks', (req, res) => {
-  models('Notebook').fetchAll().then(notebooks => {
+  models('Notebook').fetchAll({
+    withRelated: [{ tags: (qb) => qb.column('id', 'name', 'notebookId') }]
+  }).then(notebooks => {
     res.json({
       data: notebooks.map(singleNotebookToJson)
     });
@@ -306,6 +315,17 @@ router.delete('/frames/:id', (req, res) => {
   models('Frame').where({ id }).destroy({ require: true })
     .then(() => res.status(204).send())
     .catch(err => errorResponse(res, err));
+});
+
+/*
+GET /api/v2/tags/
+*/
+router.get('/tags', (req, res) => {
+  models('Tag').fetchAll().then(tags => {
+    res.json({
+      data: tags.map(singleTagToJson)
+    });
+  }).catch(err => errorResponse(res, err));
 });
 
 module.exports = router;

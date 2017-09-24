@@ -1,9 +1,10 @@
 const _ = require('lodash');
 const fetch = require('../helpers/fetch');
+const tagActionCreators = require('./tags');
 
-const MODIFY_FRAME = Symbol('sconce/notebooks/MODIFY_FRAME');
-const ADD_NOTEBOOKS = Symbol('sconce/notebooks/ADD_NOTEBOOKS');
-const REMOVE_NOTEBOOK = Symbol('sconce/notebooks/REMOVE_NOTEBOOK');
+const MODIFY_FRAME = Symbol('showoff/notebooks/MODIFY_FRAME');
+const ADD_NOTEBOOKS = Symbol('showoff/notebooks/ADD_NOTEBOOKS');
+const REMOVE_NOTEBOOK = Symbol('showoff/notebooks/REMOVE_NOTEBOOK');
 
 const initialState = [];
 
@@ -62,6 +63,10 @@ function reducer(state, action) {
   }
 }
 
+const flattenResource = (resource) => {
+  return _.assign({ id: parseInt(resource.id, 10) }, resource.attributes);
+};
+
 reducer.modifyFrame = (frame) =>
   ({ type: MODIFY_FRAME, frame });
 
@@ -105,6 +110,7 @@ reducer.updateNotebook = (notebook) => (dispatch) =>
       if(!res.ok) throw new Error(res.statusText);
       res.json().then((data) => {
         dispatch(reducer.addNotebook(data.notebook));
+        dispatch(tagActionCreators.addTags(data.notebook.tags));
         resolve(data.notebook);
       }).catch(reject);
     }).catch((err) => {
@@ -131,11 +137,12 @@ reducer.loadNotebook = (notebookId) => (dispatch) =>
 
 reducer.loadNotebooksShallow = () => (dispatch) =>
   new Promise((resolve, reject) => {
-    fetch('/api/notebooks').then((res) => {
+    fetch('/api/v2/notebooks').then((res) => {
       if(!res.ok) throw new Error(res.statusText);
       res.json().then((data) => {
-        dispatch(reducer.addNotebook(data.notebooks));
-        resolve(data.notebooks);
+        const notebooks = data.data.map(flattenResource);
+        dispatch(reducer.addNotebook(notebooks));
+        resolve(notebooks);
       }).catch(reject);
     }).catch((err) => {
       console.error(err);

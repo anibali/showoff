@@ -27,7 +27,7 @@
     "ordered-merge-stream": "1.0.0",
     "pg": "6.2.3",
     "react": "15.3.0",
-    "react-addons-pure-render-mixin": "15.3.0",
+    "react-bootstrap-typeahead": "2.0.0-alpha.3",
     "react-document-title": "2.0.2",
     "react-dom": "15.3.0",
     "react-draggable": "2.2.2",

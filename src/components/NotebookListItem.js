@@ -93,17 +93,7 @@ class NotebookListItemEdit extends React.Component {
       this.setState({ title: event.target.value });
     };
 
-    const onKeyDownTitle = (event) => {
-      if(event.keyCode === 13) { // Enter key
-        event.preventDefault();
-        onConfirmEdit(event);
-      } else if(event.keyCode === 27) { // Escape key
-        event.preventDefault();
-        onCancelEdit(event);
-      }
-    };
-
-    const onClickConfirm = (event) => {
+    const onSubmitForm = (event) => {
       event.preventDefault();
       onConfirmEdit({ title: this.state.title, tags: this.state.tags });
     };
@@ -122,7 +112,7 @@ class NotebookListItemEdit extends React.Component {
 
     return (
       <div className="list-group-item">
-        <div className="form-horizontal">
+        <form className="form-horizontal" onSubmit={onSubmitForm}>
           <div className="form-group">
             <label htmlFor={`notebook-title-field-${notebook.id}`} className="col-md-1 control-label">Title</label>
             <div className="col-md-11">
@@ -132,7 +122,6 @@ class NotebookListItemEdit extends React.Component {
                 autoFocus
                 value={this.state.title}
                 onChange={onChangeTitle}
-                onKeyDown={onKeyDownTitle}
               />
             </div>
           </div>
@@ -155,16 +144,17 @@ class NotebookListItemEdit extends React.Component {
           <div className="form-group" style={{ marginBottom: 0 }}>
             <div className="col-md-offset-1 col-md-11">
               <div className="btn-toolbar">
-                <button className="btn btn-success" type="button" onClick={onClickConfirm}>
-                  Save
-                </button>
-                <button className="btn btn-default" type="button" onClick={onClickCancel}>
+                <input type="submit"
+                  value="Save"
+                  className="btn btn-success"
+                />
+                <button className="btn btn-default" onClick={onClickCancel}>
                   Cancel
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        </form>
       </div>
     );
   }

@@ -14,9 +14,13 @@ WORKDIR /app
 # Install native dependencies (for "canvas")
 RUN sudo apk add --no-cache make g++ python pkgconfig pixman cairo-dev
 
+# Install Node header files for node-gyp
+RUN yarn global add node-gyp-install \
+ && node-gyp-install
+
 # Install the project's NPM dependencies.
 COPY package.json /app/
-RUN npm --silent install
+RUN yarn install
 RUN mkdir /deps && mv node_modules /deps/node_modules
 
 # Set environment variables to point to the installed NPM modules.

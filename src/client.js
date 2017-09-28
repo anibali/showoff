@@ -3,6 +3,8 @@
  * When the web page is loaded, this code will run on the client.
  */
 
+require('babel-polyfill');
+
 const React = require('react');
 const ReactDOM = require('react-dom');
 const { Provider } = require('react-redux');
@@ -42,9 +44,4 @@ window.main = (initialState) => {
   // Mount our React root component in the DOM
   const mountPoint = document.getElementById('root');
   ReactDOM.render(<Root />, mountPoint);
-
-  if(process.env.NODE_ENV === 'development') {
-    window.Perf = require('react-addons-perf');
-    window.Perf.start();
-  }
 };

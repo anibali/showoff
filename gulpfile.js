@@ -18,6 +18,7 @@ const libs = [
   'lodash',
   'react',
   'react-bootstrap-typeahead',
+  'react-document-title',
   'react-dom',
   'react-draggable',
   'react-redux',
@@ -28,11 +29,10 @@ const libs = [
   'redux-thunk',
 ];
 
-const devLibs = [
-  'react-addons-perf'
-];
+const devLibs = [];
 
 const nodeEnv = process.env.NODE_ENV || 'development';
+const useSourceMaps = nodeEnv === 'development';
 
 // Information about where project files are located
 const paths = {
@@ -76,10 +76,10 @@ gulp.task('styles', ['cleanStyles'], () =>
 
 // Task to bundle up vendor scripts (dependencies)
 gulp.task('vendorScripts', ['cleanVendorScripts'], () => {
-  var bundler = browserify({ debug: true }).require(libs);
+  let bundler = browserify({ debug: useSourceMaps }).require(libs);
   // Minify the vendor scripts when not in development mode
   if(nodeEnv !== 'development') {
-    bundler = bundler.transform({ global: true }, uglifyify);
+    bundler = bundler.transform(uglifyify, { global: true });
   } else {
     bundler = bundler.require(devLibs);
   }
@@ -97,7 +97,7 @@ function bundleScripts(shouldWatch) {
   // Options for the browserify bundler
   const opts = {
     entries: [paths.scriptEntryPoint],
-    debug: true,
+    debug: useSourceMaps,
     plugin: [],
     // These properties are used by watchify for caching
     cache: {},
@@ -110,7 +110,18 @@ function bundleScripts(shouldWatch) {
   // Create the bundler
   const bundler = browserify(opts)
     .transform(envify({ NODE_ENV: nodeEnv, IN_BROWSER: true }))
-    .transform([babelify, { sourceMap: true }])
+    .transform(babelify.configure({
+      sourceMap: useSourceMaps,
+      presets: [
+        ['env', {
+          useBuiltIns: 'entry',
+          targets: {
+            browsers: ['> 1%', 'last 2 versions', 'Firefox ESR']
+          }
+        }],
+        'react',
+      ]
+    }))
     .external(libs)
     .external(devLibs);
 

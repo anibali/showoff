@@ -20,8 +20,7 @@ $ docker-compose run --rm web knex seed:run
 ## Upgrading
 
 ```sh
-$ docker-compose stop
 $ git pull
 $ docker-compose build
-$ docker-compose up
+$ docker-compose up -d
 ```

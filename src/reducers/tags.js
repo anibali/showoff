@@ -41,8 +41,7 @@ const flattenResource = (resource) => {
   return _.assign({ id: parseInt(resource.id, 10) }, resource.attributes);
 };
 
-reducer.addTags = (tag) => {
-  let tags = tag;
+reducer.addTags = (tags) => {
   if(!_.isArray(tags)) {
     tags = [tags];
   }

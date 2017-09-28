@@ -98,8 +98,10 @@ reducer.addNotebook = (notebook) => {
   return { type: ADD_NOTEBOOKS, notebooks };
 };
 
-reducer.removeNotebook = (notebookId) =>
-  ({ type: REMOVE_NOTEBOOK, notebookId });
+reducer.removeNotebook = (notebookId) => (dispatch) => {
+  dispatch(tagActionCreators.removeTagsFromNotebook(notebookId));
+  dispatch({ type: REMOVE_NOTEBOOK, notebookId });
+};
 
 reducer.updateNotebook = (notebook) => (dispatch) =>
   new Promise((resolve, reject) => {

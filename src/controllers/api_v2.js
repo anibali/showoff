@@ -134,9 +134,16 @@ Example response:
         "type": "notebooks"
         "relationships": {
           "frames": {
-            "data": []
+            "data": [{ "type": "frames", "id": "1" }]
           }
-        }
+        },
+        "included": [
+          {
+            "type": "frames",
+            "id": "1",
+            "attributes": { "title": "A frame" }
+          }
+        ]
       }
     }
 */
@@ -168,7 +175,8 @@ router.get('/notebooks/:id', (req, res) => {
         for(let i = 1; i < renderedContentArray.length; ++i) {
           framesJson[i].attributes.renderedContent = renderedContentArray[i];
         }
-        notebookJson.relationships = { frames: { data: framesJson } };
+        notebookJson.relationships = { frames: { data: framesJson.map(f => _.pick(f, ['type', 'id'])) } };
+        notebookJson.included = framesJson;
         res.json({ data: notebookJson });
       });
     })

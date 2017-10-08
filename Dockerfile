@@ -18,10 +18,16 @@ RUN sudo apk add --no-cache make g++ python pkgconfig pixman cairo-dev
 RUN yarn global add node-gyp-install \
  && node-gyp-install
 
+# Switch to a non-root user
+RUN chown -R node:node /app/ \
+ && echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-node
+USER node
+
 # Install the project's NPM dependencies.
-COPY package.json /app/
-RUN yarn install
-RUN mkdir /deps && mv node_modules /deps/node_modules
+COPY package.json .
+RUN sudo mkdir -p /deps/node_modules \
+ && sudo chown -R node:node /deps/ \
+ && yarn install --modules-folder /deps/node_modules
 
 # Set environment variables to point to the installed NPM modules.
 ENV NODE_PATH=/deps/node_modules \
@@ -29,15 +35,9 @@ ENV NODE_PATH=/deps/node_modules \
 
 # Copy our application files into the image.
 COPY . /app
-RUN rm -rf /app/node_modules
 
 # Bundle client-side assets.
 RUN rm -rf dist && NODE_ENV=production gulp build
-
-# Switch to a non-privileged user for running commands inside the container.
-RUN chown -R node:node /app /deps \
- && echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-node
-USER node
 
 # Start the server on exposed port 3000.
 EXPOSE 3000

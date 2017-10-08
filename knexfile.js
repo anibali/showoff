@@ -17,7 +17,25 @@ const dbConfig = {
   }
 };
 
+const testDbConfig = {
+  client: 'postgres',
+  connection: {
+    host: 'testdb',
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: 'test_showoff_db',
+    charset: 'utf8'
+  },
+  migrations: {
+    directory: path.join(__dirname, './src/migrations')
+  },
+  seeds: {
+    directory: path.join(__dirname, './src/seeds')
+  }
+};
+
 module.exports = {
   development: dbConfig,
-  production: dbConfig
+  production: dbConfig,
+  test: testDbConfig,
 };

@@ -1,8 +1,8 @@
 exports.up = function(knex) {
   return knex.schema.createTable('frames', (table) => {
     table.increments('id').primary();
-    table.dateTime('createdAt').notNullable().defaultTo(knex.raw('now()'));
-    table.dateTime('updatedAt').notNullable().defaultTo(knex.raw('now()'));
+    table.dateTime('createdAt').notNullable();
+    table.dateTime('updatedAt').notNullable();
     table.string('title');
     table.string('type');
     table.json('content');

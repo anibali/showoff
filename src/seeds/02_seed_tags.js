@@ -18,6 +18,10 @@ for(let i = 3; i < 13; ++i) {
 }
 
 exports.seed = function(knex, Promise) {
+  tags.forEach(tag => {
+    tag.createdAt = new Date();
+    tag.updatedAt = new Date();
+  });
   return (Promise.resolve()
     .then(() => knex('tags').del())
     .then(() => knex.raw('ALTER SEQUENCE tags_id_seq RESTART WITH 1;'))

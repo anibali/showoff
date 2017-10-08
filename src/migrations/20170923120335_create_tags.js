@@ -1,8 +1,8 @@
 exports.up = function(knex) {
   return knex.schema.createTable('tags', (table) => {
     table.increments('id').primary();
-    table.dateTime('createdAt').notNullable().defaultTo(knex.raw('now()'));
-    table.dateTime('updatedAt').notNullable().defaultTo(knex.raw('now()'));
+    table.dateTime('createdAt').notNullable();
+    table.dateTime('updatedAt').notNullable();
     table.string('name').notNullable();
     table.integer('notebookId')
       .unsigned()

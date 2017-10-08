@@ -86,9 +86,8 @@ Example response:
     }
 */
 router.post('/notebooks', (req, res) => {
-  const attrs = notebookParams(req.body.data.attributes);
-
-  models('Notebook').forge(attrs).save()
+  new Promise((resolve) => resolve(notebookParams(req.body.data.attributes)))
+    .then(attrs => models('Notebook').forge(attrs).save())
     .then(notebook => res.json({
       data: singleNotebookToJson(notebook)
     }))

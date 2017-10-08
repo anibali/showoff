@@ -1,4 +1,4 @@
-const knexConf = require('../../knexfile').development;
+const knexConf = require('../../knexfile')[process.env.NODE_ENV || 'development'];
 const knex = require('knex')(knexConf);
 
 const bookshelf = require('bookshelf')(knex);
@@ -14,4 +14,7 @@ require('./Notebook')(bookshelf);
 require('./Frame')(bookshelf);
 require('./Tag')(bookshelf);
 
-module.exports = (modelName) => bookshelf.model(modelName);
+const models = modelName => bookshelf.model(modelName);
+models.knex = knex;
+
+module.exports = models;

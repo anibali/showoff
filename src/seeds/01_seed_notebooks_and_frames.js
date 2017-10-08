@@ -131,6 +131,14 @@ const frames = [
 ];
 
 exports.seed = function(knex, Promise) {
+  notebooks.forEach(notebook => {
+    notebook.createdAt = new Date();
+    notebook.updatedAt = new Date();
+  });
+  frames.forEach(frame => {
+    frame.createdAt = new Date();
+    frame.updatedAt = new Date();
+  });
   return (Promise.resolve()
     .then(() => knex('frames').del())
     .then(() => knex.raw('ALTER SEQUENCE frames_id_seq RESTART WITH 1;'))

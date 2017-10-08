@@ -3,7 +3,7 @@
  * When the server is started, this code will run.
  */
 
-// Use Babel to provide support for ES6
+// Use Babel to provide support for JSX
 require('babel-core/register');
 
 // Require our Express app (see app.js)

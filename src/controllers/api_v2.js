@@ -5,14 +5,17 @@
 
 const express = require('express');
 const _ = require('lodash');
+const Mapper = require('jsonapi-mapper');
+
 const models = require('../models');
 const wss = require('../websocket-server');
 const frameViews = require('../frameViews');
 
 const router = express.Router();
 
-// TODO: It would be a much better idea to render the frame content on POST/PUT
-// and store the result in the database.
+const mapper = new Mapper.Bookshelf();
+
+// TODO: It might be a good idea to cache rendered frame content in the DB
 
 const errorResponse = (res, err) => {
   console.error(err.stack);
@@ -23,27 +26,17 @@ const errorResponse = (res, err) => {
   }
 };
 
-const singleNotebookToJson = notebook => ({
-  type: 'notebooks',
-  id: notebook.id.toString(),
-  attributes: _.pick(notebook.toJSON ? notebook.toJSON() : notebook,
-    'pinned', 'title', 'createdAt', 'updatedAt'),
-});
+const renderFrame = (frameJson) =>
+  frameViews
+    .render(frameJson.attributes)
+    .catch(err => `<p style="color: red;">
+        Error rendering frame content (type = "${frameJson.attributes}")
+      </p>
+      <pre>${err}</pre>`)
+    .then(renderedContent =>
+      _.merge({}, frameJson, { attributes: { renderedContent } }));
 
-const singleFrameToJson = frame => ({
-  type: 'frames',
-  id: frame.id.toString(),
-  attributes: _.pick(frame.toJSON ? frame.toJSON() : frame,
-    'title', 'type', 'content', 'x', 'y', 'width', 'height', 'createdAt',
-    'updatedAt', 'renderedContent')
-});
-
-const singleTagToJson = tag => ({
-  type: 'tags',
-  id: tag.id.toString(),
-  attributes: _.pick(tag.toJSON ? tag.toJSON() : tag,
-    'name', 'createdAt', 'updatedAt', 'notebookId')
-});
+const renderFrames = (framesJson) => Promise.all(framesJson.map(renderFrame));
 
 const notebookParams = (rawAttrs) =>
   _.pick(rawAttrs, 'title', 'pinned');
@@ -52,13 +45,11 @@ const notebookParams = (rawAttrs) =>
 GET /api/v2/notebooks
 */
 router.get('/notebooks', (req, res) => {
-  models('Notebook').fetchAll({
-    withRelated: [{ tags: (qb) => qb.column('id', 'name', 'notebookId') }]
-  }).then(notebooks => {
-    res.json({
-      data: notebooks.map(singleNotebookToJson)
-    });
-  }).catch(err => errorResponse(res, err));
+  models('Notebook').fetchAll()
+    .then(notebooks => {
+      res.json(mapper.map(notebooks, 'notebooks', { enableLinks: false }));
+    })
+    .catch(err => errorResponse(res, err));
 });
 
 /*
@@ -88,9 +79,7 @@ Example response:
 router.post('/notebooks', (req, res) => {
   new Promise((resolve) => resolve(notebookParams(req.body.data.attributes)))
     .then(attrs => models('Notebook').forge(attrs).save())
-    .then(notebook => res.json({
-      data: singleNotebookToJson(notebook)
-    }))
+    .then(notebook => res.json(mapper.map(notebook, 'notebooks', { enableLinks: false })))
     .catch(err => errorResponse(res, err));
 });
 
@@ -112,9 +101,7 @@ router.patch('/notebooks/:id', (req, res) => {
 
   models('Notebook').where({ id }).fetch({ require: true })
     .then(notebook => notebook.save(attrs))
-    .then(notebook => res.json({
-      data: singleNotebookToJson(notebook)
-    }))
+    .then(notebook => res.json(mapper.map(notebook, 'notebooks', { enableLinks: false })))
     .catch(err => {
       errorResponse(res, err);
     });
@@ -150,37 +137,16 @@ Example response:
 router.get('/notebooks/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
 
-  models('Notebook').where({ id }).fetch({ require: true, withRelated: ['frames'] })
-    .then((notebook) => {
-      const promises = [];
-      const relatedFrames = notebook.related('frames');
-
-      relatedFrames.forEach(frame => {
-        const frameJson = frame.toJSON();
-
-        promises.push(
-          frameViews
-            .render(frameJson)
-            .catch(err => `<p style="color: red;">
-                Error rendering frame content (type = "${frameJson.type}")
-              </p>
-              <pre>${err}</pre>`
-            )
-        );
-      });
-
-      return Promise.all(promises).then(renderedContentArray => {
-        const notebookJson = singleNotebookToJson(notebook);
-        const framesJson = relatedFrames.map(singleFrameToJson);
-        for(let i = 1; i < renderedContentArray.length; ++i) {
-          framesJson[i].attributes.renderedContent = renderedContentArray[i];
-        }
-        notebookJson.relationships = { frames: { data: framesJson.map(f => _.pick(f, ['type', 'id'])) } };
-        notebookJson.included = framesJson;
-        res.json({ data: notebookJson });
-      });
-    })
-    .catch((err) => errorResponse(res, err));
+  models('Notebook').where({ id })
+    .fetchJsonApi({ include: ['frames'] }, false)
+    .then(notebook => mapper.map(notebook, 'notebooks', { enableLinks: false }))
+    .then(notebookJson =>
+      renderFrames(_.filter(notebookJson.included, { type: 'frames' }))
+        .then(framesJson => _.assign({}, notebookJson, {
+          included: _.reject(notebookJson.included, { type: 'frames' }).concat(framesJson)
+        })))
+    .then(notebookJson => res.json(notebookJson))
+    .catch(err => errorResponse(res, err));
 });
 
 /*
@@ -209,14 +175,12 @@ const frameParams = (rawAttrs) =>
   _.pick(rawAttrs, 'title', 'type', 'content', 'x', 'y', 'width', 'height');
 
 /*
-GET /api/v2/frames/
+GET /api/v2/frames
 */
 router.get('/frames', (req, res) => {
-  models('Frame').fetchAll().then(frames => {
-    res.json({
-      data: frames.map(singleFrameToJson)
-    });
-  }).catch(err => errorResponse(res, err));
+  models('Frame').fetchAll()
+    .then(frames => res.json(mapper.map(frames, 'frames', { enableLinks: false })))
+    .catch(err => errorResponse(res, err));
 });
 
 /*
@@ -225,18 +189,20 @@ GET /api/v2/frames/1
 router.get('/frames/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
 
-  models('Frame').where({ id }).fetch({ require: true })
-    .then(frame => {
-      res.json({
-        data: singleFrameToJson(frame)
-      });
-    })
+  models('Frame').where({ id })
+    .fetchJsonApi({}, false)
+    .then(frame => mapper.map(frame, 'frames', { enableLinks: false }))
+    .then(frameJson =>
+      renderFrame(frameJson.data)
+        .then(data => _.assign({}, frameJson, { data })))
+    .then(frameJson => res.json(frameJson))
     .catch(err => errorResponse(res, err));
 });
 
 /*
 PATCH /api/v2/frames/3
 */
+// FIXME: Probably broken
 router.patch('/frames/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const attrs = frameParams(req.body.data.attributes);
@@ -258,9 +224,8 @@ router.patch('/frames/:id', (req, res) => {
       wss.broadcast(JSON.stringify(broadcastFrame));
       return frame;
     })
-    .then(frame => res.json({
-      data: singleFrameToJson(frame)
-    }))
+    .then(frame => mapper.map(frame, 'frames', { enableLinks: false }))
+    .then(frameJson => res.json(frameJson))
     .catch(err => {
       errorResponse(res, err);
     });
@@ -281,6 +246,7 @@ Example request:
       }
     }
 */
+// FIXME: Broken
 router.post('/frames', (req, res) => {
   const notebookId = parseInt(req.body.data.relationships.notebook.id, 10);
 
@@ -307,9 +273,8 @@ router.post('/frames', (req, res) => {
       wss.broadcast(JSON.stringify(broadcastFrame));
       return frame;
     })
-    .then(frame => res.json({
-      data: singleFrameToJson(frame)
-    }))
+    .then(frame => mapper.map(frame, 'frames', { enableLinks: false }))
+    .then(frameJson => res.json(frameJson))
     .catch(err => errorResponse(res, err));
 });
 
@@ -328,11 +293,10 @@ router.delete('/frames/:id', (req, res) => {
 GET /api/v2/tags/
 */
 router.get('/tags', (req, res) => {
-  models('Tag').fetchAll().then(tags => {
-    res.json({
-      data: tags.map(singleTagToJson)
-    });
-  }).catch(err => errorResponse(res, err));
+  models('Tag').fetchAll()
+    .then(tags => mapper.map(tags, 'tags', { enableLinks: false }))
+    .then(tagsJson => res.json(tagsJson))
+    .catch(err => errorResponse(res, err));
 });
 
 module.exports = router;

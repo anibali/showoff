@@ -6,6 +6,7 @@
 const express = require('express');
 const _ = require('lodash');
 const Mapper = require('jsonapi-mapper');
+const Joi = require('joi');
 
 const models = require('../models');
 const wss = require('../websocket-server');
@@ -16,6 +17,16 @@ const router = express.Router();
 const mapper = new Mapper.Bookshelf();
 
 // TODO: It might be a good idea to cache rendered frame content in the DB
+
+const postBodySchema = Joi.object().keys({
+  data: Joi.object().keys({
+    type: Joi.string().valid(['notebooks']),
+    attributes: Joi.object().keys({
+      pinned: Joi.boolean().optional(),
+      title: Joi.string(),
+    }),
+  }),
+});
 
 const errorResponse = (res, err) => {
   console.error(err.stack);
@@ -77,10 +88,15 @@ Example response:
     }
 */
 router.post('/notebooks', (req, res) => {
-  new Promise((resolve) => resolve(notebookParams(req.body.data.attributes)))
-    .then(attrs => models('Notebook').forge(attrs).save())
-    .then(notebook => res.json(mapper.map(notebook, 'notebooks', { enableLinks: false })))
-    .catch(err => errorResponse(res, err));
+  Joi.validate(req.body, postBodySchema, { presence: 'required' })
+    .then((body) =>
+      new Promise((resolve) => resolve(notebookParams(body.data.attributes)))
+        .then(attrs => models('Notebook').forge(attrs).save())
+        .then(notebook => res.status(201).json(
+          mapper.map(notebook, 'notebooks', { enableLinks: false })))
+        .catch(err => errorResponse(res, err))
+    )
+    .catch((err) => res.status(400).json({ error: err.message }));
 });
 
 /*

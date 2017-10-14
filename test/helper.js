@@ -1,9 +1,12 @@
 // Use Babel to provide support for JSX
 require('babel-core/register');
 
+const Must = require('must');
+const MustHttp = require('./mustHttp');
 const { factory, BookshelfAdapter } = require('factory-girl');
-
 const models = require('../src/models');
+
+MustHttp.register(Must);
 
 const adapter = new BookshelfAdapter();
 factory.setAdapter(adapter);

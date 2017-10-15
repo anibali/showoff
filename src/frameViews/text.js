@@ -1,8 +1,7 @@
-const React = require('react');
-const reactDomServer = require('react-dom/server');
+const escape = require('escape-html');
 
 const plainTextToHtml = (text) =>
-  reactDomServer.renderToString(<pre>{text}</pre>);
+  `<pre>${escape(text)}</pre>`;
 
 module.exports = (frameContent) => new Promise((resolve) =>
   resolve(plainTextToHtml(frameContent.body)));

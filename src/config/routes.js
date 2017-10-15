@@ -1,5 +1,5 @@
-const apiv1 = require('../controllers/api_v1');
-const apiv2 = require('../controllers/api_v2');
+const apiv1 = require('../controllers/api/v1');
+const apiv2 = require('../controllers/api/v2');
 
 const routes = {};
 

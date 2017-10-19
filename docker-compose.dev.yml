@@ -15,7 +15,7 @@ services:
       - db
       - testdb
   db:
-    image: postgres:9.6.3-alpine
+    image: postgres:9.5.7-alpine
     environment:
       - POSTGRES_DB=showoff_db
     env_file:
@@ -23,7 +23,7 @@ services:
     volumes:
       - "db_data:/var/lib/postgresql/data"
   testdb:
-    image: postgres:9.6.3-alpine
+    image: postgres:9.5.7-alpine
     environment:
       - POSTGRES_DB=test_showoff_db
     env_file:

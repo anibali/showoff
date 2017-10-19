@@ -35,11 +35,36 @@ const postFrameSchema = Joi.object().keys({
   }),
 });
 
+const patchFrameSchema = Joi.object().keys({
+  data: Joi.object().keys({
+    type: Joi.string().valid(['frames']),
+    attributes: Joi.object().keys({
+      title: Joi.string().optional(),
+      type: Joi.string().optional(),
+      content: Joi.object().optional(),
+      height: Joi.number().optional(),
+      width: Joi.number().optional(),
+      x: Joi.number().optional(),
+      y: Joi.number().optional(),
+    }),
+    relationships: Joi.object().optional().keys({
+      notebook: Joi.object().keys({
+        data: Joi.object().keys({
+          type: Joi.string().valid(['notebooks']),
+          id: Joi.string().regex(/^[0-9]+$/, 'numbers'),
+        })
+      })
+    }),
+  }),
+});
+
 const errorResponse = (res, err) => {
-  console.error(err.stack);
-  if(err.message === 'EmptyResponse') {
+  if(err.message === 'EmptyResponse' || err.message.indexOf('No Rows Deleted') > -1) {
     res.status(404).json({ error: 'not found' });
+  } else if(err.message.indexOf('violates foreign key constraint') > -1) {
+    res.status(400).json({ error: 'invalid foreign key' });
   } else {
+    console.error(err);
     res.status(500).json({ error: 'internal server error' });
   }
 };
@@ -54,9 +79,27 @@ const renderFrame = (frameJson) =>
     .then(renderedContent =>
       _.merge({}, frameJson, { attributes: { renderedContent } }));
 
-// TODO: Remove this function
-const frameParams = (rawAttrs) =>
-  _.pick(rawAttrs, 'title', 'type', 'content', 'x', 'y', 'width', 'height');
+const mapFrameToJson = (frame) => {
+  const frameJson = mapper.map(frame, 'frames', {
+    enableLinks: false,
+    attributes: { omit: ['id', 'notebookId'] },
+    relations: { included: false },
+  });
+  frameJson.data.relationships = _.assign({}, frameJson.data.relationships, {
+    notebook: { data: { type: 'notebooks', id: String(frame.attributes.notebookId) } }
+  });
+  return frameJson;
+};
+
+const broadcastFrame = (frame) => {
+  const flatFrame = _.assign({}, frame.data.attributes, {
+    id: parseInt(frame.data.id, 10),
+    notebookId: parseInt(frame.data.relationships.notebook.data.id, 10),
+    content: frame.data.attributes.renderedContent,
+  });
+  wss.broadcast(JSON.stringify(flatFrame));
+  return frame;
+};
 
 // GET /api/v2/frames
 const indexFrames = (req, res) => {
@@ -72,31 +115,14 @@ const indexFrames = (req, res) => {
 // POST /api/v2/frames
 const createFrame = (req, res) => {
   Joi.validate(req.body, postFrameSchema, { presence: 'required' })
-    .then(body =>
-      models('Notebook')
-        .where({ id: parseInt(body.data.relationships.notebook.data.id, 10) })
-        .fetch({ require: true })
-        .catch(() => { throw Error('invalid notebook ID'); })
-        .then((notebook) => ({ body, notebook }))
-    )
-    .then(({ body, notebook }) =>
+    .then((body) =>
       new Promise((resolve) => resolve(_.assign({}, body.data.attributes,
-        { notebookId: notebook.id })))
+        { notebookId: parseInt(body.data.relationships.notebook.data.id, 10) })))
         .then(attrs => models('Frame').forge(attrs).save())
-        .then(frame => { frame.relations.notebook = notebook; return frame; })
-        .then(frame => frameViews.render(frame.toJSON())
-          .then(renderedContent => _.merge(_.clone(frame), { attributes: { renderedContent } })))
-        .then(frame => {
-          const broadcastFrame = frame.toJSON();
-          broadcastFrame.content = frame.attributes.renderedContent;
-          wss.broadcast(JSON.stringify(broadcastFrame));
-          return frame;
-        })
-        .then(frame => mapper.map(frame, 'frames', {
-          enableLinks: false,
-          attributes: { omit: ['id', 'notebookId'] },
-          relations: { included: false },
-        }))
+        .then(mapFrameToJson)
+        .then(frame => renderFrame(frame.data)
+          .then(renderedContent => _.assign({}, frame, { data: renderedContent })))
+        .then(broadcastFrame)
         .then(frameJson => res.status(201).json(frameJson))
         .catch(err => errorResponse(res, err))
     )
@@ -108,8 +134,12 @@ const showFrame = (req, res) => {
   const id = parseInt(req.params.id, 10);
 
   models('Frame').where({ id })
-    .fetchJsonApi({}, false)
-    .then(frame => mapper.map(frame, 'frames', { enableLinks: false }))
+    .fetchJsonApi({ include: ['notebook'], require: true }, false)
+    .then(frame => mapper.map(frame, 'frames', {
+      enableLinks: false,
+      attributes: { omit: ['id', 'notebookId'] },
+      relations: { included: false },
+    }))
     .then(frameJson =>
       renderFrame(frameJson.data)
         .then(data => _.assign({}, frameJson, { data })))
@@ -118,33 +148,20 @@ const showFrame = (req, res) => {
 };
 
 // PATCH /api/v2/frames/3
-// FIXME: Probably broken
 const updateFrame = (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const attrs = frameParams(req.body.data.attributes);
-
-  models('Frame').where({ id }).fetch({ require: true })
-    .then(frame => frame.save(attrs))
-    .then(frame => {
-      const newFrame = _.clone(frame.toJSON());
-      const promise = frameViews.render(newFrame)
-        .then(renderedContent => {
-          newFrame.renderedContent = renderedContent;
-        })
-        .then(() => newFrame);
-      return promise;
+  Joi.validate(req.body, patchFrameSchema, { presence: 'required' })
+    .then((body) => {
+      const id = parseInt(req.params.id, 10);
+      models('Frame').where({ id }).fetch({ require: true })
+        .then(frame => frame.save(body.data.attributes))
+        .then(mapFrameToJson)
+        .then(frame => renderFrame(frame.data)
+          .then(renderedContent => _.assign({}, frame, { data: renderedContent })))
+        .then(broadcastFrame)
+        .then(frameJson => res.json(frameJson))
+        .catch(err => errorResponse(res, err));
     })
-    .then(frame => {
-      const broadcastFrame = _.clone(frame);
-      broadcastFrame.content = broadcastFrame.renderedContent;
-      wss.broadcast(JSON.stringify(broadcastFrame));
-      return frame;
-    })
-    .then(frame => mapper.map(frame, 'frames', { enableLinks: false }))
-    .then(frameJson => res.json(frameJson))
-    .catch(err => {
-      errorResponse(res, err);
-    });
+    .catch((err) => res.status(400).json({ error: err.message }));
 };
 
 // DELETE /api/v2/frames/3

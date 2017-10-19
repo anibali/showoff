@@ -131,13 +131,16 @@ const frames = [
 ];
 
 exports.seed = function(knex, Promise) {
+  let time = 1508455148000;
   notebooks.forEach(notebook => {
-    notebook.createdAt = new Date();
-    notebook.updatedAt = new Date();
+    notebook.createdAt = new Date(time);
+    notebook.updatedAt = new Date(time);
+    time += 1000;
   });
   frames.forEach(frame => {
-    frame.createdAt = new Date();
-    frame.updatedAt = new Date();
+    frame.createdAt = new Date(time);
+    frame.updatedAt = new Date(time);
+    time += 1000;
   });
   return (Promise.resolve()
     .then(() => knex('frames').del())

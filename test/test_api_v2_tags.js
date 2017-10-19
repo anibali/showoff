@@ -130,6 +130,37 @@ describe('API V2 Tags', () => {
       );
     });
 
+    describe('when the related notebook does not exist', () => {
+      const reqBody = {
+        data: {
+          type: 'tags',
+          attributes: {
+            name: 'new-tag-1',
+          },
+          relationships: {
+            notebook: {
+              data: {
+                type: 'notebooks',
+                id: '1337',
+              }
+            }
+          },
+        }
+      };
+
+      it('should return HTTP status 400', () =>
+        expect(sendRequest(reqBody)).to.eventually.have.status(400)
+      );
+
+      it('should have JSON content type', () =>
+        expect(sendRequest(reqBody)).to.eventually.have.jsonContent()
+      );
+
+      it('should return an error message', () =>
+        expect(sendRequest(reqBody).then(res => res.json())).to.eventually.have.property('error')
+      );
+    });
+
     describe('when valid attributes for one tag are specified', () => {
       beforeEach(() =>
         factory.create('notebook', { id: 1 })

@@ -38,7 +38,13 @@ function reducer(state, action) {
 }
 
 const flattenResource = (resource) => {
-  return _.assign({ id: parseInt(resource.id, 10) }, resource.attributes);
+  const flat = _.assign({ id: parseInt(resource.id, 10) }, resource.attributes);
+  if(resource.relationships) {
+    _.assign(flat, ..._.map(resource.relationships, (v, k) => {
+      return { [`${k}Id`]: parseInt(v.data.id, 10) };
+    }));
+  }
+  return flat;
 };
 
 reducer.addTags = (tags) => {

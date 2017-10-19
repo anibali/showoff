@@ -16,4 +16,10 @@ module.exports = (factory, models) => {
     y: 0,
     notebookId: factory.assoc('notebook', 'id'),
   });
+
+  factory.define('tag', models('Tag'), {
+    id: factory.sequence('tag.id'),
+    name: factory.sequence('tag.title', n => `test-tag-${n}`),
+    notebookId: factory.assoc('notebook', 'id'),
+  });
 };

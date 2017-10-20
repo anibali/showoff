@@ -405,6 +405,7 @@ describe('API V2 Frames', () => {
       const reqBody = {
         data: {
           type: 'frames',
+          id: '1',
           attributes: {
             title: 'Updated frame',
           },

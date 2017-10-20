@@ -17,12 +17,12 @@ const postFrameSchema = Joi.object().keys({
     type: Joi.string().valid(['frames']),
     attributes: Joi.object().keys({
       title: Joi.string(),
-      type: Joi.string(),
-      content: Joi.object(),
-      height: Joi.number(),
-      width: Joi.number(),
-      x: Joi.number(),
-      y: Joi.number(),
+      type: Joi.string().optional(),
+      content: Joi.object().optional(),
+      height: Joi.number().optional(),
+      width: Joi.number().optional(),
+      x: Joi.number().optional(),
+      y: Joi.number().optional(),
     }),
     relationships: Joi.object().keys({
       notebook: Joi.object().keys({
@@ -38,6 +38,7 @@ const postFrameSchema = Joi.object().keys({
 const patchFrameSchema = Joi.object().keys({
   data: Joi.object().keys({
     type: Joi.string().valid(['frames']),
+    id: Joi.string().regex(/^[0-9]+$/, 'numbers'),
     attributes: Joi.object().keys({
       title: Joi.string().optional(),
       type: Joi.string().optional(),

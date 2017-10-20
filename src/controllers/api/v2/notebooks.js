@@ -42,6 +42,7 @@ const postNotebookSchema = Joi.object().keys({
 const patchNotebookSchema = Joi.object().keys({
   data: Joi.object().keys({
     type: Joi.string().valid(['notebooks']),
+    id: Joi.string().regex(/^[0-9]+$/, 'numbers'),
     attributes: Joi.object().keys({
       pinned: Joi.boolean().optional(),
       title: Joi.string().optional(),

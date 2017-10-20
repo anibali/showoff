@@ -263,6 +263,7 @@ describe('API V2 Notebooks', () => {
       const reqBody = {
         data: {
           type: 'notebooks',
+          id: '1',
           attributes: {
             title: 'Updated notebook',
           },

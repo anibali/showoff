@@ -92,13 +92,8 @@
   font-size: 16px;
 }
 
-.nli-btn[disabled] {
-  color: #666;
-  background-color: #ccc;
-  border-color: #ccc;
-}
-
-.nli-btn[disabled]:hover {
+.nli-btn-disabled, .nli-btn-disabled:hover, .nli-btn-disabled:focus,
+.nli-btn-disabled:active, .nli-btn-disabled:active:hover {
   color: #666;
   background-color: #ccc;
   border-color: #ccc;

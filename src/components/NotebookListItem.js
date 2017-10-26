@@ -38,6 +38,10 @@ const TagList = ({ tags }) => {
 };
 
 const NotebookListItemView = ({ notebook, onChangePinned, onClickEdit, onClickDelete }) => {
+  const absorbClick = (event) => {
+    event.preventDefault();
+  };
+
   const tags = notebook.tags || [];
 
   return (
@@ -69,9 +73,9 @@ const NotebookListItemView = ({ notebook, onChangePinned, onClickEdit, onClickDe
         >
           <span className="fa fa-edit" />
         </button>
-        <button className="btn btn-xs btn-danger nli-btn"
+        <button className={'btn btn-xs btn-danger nli-btn' + (notebook.pinned ? ' nli-btn-disabled' : '')}
           title="Delete notebook"
-          onClick={onClickDelete} disabled={ notebook.pinned }
+          onClick={notebook.pinned ? absorbClick : onClickDelete}
         >
           <span className="fa fa-trash-o" />
         </button>

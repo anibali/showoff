@@ -4,10 +4,12 @@ const knex = require('knex')(knexConf);
 const bookshelf = require('bookshelf')(knex);
 
 const cascadeDelete = require('bookshelf-cascade-delete');
+const jsonApiParams = require('bookshelf-jsonapi-params');
 const jsonColumns = require('bookshelf-json-columns');
 
 bookshelf.plugin('registry');
 bookshelf.plugin(cascadeDelete);
+bookshelf.plugin(jsonApiParams);
 bookshelf.plugin(jsonColumns);
 
 require('./Notebook')(bookshelf);

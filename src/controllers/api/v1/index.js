@@ -1,8 +1,8 @@
 const express = require('express');
 const _ = require('lodash');
-const models = require('../models');
-const wss = require('../websocket-server');
-const frameViews = require('../frameViews');
+const models = require('../../../models');
+const wss = require('../../../websocket-server');
+const frameViews = require('../../../frameViews');
 
 const router = express.Router();
 

@@ -52,19 +52,22 @@ class Home extends React.Component {
 
     return (
       <div className="container">
-        <h1>Notebooks</h1>
-        <Typeahead
-          clearButton
-          labelKey="name"
-          multiple
-          options={tagOptions}
-          defaultSelected={this.state.filterTags}
-          placeholder="Filter tags..."
-          highlightOnlyResult
-          onChange={onChange}
-        />
-        <div className="list-group">
-          {notebooks.map(createListItem)}
+        <div className="row">
+          <h1>Notebooks</h1>
+          <Typeahead
+            clearButton
+            labelKey="name"
+            multiple
+            options={tagOptions}
+            defaultSelected={this.state.filterTags}
+            placeholder="Filter tags..."
+            highlightOnlyResult
+            onChange={onChange}
+          />
+          <div style={{ height: 8 }}></div>
+          <div className="list-group">
+            {notebooks.map(createListItem)}
+          </div>
         </div>
       </div>
     );

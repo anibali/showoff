@@ -41,39 +41,41 @@ const NotebookListItemView = ({ notebook, onChangePinned, onClickEdit, onClickDe
   const tags = notebook.tags || [];
 
   return (
-    <Link className="list-group-item" to={`/notebooks/${notebook.id}`}>
-      <div
-        style={{ display: 'inline-block',
-          color: notebook.pinned ? '#369' : '#aaa',
-          paddingRight: 8 }}
-        onClick={onChangePinned}
-      >
-        <span className="fa-stack fa-lg" style={{ fontSize: '0.9em' }}>
-          <i className="fa fa-square-o fa-stack-2x"></i>
-          <i className="fa fa-thumb-tack fa-stack-1x"></i>
+    <Link className="nli list-group-item clearfix" to={`/notebooks/${notebook.id}`}>
+      <span className="nli-content">
+        <span
+          style={{
+            color: notebook.pinned ? '#369' : '#aaa',
+            paddingRight: 8 }}
+          onClick={onChangePinned}
+        >
+          <span className="fa-stack fa-lg" style={{ fontSize: '0.9em' }}>
+            <i className="fa fa-square-o fa-stack-2x"></i>
+            <i className="fa fa-thumb-tack fa-stack-1x"></i>
+          </span>
         </span>
-      </div>
-      <span>
-        {notebook.title}
-        <small style={{ paddingLeft: 8 }} className="text-muted">
-          {new Date(notebook.createdAt).toUTCString()}
-        </small>
-        <TagList tags={tags} />
+        <span>
+          {notebook.title}
+          <small style={{ paddingLeft: 8 }} className="text-muted">
+            {new Date(notebook.createdAt).toUTCString()}
+          </small>
+          <TagList tags={tags} />
+        </span>
       </span>
-      <div className="btn-group pull-right" role="group">
-        <button className="btn btn-xs btn-warning btn-notebook-list"
+      <span className="btn-group pull-right" role="group">
+        <button className="btn btn-xs btn-warning nli-btn"
           title="Edit notebook title"
           onClick={onClickEdit}
         >
           <span className="fa fa-edit" />
         </button>
-        <button className="btn btn-xs btn-danger btn-notebook-list"
+        <button className="btn btn-xs btn-danger nli-btn"
           title="Delete notebook"
           onClick={onClickDelete} disabled={ notebook.pinned }
         >
           <span className="fa fa-trash-o" />
         </button>
-      </div>
+      </span>
     </Link>
   );
 };

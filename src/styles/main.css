@@ -1,3 +1,11 @@
+/* Bootstrap overrides/extensions */
+
+.label {
+  display: inline-block;
+}
+
+/* Custom styles */
+
 .progress {
   margin-bottom: 0;
 }
@@ -74,23 +82,29 @@
   cursor: se-resize;
 }
 
-.btn-notebook-list[disabled] {
-  cursor: not-allowed;
-  color: #666;
-  background-color: #ccc;
-  border-color: #ccc;
+.nli {
+  padding: 6px;
 }
 
-.btn-notebook-list[disabled]:hover {
-  cursor: not-allowed;
-  color: #666;
-  background-color: #ccc;
-  border-color: #ccc;
-}
-
-.btn-notebook-list {
+.nli-btn {
   width: 32px;
   line-height: 28px;
-  margin-top: -3px;
   font-size: 16px;
+}
+
+.nli-btn[disabled] {
+  color: #666;
+  background-color: #ccc;
+  border-color: #ccc;
+}
+
+.nli-btn[disabled]:hover {
+  color: #666;
+  background-color: #ccc;
+  border-color: #ccc;
+}
+
+.nli-content {
+  margin-top: 4px;
+  display: inline-block;
 }

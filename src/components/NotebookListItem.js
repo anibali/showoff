@@ -42,22 +42,33 @@ const NotebookListItemView = ({ notebook, onChangePinned, onClickEdit, onClickDe
     event.preventDefault();
   };
 
+  const onPinnedKeyDown = (event) => {
+    if(event.keyCode === 13) {
+      onChangePinned(event);
+    }
+  };
+
   const tags = notebook.tags || [];
 
   return (
     <Link className="nli list-group-item clearfix" to={`/notebooks/${notebook.id}`}>
-      <span className="nli-content">
+      <div className="nli-col-left">
         <span
           style={{
             color: notebook.pinned ? '#369' : '#aaa',
             paddingRight: 8 }}
+          role="button"
+          tabIndex={0}
           onClick={onChangePinned}
+          onKeyDown={onPinnedKeyDown}
         >
           <span className="fa-stack fa-lg" style={{ fontSize: '0.9em' }}>
-            <i className="fa fa-square-o fa-stack-2x"></i>
-            <i className="fa fa-thumb-tack fa-stack-1x"></i>
+            <i className="fa fa-square-o fa-stack-2x" />
+            <i className="fa fa-thumb-tack fa-stack-1x" />
           </span>
         </span>
+      </div>
+      <div className="nli-col-centre">
         <span>
           {notebook.title}
           <small style={{ paddingLeft: 8 }} className="text-muted">
@@ -65,21 +76,23 @@ const NotebookListItemView = ({ notebook, onChangePinned, onClickEdit, onClickDe
           </small>
           <TagList tags={tags} />
         </span>
-      </span>
-      <span className="btn-group pull-right" role="group">
-        <button className="btn btn-xs btn-warning nli-btn"
+      </div>
+      <div className="nli-col-right">
+        <button
+          className="btn btn-xs btn-warning nli-btn"
           title="Edit notebook title"
           onClick={onClickEdit}
         >
           <span className="fa fa-edit" />
         </button>
-        <button className={'btn btn-xs btn-danger nli-btn' + (notebook.pinned ? ' nli-btn-disabled' : '')}
+        <button
+          className={`btn btn-xs btn-danger nli-btn ${notebook.pinned ? ' nli-btn-disabled' : ''}`}
           title="Delete notebook"
           onClick={notebook.pinned ? absorbClick : onClickDelete}
         >
           <span className="fa fa-trash-o" />
         </button>
-      </span>
+      </div>
     </Link>
   );
 };

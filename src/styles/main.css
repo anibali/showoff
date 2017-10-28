@@ -84,6 +84,20 @@
 
 .nli {
   padding: 6px;
+  display: flex;
+}
+
+.nli-col-left {
+  flex: 0 30px;
+}
+
+.nli-col-centre {
+  flex: 1 0;
+}
+
+.nli-col-right {
+  flex: 0 0 70px;
+  text-align: right;
 }
 
 .nli-btn {
@@ -97,9 +111,4 @@
   color: #666;
   background-color: #ccc;
   border-color: #ccc;
-}
-
-.nli-content {
-  margin-top: 4px;
-  display: inline-block;
 }

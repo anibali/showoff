@@ -11,6 +11,12 @@ for(let i = 0; i < 10; ++i) {
   notebooks.push({ title: 'Spam' });
 }
 
+notebooks.push({
+  title: 'This notebook has a very long title that just seems to go on and on' +
+    ' and on and on and on, with little point except to test that the' +
+    ' interface can handle long titles'
+});
+
 const frames = [
   {
     notebookId: 1,

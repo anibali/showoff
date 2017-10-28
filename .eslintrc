@@ -28,6 +28,7 @@
     "no-console": 0,
     "no-param-reassign": 0,
     "no-plusplus": [2, { "allowForLoopAfterthoughts": true }],
+    "object-curly-newline": 0,
     "object-shorthand": [2, "properties"],
     "quote-props": [2, "consistent"],
     "react/no-did-mount-set-state": 0,

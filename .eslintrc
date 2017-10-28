@@ -28,14 +28,17 @@
     "no-console": 0,
     "no-param-reassign": 0,
     "no-plusplus": [2, { "allowForLoopAfterthoughts": true }],
+    "no-bitwise": 0,
     "object-curly-newline": 0,
     "object-shorthand": [2, "properties"],
     "quote-props": [2, "consistent"],
+    "jsx-a11y/anchor-is-valid": [ "error", { "specialLink": [ "to" ] }],
     "react/no-did-mount-set-state": 0,
     "react/no-multi-comp": 0,
     "react/prefer-es6-class": 0,
     "react/prop-types": 0,
     "react/sort-comp": 0,
+    "react/jsx-filename-extension": 0,
     "space-after-keywords": 0,
     "space-before-function-paren": [2, "never"]
   }

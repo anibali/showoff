@@ -91,6 +91,7 @@ app.use((req, res) => {
         // Respond with the HTML
         res.send(htmlContent);
       }).catch((error) => {
+        console.error(error);
         res.status(500).send(error.message);
       });
     }

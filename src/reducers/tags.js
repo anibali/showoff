@@ -48,7 +48,9 @@ const flattenResource = (resource) => {
 };
 
 reducer.addTags = (tags) => {
-  if(!_.isArray(tags)) {
+  if(tags === undefined) {
+    tags = [];
+  } else if(!_.isArray(tags)) {
     tags = [tags];
   }
   return { type: ADD_TAGS, tags };

@@ -41,14 +41,15 @@ class Home extends React.Component {
 
     const tagOptions = _.uniqBy(this.props.tags, 'name');
 
-    const createListItem = (notebook) =>
+    const createListItem = (notebook) => (
       <NotebookListItem
         key={notebook.id}
         notebook={notebook}
         deleteNotebook={this.props.deleteNotebook}
         updateNotebook={this.props.updateNotebook}
         tagOptions={tagOptions}
-      />;
+      />
+    );
 
     return (
       <div className="container">
@@ -64,7 +65,7 @@ class Home extends React.Component {
             highlightOnlyResult
             onChange={onChange}
           />
-          <div style={{ height: 8 }}></div>
+          <div style={{ height: 8 }} />
           <div className="list-group">
             {notebooks.map(createListItem)}
           </div>
@@ -74,14 +75,11 @@ class Home extends React.Component {
   }
 }
 
-const getNotebooksWithTags = (state) => {
-  const tags = state.tags;
-  const notebooks = state.notebooks.map(notebook => {
+const getNotebooksWithTags = ({ notebooks, tags }) =>
+  notebooks.map(notebook => {
     const notebookTags = _.filter(tags, { notebookId: notebook.id });
     return _.assign({ tags: notebookTags }, notebook);
   });
-  return notebooks;
-};
 
 module.exports = ReactRedux.connect(
   // Map store state to props

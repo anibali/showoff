@@ -85,6 +85,7 @@
 .nli {
   padding: 6px;
   display: flex;
+  align-items: center;
 }
 
 .nli-col-left {
@@ -98,6 +99,22 @@
 .nli-col-right {
   flex: 0 0 70px;
   text-align: right;
+}
+
+.nli-pin > .fa-stack {
+  font-size: 0.9em;
+}
+
+.nli-pin {
+  color: #aaa;
+}
+
+.nli-pin-active {
+  color: #369;
+}
+
+.nli-timestamp {
+  padding-left: 8px;
 }
 
 .nli-btn {

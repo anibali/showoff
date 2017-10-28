@@ -11,16 +11,16 @@ const { Provider } = require('react-redux');
 const { Router, browserHistory } = require('react-router');
 const { syncHistoryWithStore } = require('react-router-redux');
 
-const createStore = require('./helpers/createStore');
+const createStore = require('./redux/createStore');
 const routes = require('./routes');
-const notebookActionCreators = require('./reducers/notebooks');
+const notebookActionCreators = require('./redux/notebooksActionCreators');
 
 window.main = (initialState) => {
   // Create a Redux store
   const store = createStore(initialState);
   const history = syncHistoryWithStore(browserHistory, store);
 
-  let ws = new WebSocket(`ws://${location.host}/`);
+  let ws = new WebSocket(`ws://${window.location.host}/`);
 
   ws.onopen = function() {
     console.log('WebSocket connection opened');

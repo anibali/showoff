@@ -5,8 +5,8 @@ const { Typeahead } = require('react-bootstrap-typeahead');
 
 const NotebookListItem = require('./NotebookListItem');
 
-const notebookActionCreators = require('../reducers/notebooks');
-const tagActionCreators = require('../reducers/tags');
+const notebookActionCreators = require('../redux/notebooksActionCreators');
+const tagActionCreators = require('../redux/tagsActionCreators');
 const reactAsync = require('../helpers/reactAsync');
 
 class Home extends React.Component {
@@ -85,6 +85,7 @@ module.exports = ReactRedux.connect(
   // Map store state to props
   (state) => ({
     tags: state.tags,
+    // FIXME: This creates new notebooks, so every item in the list always re-renders
     notebooks: getNotebooksWithTags(state),
   }),
   (dispatch) => ({

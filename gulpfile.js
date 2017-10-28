@@ -26,6 +26,7 @@ const libs = [
   'react-router',
   'react-router-redux',
   'redux',
+  'redux-actions',
   'redux-thunk',
 ];
 

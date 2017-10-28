@@ -14,7 +14,7 @@ const { RouterContext } = require('react-router');
 
 const reactAsync = require('./helpers/reactAsync');
 const routes = require('./routes');
-const createStore = require('./helpers/createStore');
+const createStore = require('./redux/createStore');
 
 // Create a new Express app
 const app = express();

@@ -3,7 +3,7 @@ const React = require('react');
 const ReactRedux = require('react-redux');
 const DocumentTitle = require('react-document-title');
 
-const notebookActionCreators = require('../reducers/notebooks');
+const notebookActionCreators = require('../redux/notebooksActionCreators');
 const reactAsync = require('../helpers/reactAsync');
 
 const Frame = require('./Frame');

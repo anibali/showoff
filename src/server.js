@@ -6,15 +6,19 @@
 // Use Babel to provide support for JSX
 require('babel-core/register');
 
-// Require our Express app (see app.js)
-const app = require('./app');
-const wss = require('./websocket-server');
+const http = require('http');
+const ws = require('ws');
 
-// Start the server and wait for connections
-const server = app.listen(3000, () => {
+const app = require('./app');
+const WebSocketServer = require('./webSocketServer');
+
+
+const server = http.createServer(app);
+server.listen(3000, () => {
   console.log('Server started.');
 });
 
-wss.init({ server });
+global.wss = new WebSocketServer(new ws.Server({ server }));
+
 
 module.exports = server;

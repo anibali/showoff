@@ -62,6 +62,7 @@
     "gulp-concat-css": "2.2.0",
     "gulp-util": "3.0.8",
     "mocha": "4.0.1",
+    "mock-socket": "7.0.0",
     "must": "0.13.4",
     "nodemon": "1.12.1",
     "sqlite3": "3.1.13",

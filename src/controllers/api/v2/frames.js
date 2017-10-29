@@ -5,7 +5,6 @@ const Joi = require('joi');
 const escape = require('escape-html');
 
 const models = require('../../../models');
-const wss = require('../../../websocket-server');
 const frameViews = require('../../../frameViews');
 
 const mapper = new Mapper.Bookshelf();
@@ -98,7 +97,7 @@ const broadcastFrame = (frame) => {
     notebookId: parseInt(frame.data.relationships.notebook.data.id, 10),
     content: frame.data.attributes.renderedContent,
   });
-  wss.broadcast(JSON.stringify(flatFrame));
+  global.wss.fireFrameUpdate(flatFrame);
   return frame;
 };
 

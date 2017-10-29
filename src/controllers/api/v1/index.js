@@ -1,7 +1,6 @@
 const express = require('express');
 const _ = require('lodash');
 const models = require('../../../models');
-const wss = require('../../../websocket-server');
 const frameViews = require('../../../frameViews');
 
 const router = express.Router();
@@ -126,7 +125,7 @@ router.put('/frame/:id', (req, res) => {
       return promise;
     })
     .then((frame) => {
-      wss.broadcast(JSON.stringify(frame));
+      global.wss.fireFrameUpdate(frame);
       return frame;
     })
     .then((frame) => res.json(frame))

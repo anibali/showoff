@@ -5,7 +5,6 @@ const _ = require('lodash');
 const { factory } = require('factory-girl');
 
 const models = require('../src/models');
-const wss = require('../src/websocket-server');
 
 describe('API V2 Frames', () => {
   let clock = null;
@@ -103,7 +102,7 @@ describe('API V2 Frames', () => {
     let broadcastStub;
 
     beforeEach(() => {
-      broadcastStub = sinon.stub(wss, 'broadcast');
+      broadcastStub = sinon.stub(global.wss, 'broadcast');
     });
 
     afterEach(() => {
@@ -249,7 +248,7 @@ describe('API V2 Frames', () => {
 
       it('should broadcast the new notebook with WebSockets', () =>
         sendRequest(reqBody).then(() => {
-          expect(JSON.parse(broadcastStub.args[0][0])).to.be.eql({
+          expect(JSON.parse(broadcastStub.getCall(0).args[0])).to.be.eql({
             id: 1,
             title: 'New frame',
             type: 'text',
@@ -369,7 +368,7 @@ describe('API V2 Frames', () => {
     let broadcastStub;
 
     beforeEach(() => {
-      broadcastStub = sinon.stub(wss, 'broadcast');
+      broadcastStub = sinon.stub(global.wss, 'broadcast');
       return factory.create('frame', { id: 1 });
     });
 
@@ -457,7 +456,7 @@ describe('API V2 Frames', () => {
 
       it('should broadcast the updated notebook with WebSockets', () =>
         sendRequest(reqBody).then(() => {
-          expect(JSON.parse(broadcastStub.args[0][0])).to.be.eql({
+          expect(JSON.parse(broadcastStub.getCall(0).args[0])).to.be.eql({
             id: 1,
             title: 'Updated frame',
             type: 'text',

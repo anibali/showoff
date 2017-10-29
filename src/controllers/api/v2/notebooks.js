@@ -13,6 +13,7 @@ const errorResponse = (res, err) => {
   if(err.message === 'EmptyResponse') {
     res.status(404).json({ error: 'not found' });
   } else {
+    console.error(err);
     res.status(500).json({ error: 'internal server error' });
   }
 };
@@ -34,6 +35,7 @@ const postNotebookSchema = Joi.object().keys({
     type: Joi.string().valid(['notebooks']),
     attributes: Joi.object().keys({
       pinned: Joi.boolean().optional(),
+      progress: Joi.number().optional(),
       title: Joi.string(),
     }),
   }),
@@ -45,10 +47,19 @@ const patchNotebookSchema = Joi.object().keys({
     id: Joi.string().regex(/^[0-9]+$/, 'numbers'),
     attributes: Joi.object().keys({
       pinned: Joi.boolean().optional(),
+      progress: Joi.number().optional(),
       title: Joi.string().optional(),
     }),
   }),
 });
+
+const broadcastNotebook = (notebook) => {
+  const flatNotebook = _.assign({}, notebook.data.attributes, {
+    id: parseInt(notebook.data.id, 10),
+  });
+  global.wss.fireNotebookUpdate(flatNotebook);
+  return notebook;
+};
 
 // GET /api/v2/notebooks
 const indexNotebooks = (req, res) =>
@@ -90,7 +101,9 @@ const updateNotebook = (req, res) =>
       const id = parseInt(req.params.id, 10);
       return models('Notebook').where({ id }).fetch({ require: true })
         .then(notebook => notebook.save(body.data.attributes))
-        .then(notebook => res.json(mapper.map(notebook, 'notebooks', { enableLinks: false })))
+        .then(notebook => mapper.map(notebook, 'notebooks', { enableLinks: false }))
+        .then(broadcastNotebook)
+        .then(notebook => res.json(notebook))
         .catch(err => errorResponse(res, err));
     })
     .catch((err) => res.status(400).json({ error: err.message }));

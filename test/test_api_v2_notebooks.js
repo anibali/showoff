@@ -42,6 +42,7 @@ describe('API V2 Notebooks', () => {
               id: '1',
               attributes: {
                 pinned: false,
+                progress: 0.5,
                 title: 'Test notebook 1',
                 createdAt: '1970-01-01T00:00:00.000Z',
                 updatedAt: '1970-01-01T00:00:00.000Z',
@@ -52,6 +53,7 @@ describe('API V2 Notebooks', () => {
               id: '2',
               attributes: {
                 pinned: false,
+                progress: 0.5,
                 title: 'Test notebook 2',
                 createdAt: '1970-01-01T00:00:00.000Z',
                 updatedAt: '1970-01-01T00:00:00.000Z',
@@ -100,6 +102,7 @@ describe('API V2 Notebooks', () => {
           type: 'notebooks',
           attributes: {
             pinned: false,
+            progress: 0.25,
             title: 'New notebook',
           },
         },
@@ -126,6 +129,7 @@ describe('API V2 Notebooks', () => {
             id: '1',
             attributes: {
               pinned: false,
+              progress: 0.25,
               title: 'New notebook',
               createdAt: '1970-01-01T00:00:00.000Z',
               updatedAt: '1970-01-01T00:00:00.000Z',
@@ -179,6 +183,7 @@ describe('API V2 Notebooks', () => {
             id: '1',
             attributes: {
               pinned: false,
+              progress: 0.5,
               title: 'Test notebook 1',
               createdAt: '1970-01-01T00:00:00.000Z',
               updatedAt: '1970-01-01T00:00:00.000Z',
@@ -232,7 +237,16 @@ describe('API V2 Notebooks', () => {
   });
 
   describe('PATCH /notebooks/:id', () => {
-    beforeEach(() => factory.create('notebook', { id: 1 }));
+    let broadcastStub;
+
+    beforeEach(() => {
+      broadcastStub = sinon.stub(global.wss, 'broadcast');
+      return factory.create('notebook', { id: 1 });
+    });
+
+    afterEach(() => {
+      broadcastStub.restore();
+    });
 
     const sendRequest = body => fetch('http://localhost:3000/api/v2/notebooks/1', {
       method: 'PATCH',
@@ -266,6 +280,7 @@ describe('API V2 Notebooks', () => {
           id: '1',
           attributes: {
             title: 'Updated notebook',
+            progress: 0.75,
           },
         },
       };
@@ -285,6 +300,7 @@ describe('API V2 Notebooks', () => {
             id: '1',
             attributes: {
               pinned: false,
+              progress: 0.75,
               title: 'Updated notebook',
               createdAt: '1970-01-01T00:00:00.000Z',
               updatedAt: '1970-01-01T00:00:00.000Z',

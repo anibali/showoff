@@ -24,9 +24,14 @@ class NotebookListItemView extends React.Component {
   render() {
     const { notebook, onChangePinned, onClickEdit, onClickDelete } = this.props;
     const tags = notebook.tags || this.defaultTags;
+    const style = {};
+    if(notebook.progress != null && notebook.progress > 0.0 && notebook.progress < 1.0) {
+      const progress = notebook.progress * 100;
+      style.background = `linear-gradient(to right, #f0f6ff ${progress}%, white ${progress}%)`;
+    }
 
     return (
-      <Link className="nli list-group-item clearfix" to={`/notebooks/${notebook.id}`}>
+      <Link className="nli list-group-item clearfix" to={`/notebooks/${notebook.id}`} style={style}>
         <div className="nli-col-left">
           <span
             className={`nli-pin nli-pin-${notebook.pinned ? 'active' : 'inactive'}`}

@@ -3,6 +3,7 @@ module.exports = (factory, models) => {
     id: factory.sequence('notebook.id'),
     title: factory.sequence('notebook.title', n => `Test notebook ${n}`),
     pinned: false,
+    progress: 0.5,
   });
 
   factory.define('frame', models('Frame'), {

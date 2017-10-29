@@ -1,9 +1,11 @@
 const notebooks = [
   {
-    title: 'My notebook'
+    title: 'My notebook',
+    progress: 0.33,
   },
   {
-    title: 'My other notebook'
+    title: 'My other notebook',
+    progress: 0.56,
   }
 ];
 

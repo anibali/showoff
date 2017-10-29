@@ -41,7 +41,8 @@ const notebooksReducer = handleActions({
     const newState = _.clone(state);
 
     notebooks.forEach((notebook) => {
-      notebook = _.pick(notebook, 'id', 'title', 'pinned', 'createdAt', 'updatedAt', 'frames');
+      notebook = _.pick(notebook, 'id', 'title', 'pinned', 'progress',
+        'createdAt', 'updatedAt', 'frames');
       const notebookIndex = _.findIndex(state, { id: notebook.id });
 
       if(notebookIndex < 0) {

@@ -19,6 +19,11 @@ class WebSocketServer {
     const action = notebookActionCreators.modifyFrame(frame);
     this.broadcast(action);
   }
+
+  fireNotebookUpdate(notebook) {
+    const action = notebookActionCreators.addNotebook(notebook);
+    this.broadcast(action);
+  }
 }
 
 

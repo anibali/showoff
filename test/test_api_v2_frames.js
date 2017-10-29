@@ -248,19 +248,24 @@ describe('API V2 Frames', () => {
 
       it('should broadcast the new notebook with WebSockets', () =>
         sendRequest(reqBody).then(() => {
-          expect(JSON.parse(broadcastStub.getCall(0).args[0])).to.be.eql({
-            id: 1,
-            title: 'New frame',
-            type: 'text',
-            content: '<pre>Lorem ipsum</pre>',
-            x: 0,
-            y: 0,
-            width: 800,
-            height: 600,
-            renderedContent: '<pre>Lorem ipsum</pre>',
-            notebookId: 1,
-            createdAt: '1970-01-01T00:00:00.000Z',
-            updatedAt: '1970-01-01T00:00:00.000Z',
+          expect(broadcastStub.getCall(0).args[0]).to.be.eql({
+            type: 'notebooks/MODIFY_FRAME',
+            payload: {
+              frame: {
+                id: 1,
+                title: 'New frame',
+                type: 'text',
+                content: '<pre>Lorem ipsum</pre>',
+                x: 0,
+                y: 0,
+                width: 800,
+                height: 600,
+                renderedContent: '<pre>Lorem ipsum</pre>',
+                notebookId: 1,
+                createdAt: new Date('1970-01-01T00:00:00.000Z'),
+                updatedAt: new Date('1970-01-01T00:00:00.000Z'),
+              }
+            }
           });
         })
       );
@@ -456,19 +461,24 @@ describe('API V2 Frames', () => {
 
       it('should broadcast the updated notebook with WebSockets', () =>
         sendRequest(reqBody).then(() => {
-          expect(JSON.parse(broadcastStub.getCall(0).args[0])).to.be.eql({
-            id: 1,
-            title: 'Updated frame',
-            type: 'text',
-            content: '<pre>Lorem ipsum</pre>',
-            x: 0,
-            y: 0,
-            width: 800,
-            height: 600,
-            renderedContent: '<pre>Lorem ipsum</pre>',
-            notebookId: 1,
-            createdAt: '1970-01-01T00:00:00.000Z',
-            updatedAt: '1970-01-01T00:00:00.000Z',
+          expect(broadcastStub.getCall(0).args[0]).to.be.eql({
+            type: 'notebooks/MODIFY_FRAME',
+            payload: {
+              frame: {
+                id: 1,
+                title: 'Updated frame',
+                type: 'text',
+                content: '<pre>Lorem ipsum</pre>',
+                x: 0,
+                y: 0,
+                width: 800,
+                height: 600,
+                renderedContent: '<pre>Lorem ipsum</pre>',
+                notebookId: 1,
+                createdAt: new Date('1970-01-01T00:00:00.000Z'),
+                updatedAt: new Date('1970-01-01T00:00:00.000Z'),
+              }
+            }
           });
         })
       );

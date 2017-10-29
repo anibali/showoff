@@ -1,3 +1,5 @@
+const notebookActionCreators = require('./redux/notebooksActionCreators');
+
 class WebSocketServer {
   /**
    * wsServer is expected to be a ws.Server instance.
@@ -7,13 +9,15 @@ class WebSocketServer {
   }
 
   broadcast(data) {
+    const msg = JSON.stringify(data);
     this.wsServer.clients.forEach((client) => {
-      client.send(data);
+      client.send(msg);
     });
   }
 
   fireFrameUpdate(frame) {
-    this.broadcast(JSON.stringify(frame));
+    const action = notebookActionCreators.modifyFrame(frame);
+    this.broadcast(action);
   }
 }
 

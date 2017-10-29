@@ -34,13 +34,6 @@ describe('WebSocketClient', () => {
 
     clock.tick(100);
 
-    expect(store.dispatch.getCall(0).args[0]).to.eql({
-      type: 'notebooks/MODIFY_FRAME',
-      payload: {
-        frame: {
-          test: 'test'
-        }
-      }
-    });
+    expect(store.dispatch.getCall(0).args[0]).to.eql({ test: 'test' });
   });
 });

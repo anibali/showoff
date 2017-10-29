@@ -1,6 +1,3 @@
-const notebookActionCreators = require('./redux/notebooksActionCreators');
-
-
 class WebSocketClient {
   constructor(url, store) {
     this.url = url;
@@ -22,13 +19,9 @@ class WebSocketClient {
     };
 
     ws.onmessage = (event) => {
-      this.handleMessage(JSON.parse(event.data));
+      const action = JSON.parse(event.data);
+      this.store.dispatch(action);
     };
-  }
-
-  handleMessage(data) {
-    const action = notebookActionCreators.modifyFrame(data);
-    this.store.dispatch(action);
   }
 }
 

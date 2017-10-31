@@ -35,7 +35,7 @@ const notebooksReducer = handleActions({
     }
 
     const newNotebook = _.assign({}, state[notebookIndex], { frames });
-    return _.assign([], { [notebookIndex]: newNotebook });
+    return _.assign([], state, { [notebookIndex]: newNotebook });
   },
   [combineActions(addNotebook, addNotebooks)](state, { payload: { notebooks } }) {
     const newState = _.clone(state);

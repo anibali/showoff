@@ -89,7 +89,7 @@ actionCreators.loadNotebooksShallow = () => (dispatch) =>
 actionCreators.deleteNotebook = (notebookId) => (dispatch) =>
   fetch(`/api/notebook/${notebookId}`, { method: 'delete' }).then((res) => {
     if(!res.ok) throw new Error(res.statusText);
-    dispatch(actionCreators.removeTagsFromNotebook(notebookId));
+    dispatch(simpleActionCreators.tags.removeTagsFromNotebook(notebookId));
     dispatch(actionCreators.removeNotebook(notebookId));
   }).catch((err) => {
     console.error(err);

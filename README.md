@@ -24,3 +24,10 @@ $ git pull
 $ docker-compose build
 $ docker-compose up -d
 ```
+
+## License
+
+(C) 2017 Aiden Nibali
+
+This project is open source under the terms of the
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).

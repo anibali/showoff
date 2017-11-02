@@ -10,7 +10,7 @@
     "test": "NODE_ENV=test mocha"
   },
   "author": "Aiden Nibali",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "babel-core": "6.26.0",
     "babel-preset-env": "1.6.0",

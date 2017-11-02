@@ -74,6 +74,7 @@ module.exports = {
             loader: 'babel-loader',
             options: {
               babelrc: false,
+              plugins: ['lodash'],
               presets: [
                 ['env', {
                   modules: false,

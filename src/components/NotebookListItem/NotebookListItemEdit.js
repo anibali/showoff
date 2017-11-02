@@ -1,6 +1,6 @@
-const React = require('react');
-const _ = require('lodash');
-const { Typeahead } = require('react-bootstrap-typeahead');
+import React from 'react';
+import _ from 'lodash';
+import { Typeahead } from 'react-bootstrap-typeahead';
 
 
 class NotebookListItemEdit extends React.Component {
@@ -94,4 +94,4 @@ class NotebookListItemEdit extends React.Component {
   }
 }
 
-module.exports = NotebookListItemEdit;
+export default NotebookListItemEdit;

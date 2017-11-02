@@ -1,7 +1,7 @@
-const express = require('express');
-const _ = require('lodash');
-const models = require('../../../models');
-const frameViews = require('../../../frameViews');
+import express from 'express';
+import _ from 'lodash';
+import models from '../../../models';
+import frameViews from '../../../frameViews';
 
 const router = express.Router();
 
@@ -146,4 +146,4 @@ router.post('/frame', (req, res) => {
     .catch((err) => errorResponse(res, err));
 });
 
-module.exports = router;
+export default router;

@@ -26,4 +26,4 @@ class WebSocketClient {
 }
 
 
-module.exports = WebSocketClient;
+export default WebSocketClient;

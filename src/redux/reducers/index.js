@@ -1,8 +1,7 @@
-const Redux = require('redux');
-const { routerReducer } = require('react-router-redux');
-
-const notebooks = require('./notebooksReducer');
-const tags = require('./tagsReducer');
+import * as Redux from 'redux';
+import { routerReducer } from 'react-router-redux';
+import notebooks from './notebooksReducer';
+import tags from './tagsReducer';
 
 
 const combinedReducers = Redux.combineReducers({
@@ -12,4 +11,4 @@ const combinedReducers = Redux.combineReducers({
 });
 
 
-module.exports = combinedReducers;
+export default combinedReducers;

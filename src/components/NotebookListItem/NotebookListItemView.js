@@ -1,7 +1,6 @@
-const React = require('react');
-const { Link } = require('react-router');
-
-const TagList = require('./TagList');
+import React from 'react';
+import { Link } from 'react-router';
+import TagList from './TagList';
 
 
 const absorbClick = (event) => {
@@ -76,4 +75,4 @@ class NotebookListItemView extends React.Component {
   }
 }
 
-module.exports = NotebookListItemView;
+export default NotebookListItemView;

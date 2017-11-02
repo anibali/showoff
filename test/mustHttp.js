@@ -21,4 +21,4 @@ class MustHttp {
   }
 }
 
-module.exports = MustHttp;
+export default MustHttp;

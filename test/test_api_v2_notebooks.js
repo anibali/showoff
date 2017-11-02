@@ -1,10 +1,8 @@
-const expect = require('must');
-const sinon = require('sinon');
-const _ = require('lodash');
-
-const { factory } = require('factory-girl');
-
-const models = require('../src/models');
+import expect from 'must';
+import sinon from 'sinon';
+import _ from 'lodash';
+import { factory } from 'factory-girl';
+import models from '../src/models';
 
 describe('API V2 Notebooks', () => {
   let clock = null;

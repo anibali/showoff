@@ -5,12 +5,12 @@ const { factory, BookshelfAdapter } = require('factory-girl');
 const Must = require('must');
 const mockWs = require('mock-socket');
 
-const MustHttp = require('./mustHttp');
+const MustHttp = require('./mustHttp').default;
 const fixtures = require('./fixtures');
 
-const models = require('../src/models');
-const app = require('../src/app');
-const WebSocketServer = require('../src/webSocketServer');
+const models = require('../src/models').default;
+const app = require('../src/app').default;
+const WebSocketServer = require('../src/webSocketServer').default;
 
 MustHttp.register(Must);
 

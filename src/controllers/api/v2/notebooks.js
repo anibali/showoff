@@ -1,11 +1,10 @@
-const express = require('express');
-const _ = require('lodash');
-const Mapper = require('jsonapi-mapper');
-const Joi = require('joi');
-const escape = require('escape-html');
-
-const models = require('../../../models');
-const frameViews = require('../../../frameViews');
+import express from 'express';
+import _ from 'lodash';
+import * as Mapper from 'jsonapi-mapper';
+import Joi from 'joi';
+import escape from 'escape-html';
+import models from '../../../models';
+import frameViews from '../../../frameViews';
 
 const mapper = new Mapper.Bookshelf();
 
@@ -142,4 +141,4 @@ router.route('/:id')
 router.route('/:id/frames')
   .delete(destroyNotebookFrames);
 
-module.exports = router;
+export default router;

@@ -1,5 +1,5 @@
-const React = require('react');
-const DocumentTitle = require('react-document-title');
+import React from 'react';
+import DocumentTitle from 'react-document-title';
 
 const App = (props) => (
   <DocumentTitle title="Showoff">
@@ -9,4 +9,4 @@ const App = (props) => (
   </DocumentTitle>
 );
 
-module.exports = App;
+export default App;

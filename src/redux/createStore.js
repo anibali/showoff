@@ -1,9 +1,8 @@
-const Redux = require('redux');
-const ReduxThunk = require('redux-thunk').default;
+import * as Redux from 'redux';
+import ReduxThunk from 'redux-thunk';
+import combinedReducers from './reducers';
 
-const combinedReducers = require('./reducers');
-
-module.exports = (initialState) =>
+export default (initialState) =>
   Redux.createStore(
     combinedReducers,
     initialState,

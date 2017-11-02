@@ -1,4 +1,4 @@
-module.exports = (bookshelf) =>
+export default (bookshelf) =>
   bookshelf.model('Tag', {
     tableName: 'tags',
     hasTimestamps: ['createdAt', 'updatedAt'],

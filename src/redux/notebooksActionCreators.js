@@ -5,9 +5,10 @@
  *   - Calls one or more other action creators
  */
 
-const _ = require('lodash');
-const fetch = require('../helpers/fetch');
-const simpleActionCreators = require('./simpleActionCreators');
+import _ from 'lodash';
+
+import fetch from '../helpers/fetch';
+import simpleActionCreators from './simpleActionCreators';
 
 
 const actionCreators = _.clone(simpleActionCreators.notebooks);
@@ -97,4 +98,4 @@ actionCreators.deleteNotebook = (notebookId) => (dispatch) =>
   });
 
 
-module.exports = actionCreators;
+export default actionCreators;

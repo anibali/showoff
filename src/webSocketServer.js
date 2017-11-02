@@ -1,4 +1,4 @@
-const notebookActionCreators = require('./redux/notebooksActionCreators');
+import notebookActionCreators from './redux/notebooksActionCreators';
 
 class WebSocketServer {
   /**
@@ -27,4 +27,4 @@ class WebSocketServer {
 }
 
 
-module.exports = WebSocketServer;
+export default WebSocketServer;

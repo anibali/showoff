@@ -1,12 +1,10 @@
-const _ = require('lodash');
-const React = require('react');
-const ReactRedux = require('react-redux');
-const DocumentTitle = require('react-document-title');
-
-const notebookActionCreators = require('../redux/notebooksActionCreators');
-const reactAsync = require('../helpers/reactAsync');
-
-const Frame = require('./Frame');
+import _ from 'lodash';
+import React from 'react';
+import * as ReactRedux from 'react-redux';
+import DocumentTitle from 'react-document-title';
+import notebookActionCreators from '../redux/notebooksActionCreators';
+import reactAsync from '../helpers/reactAsync';
+import Frame from './Frame';
 
 class Notebook extends React.Component {
   componentWillMount() {
@@ -59,7 +57,7 @@ class Notebook extends React.Component {
   }
 }
 
-module.exports = ReactRedux.connect(
+export default ReactRedux.connect(
   // Map store state to props
   (state, ownProps) => {
     const id = parseInt(ownProps.params.id, 10);

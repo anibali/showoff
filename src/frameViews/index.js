@@ -1,10 +1,15 @@
 const frameViews = {};
 
+import html from './html';
+import text from './text';
+import vega from './vega';
+import vegalite from './vegalite';
+
 const renderers = {
-  html: require('./html'),
-  text: require('./text'),
-  vega: require('./vega'),
-  vegalite: require('./vegalite')
+  html,
+  text,
+  vega,
+  vegalite
 };
 
 frameViews.render = (frame) => {
@@ -17,4 +22,4 @@ frameViews.render = (frame) => {
   return renderers[frame.type](frame.content);
 };
 
-module.exports = frameViews;
+export default frameViews;

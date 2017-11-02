@@ -1,9 +1,8 @@
-const React = require('react');
-const { Route, IndexRoute } = require('react-router');
-
-const App = require('./components/App');
-const Home = require('./components/Home');
-const Notebook = require('./components/Notebook');
+import React from 'react';
+import { Route, IndexRoute } from 'react-router';
+import App from './components/App';
+import Home from './components/Home';
+import Notebook from './components/Notebook';
 
 const routes = (
   <Route path="/" component={App}>
@@ -13,4 +12,4 @@ const routes = (
   </Route>
 );
 
-module.exports = routes;
+export default routes;

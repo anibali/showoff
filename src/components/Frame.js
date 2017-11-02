@@ -1,8 +1,7 @@
-const React = require('react');
-
-const _ = require('lodash');
-const Draggable = require('react-draggable');
-const { Resizable } = require('react-resizable');
+import React from 'react';
+import _ from 'lodash';
+import Draggable from 'react-draggable';
+import { Resizable } from 'react-resizable';
 
 class Frame extends React.Component {
   constructor(props) {
@@ -81,4 +80,4 @@ class Frame extends React.Component {
   }
 }
 
-module.exports = Frame;
+export default Frame;

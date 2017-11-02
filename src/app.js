@@ -1,22 +1,21 @@
-const path = require('path');
-const _ = require('lodash');
-const express = require('express');
-const bodyParser = require('body-parser');
-const compression = require('compression');
-const reactRouter = require('react-router');
-const { syncHistoryWithStore } = require('react-router-redux');
-const DocumentTitle = require('react-document-title');
-const fs = require('fs-extra');
-const mime = require('mime');
-
-const React = require('react');
-const reactDomServer = require('react-dom/server');
-const { Provider } = require('react-redux');
-const { RouterContext } = require('react-router');
-
-const reactAsync = require('./helpers/reactAsync');
-const routes = require('./routes');
-const createStore = require('./redux/createStore');
+import path from 'path';
+import _ from 'lodash';
+import express from 'express';
+import bodyParser from 'body-parser';
+import compression from 'compression';
+import * as reactRouter from 'react-router';
+import { syncHistoryWithStore } from 'react-router-redux';
+import DocumentTitle from 'react-document-title';
+import fs from 'fs-extra';
+import mime from 'mime';
+import React from 'react';
+import reactDomServer from 'react-dom/server';
+import { Provider } from 'react-redux';
+import { RouterContext } from 'react-router';
+import controllerRoutes from './config/routes';
+import reactAsync from './helpers/reactAsync';
+import routes from './routes';
+import createStore from './redux/createStore';
 
 // Create a new Express app
 const app = express();
@@ -53,7 +52,7 @@ app.use(compression({ filter: shouldCompress }));
 
 app.use(bodyParser.json({ limit: '50mb' }));
 
-require('./config/routes').connect(app);
+controllerRoutes.connect(app);
 
 app.use((req, res) => {
   const store = createStore();
@@ -118,4 +117,4 @@ app.use((req, res) => {
 });
 
 // Export the Express app
-module.exports = app;
+export default app;

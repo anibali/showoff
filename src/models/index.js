@@ -1,22 +1,28 @@
+import knexFactory from 'knex';
+import bookshelfFactory from 'bookshelf';
+import cascadeDelete from 'bookshelf-cascade-delete';
+import jsonApiParams from 'bookshelf-jsonapi-params';
+import jsonColumns from 'bookshelf-json-columns';
+
+import Notebook from './Notebook';
+import Frame from './Frame';
+import Tag from './Tag';
+
 const knexConf = require('../../knexfile')[process.env.NODE_ENV || 'development'];
-const knex = require('knex')(knexConf);
 
-const bookshelf = require('bookshelf')(knex);
-
-const cascadeDelete = require('bookshelf-cascade-delete');
-const jsonApiParams = require('bookshelf-jsonapi-params');
-const jsonColumns = require('bookshelf-json-columns');
+const knex = knexFactory(knexConf);
+const bookshelf = bookshelfFactory(knex);
 
 bookshelf.plugin('registry');
 bookshelf.plugin(cascadeDelete);
 bookshelf.plugin(jsonApiParams);
 bookshelf.plugin(jsonColumns);
 
-require('./Notebook')(bookshelf);
-require('./Frame')(bookshelf);
-require('./Tag')(bookshelf);
+Notebook(bookshelf);
+Frame(bookshelf);
+Tag(bookshelf);
 
 const models = modelName => bookshelf.model(modelName);
 models.knex = knex;
 
-module.exports = models;
+export default models;

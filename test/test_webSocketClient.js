@@ -1,8 +1,7 @@
-const expect = require('must');
-const sinon = require('sinon');
-const { Server } = require('mock-socket');
-
-const WebSocketClient = require('../src/webSocketClient');
+import expect from 'must';
+import sinon from 'sinon';
+import { Server } from 'mock-socket';
+import WebSocketClient from '../src/webSocketClient';
 
 
 describe('WebSocketClient', () => {

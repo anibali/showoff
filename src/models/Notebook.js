@@ -1,4 +1,4 @@
-module.exports = (bookshelf) => {
+export default (bookshelf) => {
   const Notebook = bookshelf.Model.extend(
     {
       tableName: 'notebooks',

@@ -1,7 +1,7 @@
-const vega = require('vega');
-const vl = require('vega-lite');
+import vega from 'vega';
+import vl from 'vega-lite';
 
-module.exports = (frameContent) =>
+export default (frameContent) =>
   new Promise((resolve, reject) => {
     const spec = vl.compile(frameContent.body).spec;
     vega.parse.spec(spec, (err, chart) => {

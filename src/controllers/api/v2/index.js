@@ -3,11 +3,11 @@
  * at http://jsonapi.org/ (v1.0).
  */
 
-const express = require('express');
+import express from 'express';
 
-const notebooksController = require('./notebooks');
-const framesController = require('./frames');
-const tagsController = require('./tags');
+import notebooksController from './notebooks';
+import framesController from './frames';
+import tagsController from './tags';
 
 
 const router = express.Router();
@@ -16,4 +16,4 @@ router.use('/notebooks', notebooksController);
 router.use('/frames', framesController);
 router.use('/tags', tagsController);
 
-module.exports = router;
+export default router;

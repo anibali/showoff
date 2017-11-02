@@ -1,13 +1,11 @@
-const React = require('react');
-const ReactRedux = require('react-redux');
-const _ = require('lodash');
-const { Typeahead } = require('react-bootstrap-typeahead');
-
-const NotebookListItem = require('./NotebookListItem');
-
-const notebookActionCreators = require('../redux/notebooksActionCreators');
-const tagActionCreators = require('../redux/tagsActionCreators');
-const reactAsync = require('../helpers/reactAsync');
+import React from 'react';
+import * as ReactRedux from 'react-redux';
+import _ from 'lodash';
+import { Typeahead } from 'react-bootstrap-typeahead';
+import NotebookListItem from './NotebookListItem';
+import notebookActionCreators from '../redux/notebooksActionCreators';
+import tagActionCreators from '../redux/tagsActionCreators';
+import reactAsync from '../helpers/reactAsync';
 
 class Home extends React.Component {
   constructor(props) {
@@ -81,7 +79,7 @@ const getNotebooksWithTags = ({ notebooks, tags }) =>
     return _.assign({ tags: notebookTags }, notebook);
   });
 
-module.exports = ReactRedux.connect(
+export default ReactRedux.connect(
   // Map store state to props
   (state) => ({
     tags: state.tags,

@@ -10,4 +10,4 @@ const reactAsync = {
   }
 };
 
-module.exports = reactAsync;
+export default reactAsync;

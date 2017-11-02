@@ -1,6 +1,6 @@
-const vega = require('vega');
+import vega from 'vega';
 
-module.exports = (frameContent) =>
+export default (frameContent) =>
   new Promise((resolve, reject) => {
     vega.parse.spec(frameContent.body, (err, chart) => {
       if(err) {

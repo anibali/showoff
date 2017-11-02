@@ -1,4 +1,4 @@
-module.exports = (bookshelf) =>
+export default (bookshelf) =>
   bookshelf.model('Frame', {
     tableName: 'frames',
     hasTimestamps: ['createdAt', 'updatedAt'],

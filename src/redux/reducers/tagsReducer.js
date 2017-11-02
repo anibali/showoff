@@ -1,7 +1,6 @@
-const { handleActions, combineActions } = require('redux-actions');
-
-const _ = require('lodash');
-const simpleActionCreators = require('../simpleActionCreators');
+import { handleActions, combineActions } from 'redux-actions';
+import _ from 'lodash';
+import simpleActionCreators from '../simpleActionCreators';
 
 
 const defaultState = [];
@@ -34,4 +33,4 @@ const tagsReducer = handleActions({
 }, defaultState);
 
 
-module.exports = tagsReducer;
+export default tagsReducer;

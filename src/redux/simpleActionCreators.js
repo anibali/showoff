@@ -5,7 +5,7 @@
  *   - Doesn't call other action creators
  */
 
-const { createActions } = require('redux-actions');
+import { createActions } from 'redux-actions';
 
 
 const simpleActionCreators = createActions({
@@ -23,4 +23,4 @@ const simpleActionCreators = createActions({
 });
 
 
-module.exports = simpleActionCreators;
+export default simpleActionCreators;

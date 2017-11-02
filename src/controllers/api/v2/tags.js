@@ -1,9 +1,8 @@
-const express = require('express');
-const Mapper = require('jsonapi-mapper');
-const Joi = require('joi');
-const _ = require('lodash');
-
-const models = require('../../../models');
+import express from 'express';
+import * as Mapper from 'jsonapi-mapper';
+import Joi from 'joi';
+import _ from 'lodash';
+import models from '../../../models';
 
 const mapper = new Mapper.Bookshelf();
 
@@ -80,4 +79,4 @@ router.route('/')
   .get(indexTags)
   .post(createTag);
 
-module.exports = router;
+export default router;

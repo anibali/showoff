@@ -1,4 +1,4 @@
-const React = require('react');
+import React from 'react';
 
 
 const contrastBW = (hex) => {
@@ -35,4 +35,4 @@ const TagList = ({ tags }) => {
   );
 };
 
-module.exports = TagList;
+export default TagList;

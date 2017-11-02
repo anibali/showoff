@@ -1,8 +1,7 @@
-const React = require('react');
-const _ = require('lodash');
-
-const NotebookListItemView = require('./NotebookListItemView');
-const NotebookListItemEdit = require('./NotebookListItemEdit');
+import React from 'react';
+import _ from 'lodash';
+import NotebookListItemView from './NotebookListItemView';
+import NotebookListItemEdit from './NotebookListItemEdit';
 
 
 class NotebookListItem extends React.Component {
@@ -57,4 +56,4 @@ class NotebookListItem extends React.Component {
   }
 }
 
-module.exports = NotebookListItem;
+export default NotebookListItem;

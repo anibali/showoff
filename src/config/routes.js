@@ -1,5 +1,5 @@
-const apiv1 = require('../controllers/api/v1');
-const apiv2 = require('../controllers/api/v2');
+import apiv1 from '../controllers/api/v1';
+import apiv2 from '../controllers/api/v2';
 
 const routes = {};
 
@@ -9,4 +9,4 @@ routes.connect = (app) => {
   app.use('/api/v2', apiv2);
 };
 
-module.exports = routes;
+export default routes;

@@ -3,17 +3,16 @@
  * When the web page is loaded, this code will run on the client.
  */
 
-require('babel-polyfill');
+import 'babel-polyfill';
 
-const React = require('react');
-const ReactDOM = require('react-dom');
-const { Provider } = require('react-redux');
-const { Router, browserHistory } = require('react-router');
-const { syncHistoryWithStore } = require('react-router-redux');
-
-const createStore = require('./redux/createStore');
-const routes = require('./routes');
-const WebSocketClient = require('./webSocketClient');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import { Router, browserHistory } from 'react-router';
+import { syncHistoryWithStore } from 'react-router-redux';
+import createStore from './redux/createStore';
+import routes from './routes';
+import WebSocketClient from './webSocketClient';
 
 window.main = (initialState) => {
   // Create a Redux store

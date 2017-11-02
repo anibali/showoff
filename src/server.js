@@ -9,8 +9,8 @@ require('babel-core/register');
 const http = require('http');
 const ws = require('ws');
 
-const app = require('./app');
-const WebSocketServer = require('./webSocketServer');
+const app = require('./app').default;
+const WebSocketServer = require('./webSocketServer').default;
 
 
 const server = http.createServer(app);

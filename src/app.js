@@ -6,6 +6,8 @@ const compression = require('compression');
 const reactRouter = require('react-router');
 const { syncHistoryWithStore } = require('react-router-redux');
 const DocumentTitle = require('react-document-title');
+const fs = require('fs-extra');
+const mime = require('mime');
 
 const React = require('react');
 const reactDomServer = require('react-dom/server');
@@ -19,20 +21,37 @@ const createStore = require('./redux/createStore');
 // Create a new Express app
 const app = express();
 
+const distDir = path.resolve(__dirname, '..', 'dist');
+
+// Use gzipped version of assets if they are available and acceptable
+app.use('/assets/bundle', (req, res, next) => {
+  // Do nothing if client doesn't accept gzip encoding
+  const accepts = req.headers['accept-encoding'];
+  if(!(accepts && accepts.search(/[^\w]gzip[^\w]/))) {
+    next();
+    return;
+  }
+
+  const gzPath = `${req.url}.gz`;
+  fs.access(path.join(distDir, gzPath), fs.constants.R_OK)
+    .then(() => {
+      res.set('Content-Type', mime.lookup(req.url));
+      res.set('Content-Encoding', 'gzip');
+      req.url = gzPath;
+    })
+    .catch(() => {})
+    .then(() => next());
+});
+
+// Serve up our static assets from 'dist'
+app.use('/assets/bundle', express.static(distDir));
+
 const shouldCompress = (req, res) =>
-  req.headers['x-no-compression'] ? false : compression.filter(req, res);
+  (req.headers['x-no-compression'] ? false : compression.filter(req, res));
 
 app.use(compression({ filter: shouldCompress }));
+
 app.use(bodyParser.json({ limit: '50mb' }));
-
-// Serve up our static assets from 'dist' (this includes our client-side
-// bundle of JavaScript). These assets are referred to in the HTML using
-// <link> and <script> tags.
-app.use('/assets', express.static(path.resolve(__dirname, '..', 'dist')));
-
-// Serve up font-awesome fonts from vendor folder
-app.use('/assets/fonts', express.static(path.join(__dirname,
-        '..', 'vendor', 'font-awesome', 'fonts')));
 
 require('./config/routes').connect(app);
 
@@ -76,12 +95,12 @@ app.use((req, res) => {
           <html>
             <head>
               <title>${title}</title>
-              <link rel="stylesheet" type="text/css" href="/assets/css/app.css">
+              <link rel="stylesheet" type="text/css" href="/assets/bundle/vendor.css">
+              <link rel="stylesheet" type="text/css" href="/assets/bundle/app.css">
             </head>
             <body>
               <div class="fill-space" id="root">${reactHtml}</div>
-              <script src="/assets/js/vendor.js"></script>
-              <script src="/assets/js/app.js"></script>
+              <script src="/assets/bundle/app.js"></script>
               <script>
                 main(${JSON.stringify(_.omit(store.getState(), 'routing'))})
               </script>

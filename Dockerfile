@@ -37,7 +37,7 @@ ENV NODE_PATH=/deps/node_modules \
 COPY . /app
 
 # Bundle client-side assets.
-RUN rm -rf dist && NODE_ENV=production gulp build
+RUN rm -rf dist && npm run build
 
 # Start the server on exposed port 3000.
 EXPOSE 3000

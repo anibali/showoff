@@ -8,4 +8,9 @@ do
 done
 
 # Start the server
-node src/server.js
+if [ "$NODE_ENV" == "production" ]
+then
+  node src/server.js
+else
+  webpack -w
+fi

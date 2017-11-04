@@ -30,5 +30,5 @@ window.main = (initialState) => {
 
   // Mount our React root component in the DOM
   const mountPoint = document.getElementById('root');
-  ReactDOM.render(<Root />, mountPoint);
+  ReactDOM.hydrate(<Root />, mountPoint);
 };

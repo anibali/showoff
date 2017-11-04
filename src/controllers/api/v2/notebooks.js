@@ -1,11 +1,17 @@
 import express from 'express';
+import multer from 'multer';
 import _ from 'lodash';
 import * as Mapper from 'jsonapi-mapper';
 import Joi from 'joi';
 import escape from 'escape-html';
+import fs from 'fs-extra';
+import path from 'path';
+
+import showoffConfig from '../../../config/showoff';
 import models from '../../../models';
 import frameViews from '../../../frameViews';
 
+const { uploadDir } = showoffConfig;
 const mapper = new Mapper.Bookshelf();
 
 const errorResponse = (res, err) => {
@@ -111,6 +117,7 @@ const updateNotebook = (req, res) =>
 const destroyNotebook = (req, res) =>
   new Promise(resolve => resolve(parseInt(req.params.id, 10)))
     .then((id) => models('Notebook').where({ pinned: false, id }).destroy({ require: true })
+      .then(() => fs.remove(path.join(uploadDir, 'notebooks', req.params.id)))
       .then(() => res.status(204).send())
       .catch(err => {
         if(err.message.indexOf('No Rows Deleted') < 0) {
@@ -129,6 +136,59 @@ const destroyNotebookFrames = (req, res) =>
       .catch((err) => errorResponse(res, err))
     );
 
+const upload = multer({ dest: path.join(uploadDir, 'tmp') }).single('file');
+
+// PUT /api/v2/notebooks/42/files
+const replaceNotebookFile = (req, res) =>
+  new Promise((resolve, reject) => {
+    upload(req, res, (err) => {
+      if(err) {
+        reject(err);
+        return;
+      }
+      resolve(req.file);
+    });
+  })
+    .then(file => {
+      const destDir = path.join(uploadDir, 'notebooks', req.params.id, 'files');
+      return fs.ensureDir(destDir)
+        .then(() => fs.copy(file.path, path.join(destDir, file.originalname)))
+        .then(() => fs.remove(file.path));
+    })
+    .then(() => res.status(200).send({}))
+    .catch((err) => errorResponse(res, err));
+
+// PATCH /api/v2/notebooks/42/files
+const appendNotebookFile = (req, res) =>
+  new Promise((resolve, reject) => {
+    upload(req, res, (err) => {
+      if(err) {
+        reject(err);
+        return;
+      }
+      resolve(req.file);
+    });
+  })
+    .then(file => {
+      const destDir = path.join(uploadDir, 'notebooks', req.params.id, 'files');
+      return fs.ensureDir(destDir)
+        .then(() => {
+          const destFile = path.join(destDir, file.originalname);
+          const readStream = fs.createReadStream(file.path);
+          const writeStream = fs.createWriteStream(destFile, { flags: 'a' });
+          readStream.pipe(writeStream);
+          readStream.on('end', () => {
+            writeStream.end();
+          });
+          return new Promise((resolve) => {
+            writeStream.on('finish', () => { resolve(); });
+          });
+        })
+        .then(() => fs.remove(file.path));
+    })
+    .then(() => res.status(200).send({}))
+    .catch((err) => errorResponse(res, err));
+
 const router = express.Router();
 
 router.route('/')
@@ -140,5 +200,9 @@ router.route('/:id')
   .delete(destroyNotebook);
 router.route('/:id/frames')
   .delete(destroyNotebookFrames);
+router.route('/:id/files')
+  .put(replaceNotebookFile)
+  .patch(appendNotebookFile);
+router.use(express.static(path.join(uploadDir, 'notebooks')));
 
 export default router;

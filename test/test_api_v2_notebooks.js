@@ -2,7 +2,13 @@ import expect from 'must';
 import sinon from 'sinon';
 import _ from 'lodash';
 import { factory } from 'factory-girl';
+import FormData from 'form-data';
+import path from 'path';
+import fs from 'fs-extra';
+
 import models from '../src/models';
+import showoffConfig from '../src/config/showoff';
+
 
 describe('API V2 Notebooks', () => {
   let clock = null;
@@ -312,6 +318,100 @@ describe('API V2 Notebooks', () => {
             expect(body).to.eql(expected);
           });
       });
+    });
+  });
+
+  describe('PUT /notebooks/:id/files', () => {
+    let sendRequest;
+    beforeEach(() => {
+      const formData = new FormData();
+      formData.append('file', 'Hello', 'test.txt');
+      sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
+        method: 'PUT',
+        body: formData,
+      });
+      return factory.create('notebook', { id: 1 })
+        .then(() => fs.remove(path.join(showoffConfig.uploadDir, 'notebooks')));
+    });
+
+    describe('when the file does not exist yet', () => {
+      const filePath = path.join(showoffConfig.uploadDir,
+        'notebooks', '1', 'files', 'test.txt');
+
+      it('should create the file in the uploads directory', () =>
+        sendRequest()
+          .then(() => fs.readFile(filePath, 'utf8'))
+          .then((content) => {
+            expect(content).to.equal('Hello');
+          })
+      );
+    });
+
+    describe('when the file already exists', () => {
+      const filePath = path.join(showoffConfig.uploadDir,
+        'notebooks', '1', 'files', 'test.txt');
+
+      beforeEach(() => fs.ensureDir(path.dirname(filePath))
+        .then(() => fs.writeFile(filePath, 'Ciao', 'utf8')));
+
+      it('should replace the file in the uploads directory', () =>
+        fs.readFile(filePath, 'utf8')
+          .then((content) => {
+            expect(content).to.equal('Ciao');
+          })
+          .then(() => sendRequest())
+          .then(() => fs.readFile(filePath, 'utf8'))
+          .then((content) => {
+            expect(content).to.equal('Hello');
+          })
+      );
+    });
+  });
+
+  describe('PATCH /notebooks/:id/files', () => {
+    let sendRequest;
+    beforeEach(() => {
+      const formData = new FormData();
+      formData.append('file', 'Hello', 'test.txt');
+      sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
+        method: 'PATCH',
+        body: formData,
+      });
+      return factory.create('notebook', { id: 1 })
+        .then(() => fs.remove(path.join(showoffConfig.uploadDir, 'notebooks')));
+    });
+
+    describe('when the file does not exist yet', () => {
+      const filePath = path.join(showoffConfig.uploadDir,
+        'notebooks', '1', 'files', 'test.txt');
+
+      it('should create the file in the uploads directory', () =>
+        sendRequest()
+          .then(() => fs.readFile(filePath, 'utf8'))
+          .then((content) => {
+            expect(content).to.equal('Hello');
+          })
+      );
+    });
+
+    describe('when the file already exists', () => {
+      const filePath = path.join(showoffConfig.uploadDir,
+        'notebooks', '1', 'files', 'test.txt');
+
+      beforeEach(() => fs.ensureDir(path.dirname(filePath))
+        .then(() => fs.writeFile(filePath, 'Ciao', 'utf8')));
+
+      it('should append to the file in the uploads directory', () =>
+        fs.readFile(filePath, 'utf8')
+          .then((content) => {
+            expect(content).to.equal('Ciao');
+          })
+          .then(() => sendRequest())
+          .then(() => fs.readFile(filePath, 'utf8'))
+          .then((content) => {
+            expect(content).to.equal('CiaoHello');
+          })
+      );
     });
   });
 });

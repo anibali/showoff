@@ -8,6 +8,11 @@ const mockWs = require('mock-socket');
 const MustHttp = require('./mustHttp').default;
 const fixtures = require('./fixtures');
 
+const showoffConfig = require('../src/config/showoff').default;
+
+// Overwrite upload directory location
+showoffConfig.uploadDir = '/tmp/showofftest_uploads';
+
 const models = require('../src/models').default;
 const app = require('../src/app').default;
 const WebSocketServer = require('../src/webSocketServer').default;

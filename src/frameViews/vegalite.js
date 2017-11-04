@@ -1,22 +1,24 @@
-import vega from 'vega';
-import vl from 'vega-lite';
+import * as vegalite1 from 'vega-lite-1';
+import * as vegalite2 from 'vega-lite';
+
+import vegaFrameView from './vega';
+
+const vegaliteCompile = (spec) => new Promise((resolve, reject) => {
+  const schemaUrl = spec.$schema || 'https://vega.github.io/schema/vega-lite/v1.json';
+  const majorVersion = schemaUrl.match(/\/v(\d+)(.\d+)*\.json/)[1];
+  switch(majorVersion) {
+    case '2':
+      resolve(vegalite2.compile(spec).spec);
+      return;
+    case '1':
+      resolve(vegalite1.compile(spec).spec);
+      return;
+    default:
+      reject(Error(`unrecognized Vega-Lite schema URL: ${schemaUrl}`));
+  }
+});
 
 export default (frameContent) =>
-  new Promise((resolve, reject) => {
-    const spec = vl.compile(frameContent.body).spec;
-    vega.parse.spec(spec, (err, chart) => {
-      if(err) {
-        reject(err);
-        return;
-      }
-
-      const view = chart({ renderer: 'svg' }).update();
-
-      const svgDoctype = '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" ' +
-        '"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
-      const svgDoc = [svgDoctype, view.svg()].join('\n');
-      const svgDocBase64 = new Buffer(svgDoc).toString('base64');
-
-      resolve(`<img class="img-scalable" src=data:image/svg+xml;base64,${svgDocBase64}>`);
-    });
-  });
+  vegaliteCompile(frameContent.body)
+    .then(spec => Object.assign({ $schema: 'https://vega.github.io/schema/vega/v2.6.json' }, spec))
+    .then(spec => vegaFrameView({ body: spec }));

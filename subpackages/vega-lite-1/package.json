@@ -1,0 +1,9 @@
+{
+  "name": "vega-lite-1",
+  "version": "1.3.1",
+  "main": "index.js",
+  "private": true,
+  "dependencies": {
+    "vega-lite": "1.3.1"
+  }
+}

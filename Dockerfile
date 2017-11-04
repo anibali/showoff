@@ -25,6 +25,7 @@ USER node
 
 # Install the project's NPM dependencies.
 COPY package.json .
+COPY subpackages ./subpackages
 RUN sudo mkdir -p /deps/node_modules \
  && sudo chown -R node:node /deps/ \
  && yarn install --modules-folder /deps/node_modules

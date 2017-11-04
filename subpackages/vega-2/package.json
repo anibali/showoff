@@ -1,0 +1,9 @@
+{
+  "name": "vega-2",
+  "version": "2.6.5",
+  "main": "index.js",
+  "private": true,
+  "dependencies": {
+    "vega": "2.6.5"
+  }
+}

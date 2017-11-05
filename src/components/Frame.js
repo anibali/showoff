@@ -52,13 +52,13 @@ class Frame extends React.Component {
       draggableElement.style.zIndex = maxZ + 1;
     };
 
-    const frame = this.props.frame;
+    const { frame, initialX, initialY } = this.props;
 
     return (
       <Draggable
         bounds="parent"
         cancel=".react-resizable-handle"
-        defaultPosition={{ x: this.props.initialX, y: this.props.initialY }}
+        defaultPosition={{ x: initialX, y: initialY }}
         handle=".frame-handle"
         onMouseDown={onMouseDown}
         onDrag={onDrag}

@@ -16,9 +16,9 @@ const actionCreators = _.clone(simpleActionCreators.tags);
 const flattenResource = (resource) => {
   const flat = _.assign({ id: parseInt(resource.id, 10) }, resource.attributes);
   if(resource.relationships) {
-    _.assign(flat, ..._.map(resource.relationships, (v, k) => {
-      return { [`${k}Id`]: parseInt(v.data.id, 10) };
-    }));
+    _.assign(flat, ..._.map(resource.relationships, (v, k) =>
+      ({ [`${k}Id`]: parseInt(v.data.id, 10) })
+    ));
   }
   return flat;
 };

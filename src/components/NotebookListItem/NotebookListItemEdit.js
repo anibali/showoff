@@ -54,7 +54,6 @@ class NotebookListItemEdit extends React.Component {
                 onChange={onChangeTitle}
               />
             </div>
-
           </div>
           <div className="form-group">
             <label htmlFor={tagFieldId} className="col-md-1 control-label">

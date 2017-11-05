@@ -34,6 +34,11 @@
     "object-shorthand": [2, "properties"],
     "quote-props": [2, "consistent"],
     "jsx-a11y/anchor-is-valid": [ "error", { "specialLink": [ "to" ] }],
+    "jsx-a11y/label-has-for": [ 2, {
+      "required": {
+          "every": [ "id" ]
+      }
+    }],
     "react/no-did-mount-set-state": 0,
     "react/no-multi-comp": 0,
     "react/prefer-es6-class": 0,

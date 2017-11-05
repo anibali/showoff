@@ -42,15 +42,15 @@ router.put('/notebook/:id', (req, res) => {
   if(Array.isArray(req.body.notebook.tags)) {
     const tags = req.body.notebook.tags
       .map(tag => _.assign({ notebookId: id }, _.pick(tag, 'name')));
-    promise = promise.then(notebook => {
-      return models('Tag').where({ notebookId: notebook.id }).destroy()
+    promise = promise.then(notebook =>
+      models('Tag').where({ notebookId: notebook.id }).destroy()
         .then(() => Promise.all(tags.map(tag => models('Tag').forge(tag).save())))
         .then((savedTags) => {
           const notebookJson = notebook.toJSON();
           notebookJson.tags = savedTags.map(tag => tag.toJSON());
           return notebookJson;
-        });
-    });
+        })
+    );
   }
 
   promise
@@ -72,13 +72,13 @@ router.get('/notebook/:id', (req, res) => {
           frameViews.render(frame).then((content) => {
             newFrame.content = content;
           })
-          .catch(err => {
-            newFrame.content =
-              `<p style="color: red;">
-                Error rendering frame content (type = "${frame.type}")
-              </p>
-              <pre>${err}</pre>`;
-          })
+            .catch(err => {
+              newFrame.content =
+                `<p style="color: red;">
+                  Error rendering frame content (type = "${frame.type}")
+                </p>
+                <pre>${err}</pre>`;
+            })
         );
         return newFrame;
       });
@@ -135,7 +135,7 @@ router.put('/frame/:id', (req, res) => {
 });
 
 router.post('/frame', (req, res) => {
-  const notebookId = req.body.frame.notebookId;
+  const { notebookId } = req.body.frame;
   // TODO: Verify notebookId is valid
   const attrs = _.assign({},
     frameParams(req),

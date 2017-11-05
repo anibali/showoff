@@ -47,6 +47,7 @@
   padding-left: 8px;
   /* Disable text selection */
   -webkit-touch-callout: none; /* iOS Safari */
+  user-select: none;
   -webkit-user-select: none;   /* Chrome/Safari/Opera */
   -khtml-user-select: none;    /* Konqueror */
   -moz-user-select: none;      /* Firefox */

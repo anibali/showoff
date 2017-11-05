@@ -36,8 +36,11 @@ class Notebook extends React.Component {
       children = this.props.frames.map(createFrame);
     } else {
       const style = {
-        color: 'white', fontSize: 128,
-        position: 'absolute', top: '50%', left: '50%',
+        color: 'white',
+        fontSize: 128,
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
         transform: 'translate(-50%, -50%)'
       };
       children = (

@@ -1,9 +1,9 @@
-const frameViews = {};
-
 import html from './html';
 import text from './text';
 import vega from './vega';
 import vegalite from './vegalite';
+
+const frameViews = {};
 
 const renderers = {
   html,

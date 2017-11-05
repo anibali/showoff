@@ -3,8 +3,7 @@ import _ from 'lodash';
 import express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
-import * as reactRouter from 'react-router';
-import { RouterContext } from 'react-router';
+import { RouterContext, createMemoryHistory, match as matchRoute } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 import DocumentTitle from 'react-document-title';
 import fs from 'fs-extra';
@@ -63,10 +62,10 @@ controllerRoutes.connect(app);
 
 app.use((req, res) => {
   const store = createStore();
-  const history = syncHistoryWithStore(reactRouter.createMemoryHistory(), store);
+  const history = syncHistoryWithStore(createMemoryHistory(), store);
 
   const matchOpts = { history, routes, location: req.url };
-  reactRouter.match(matchOpts, (matchError, redirectLocation, renderProps) => {
+  matchRoute(matchOpts, (matchError, redirectLocation, renderProps) => {
     if(matchError) {
       res.status(500).send(matchError.message);
     } else if(redirectLocation) {

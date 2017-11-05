@@ -324,122 +324,170 @@ describe('API V2 Notebooks', () => {
   });
 
   describe('PUT /notebooks/:id/files', () => {
-    let sendRequest;
-    beforeEach(() => {
-      const formData = new FormData();
-      formData.append('file', 'Hello', 'test.txt');
-      sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
-        method: 'PUT',
-        body: formData,
+    describe('when the filename contains illegal characters', () => {
+      let sendRequest;
+      beforeEach(() => {
+        const formData = new FormData();
+        formData.append('file', 'Hello', '..');
+        sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
+          method: 'PUT',
+          body: formData,
+        });
+        return factory.create('notebook', { id: 1 });
       });
-      return factory.create('notebook', { id: 1 });
-    });
 
-    const filePath = path.join(showoffConfig.uploadDir,
-      'notebooks', '1', 'files', 'test.txt');
-
-    describe('when the file does not exist yet', () => {
-      it('should create the file in the uploads directory', () =>
-        sendRequest()
-          .then(() => fs.readFile(filePath, 'utf8'))
-          .then((content) => {
-            expect(content).to.equal('Hello');
-          })
+      it('should return HTTP status 400', () =>
+        expect(sendRequest()).to.eventually.have.status(400)
       );
 
-      it('should create a File record in the database', () =>
-        sendRequest()
-          .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
-          .then((count) => {
-            expect(parseInt(count, 10)).to.equal(1);
-          })
+      it('should return an informative error message', () =>
+        expect(sendRequest().then(res => res.json()))
+          .to.eventually.eql({ error: 'invalid filename' })
       );
     });
 
-    describe('when the file already exists', () => {
-      beforeEach(() => fs.remove(path.join(showoffConfig.uploadDir, 'notebooks'))
-        .then(() => factory.create('file', { notebookId: 1, filename: 'test.txt' }))
-      );
+    describe('when the request is valid', () => {
+      let sendRequest;
+      beforeEach(() => {
+        const formData = new FormData();
+        formData.append('file', 'Hello', 'test.txt');
+        sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
+          method: 'PUT',
+          body: formData,
+        });
+        return factory.create('notebook', { id: 1 });
+      });
 
-      it('should replace the file in the uploads directory', () =>
-        fs.readFile(filePath, 'utf8')
-          .then((content) => {
-            expect(content).to.equal('Ciao');
-          })
-          .then(() => sendRequest())
-          .then(() => fs.readFile(filePath, 'utf8'))
-          .then((content) => {
-            expect(content).to.equal('Hello');
-          })
-      );
+      const filePath = path.join(showoffConfig.uploadDir,
+        'notebooks', '1', 'files', 'test.txt');
 
-      it('should not create another File record in the database', () =>
-        sendRequest()
-          .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
-          .then((count) => {
-            expect(parseInt(count, 10)).to.equal(1);
-          })
-      );
+      describe('when the file does not exist yet', () => {
+        it('should create the file in the uploads directory', () =>
+          sendRequest()
+            .then(() => fs.readFile(filePath, 'utf8'))
+            .then((content) => {
+              expect(content).to.equal('Hello');
+            })
+        );
+
+        it('should create a File record in the database', () =>
+          sendRequest()
+            .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
+            .then((count) => {
+              expect(parseInt(count, 10)).to.equal(1);
+            })
+        );
+      });
+
+      describe('when the file already exists', () => {
+        beforeEach(() => fs.remove(path.join(showoffConfig.uploadDir, 'notebooks'))
+          .then(() => factory.create('file', { notebookId: 1, filename: 'test.txt' }))
+        );
+
+        it('should replace the file in the uploads directory', () =>
+          fs.readFile(filePath, 'utf8')
+            .then((content) => {
+              expect(content).to.equal('Ciao');
+            })
+            .then(() => sendRequest())
+            .then(() => fs.readFile(filePath, 'utf8'))
+            .then((content) => {
+              expect(content).to.equal('Hello');
+            })
+        );
+
+        it('should not create another File record in the database', () =>
+          sendRequest()
+            .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
+            .then((count) => {
+              expect(parseInt(count, 10)).to.equal(1);
+            })
+        );
+      });
     });
   });
 
   describe('PATCH /notebooks/:id/files', () => {
-    let sendRequest;
-    beforeEach(() => {
-      const formData = new FormData();
-      formData.append('file', 'Hello', 'test.txt');
-      sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
-        method: 'PATCH',
-        body: formData,
+    describe('when the filename contains illegal characters', () => {
+      let sendRequest;
+      beforeEach(() => {
+        const formData = new FormData();
+        formData.append('file', 'Hello', '..');
+        sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
+          method: 'PATCH',
+          body: formData,
+        });
+        return factory.create('notebook', { id: 1 });
       });
-      return factory.create('notebook', { id: 1 });
-    });
 
-    const filePath = path.join(showoffConfig.uploadDir,
-      'notebooks', '1', 'files', 'test.txt');
-
-    describe('when the file does not exist yet', () => {
-      it('should create the file in the uploads directory', () =>
-        sendRequest()
-          .then(() => fs.readFile(filePath, 'utf8'))
-          .then((content) => {
-            expect(content).to.equal('Hello');
-          })
+      it('should return HTTP status 400', () =>
+        expect(sendRequest()).to.eventually.have.status(400)
       );
 
-      it('should create a File record in the database', () =>
-        sendRequest()
-          .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
-          .then((count) => {
-            expect(parseInt(count, 10)).to.equal(1);
-          })
+      it('should return an informative error message', () =>
+        expect(sendRequest().then(res => res.json()))
+          .to.eventually.eql({ error: 'invalid filename' })
       );
     });
 
-    describe('when the file already exists', () => {
-      beforeEach(() => fs.remove(path.join(showoffConfig.uploadDir, 'notebooks'))
-        .then(() => factory.create('file', { notebookId: 1, filename: 'test.txt' }))
-      );
+    describe('when the request is valid', () => {
+      let sendRequest;
+      beforeEach(() => {
+        const formData = new FormData();
+        formData.append('file', 'Hello', 'test.txt');
+        sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
+          method: 'PATCH',
+          body: formData,
+        });
+        return factory.create('notebook', { id: 1 });
+      });
 
-      it('should append to the file in the uploads directory', () =>
-        fs.readFile(filePath, 'utf8')
-          .then((content) => {
-            expect(content).to.equal('Ciao');
-          })
-          .then(() => sendRequest())
-          .then(() => fs.readFile(filePath, 'utf8'))
-          .then((content) => {
-            expect(content).to.equal('CiaoHello');
-          })
-      );
+      const filePath = path.join(showoffConfig.uploadDir,
+        'notebooks', '1', 'files', 'test.txt');
 
-      it('should not create another File record in the database', () =>
-        sendRequest()
-          .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
-          .then((count) => {
-            expect(parseInt(count, 10)).to.equal(1);
-          })
-      );
+      describe('when the file does not exist yet', () => {
+        it('should create the file in the uploads directory', () =>
+          sendRequest()
+            .then(() => fs.readFile(filePath, 'utf8'))
+            .then((content) => {
+              expect(content).to.equal('Hello');
+            })
+        );
+
+        it('should create a File record in the database', () =>
+          sendRequest()
+            .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
+            .then((count) => {
+              expect(parseInt(count, 10)).to.equal(1);
+            })
+        );
+      });
+
+      describe('when the file already exists', () => {
+        beforeEach(() => fs.remove(path.join(showoffConfig.uploadDir, 'notebooks'))
+          .then(() => factory.create('file', { notebookId: 1, filename: 'test.txt' }))
+        );
+
+        it('should append to the file in the uploads directory', () =>
+          fs.readFile(filePath, 'utf8')
+            .then((content) => {
+              expect(content).to.equal('Ciao');
+            })
+            .then(() => sendRequest())
+            .then(() => fs.readFile(filePath, 'utf8'))
+            .then((content) => {
+              expect(content).to.equal('CiaoHello');
+            })
+        );
+
+        it('should not create another File record in the database', () =>
+          sendRequest()
+            .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
+            .then((count) => {
+              expect(parseInt(count, 10)).to.equal(1);
+            })
+        );
+      });
     });
   });
 });

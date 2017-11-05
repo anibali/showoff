@@ -6,6 +6,7 @@ import Joi from 'joi';
 import escape from 'escape-html';
 import fs from 'fs-extra';
 import path from 'path';
+import httpErrors from 'http-errors';
 
 import showoffConfig from '../../../config/showoff';
 import models from '../../../models';
@@ -15,7 +16,9 @@ const { uploadDir } = showoffConfig;
 const mapper = new Mapper.Bookshelf();
 
 const errorResponse = (res, err) => {
-  if(err.message === 'EmptyResponse') {
+  if(err.statusCode) {
+    res.status(err.statusCode).json({ error: err.message });
+  } else if(err.message === 'EmptyResponse') {
     res.status(404).json({ error: 'not found' });
   } else {
     console.error(err);
@@ -137,8 +140,15 @@ const destroyNotebookFrames = (req, res) =>
 
 const upload = multer({ dest: path.join(uploadDir, 'tmp') }).single('file');
 
-// PUT /api/v2/notebooks/42/files
-const replaceNotebookFile = (req, res) =>
+const validateFilename = (filename) => new Promise((resolve) => {
+  if(filename.match(/^[.\-\w]+$/) && filename.match(/[-\w]/)) {
+    resolve(filename);
+    return;
+  }
+  throw new httpErrors.BadRequest('invalid filename');
+});
+
+const handleFileUploadRequest = (processFile) => (req, res) =>
   new Promise((resolve, reject) => {
     upload(req, res, (err) => {
       if(err) {
@@ -148,53 +158,41 @@ const replaceNotebookFile = (req, res) =>
       resolve(req.file);
     });
   })
-    .then(file => {
-      const destDir = path.join(uploadDir, 'notebooks', req.params.id, 'files');
-      return fs.ensureDir(destDir)
-        .then(() => fs.copy(file.path, path.join(destDir, file.originalname)))
-        .then(() => fs.remove(file.path))
+    .then(file =>
+      validateFilename(file.originalname)
         .then(() => {
-          const attrs = { notebookId: req.params.id, filename: file.originalname };
-          return models('File').forge(attrs).where(attrs).upsert();
-        });
-    })
+          const destDir = path.join(uploadDir, 'notebooks', req.params.id, 'files');
+          return fs.ensureDir(destDir)
+            .then(() => processFile(file, destDir))
+            .then(() => {
+              const attrs = { notebookId: req.params.id, filename: file.originalname };
+              return models('File').forge(attrs).where(attrs).upsert();
+            });
+        })
+        .then(() => null).catch(err => err)
+        .then(err => fs.remove(file.path).then(() => (err ? Promise.reject(err) : null)))
+    )
     .then(() => res.status(200).send({}))
     .catch((err) => errorResponse(res, err));
 
+// PUT /api/v2/notebooks/42/files
+const replaceNotebookFile = handleFileUploadRequest((file, destDir) =>
+  fs.copy(file.path, path.join(destDir, file.originalname))
+);
+
 // PATCH /api/v2/notebooks/42/files
-const appendNotebookFile = (req, res) =>
-  new Promise((resolve, reject) => {
-    upload(req, res, (err) => {
-      if(err) {
-        reject(err);
-        return;
-      }
-      resolve(req.file);
-    });
-  })
-    .then(file => {
-      const destDir = path.join(uploadDir, 'notebooks', req.params.id, 'files');
-      return fs.ensureDir(destDir)
-        .then(() => {
-          const destFile = path.join(destDir, file.originalname);
-          const readStream = fs.createReadStream(file.path);
-          const writeStream = fs.createWriteStream(destFile, { flags: 'a' });
-          readStream.pipe(writeStream);
-          readStream.on('end', () => {
-            writeStream.end();
-          });
-          return new Promise((resolve) => {
-            writeStream.on('finish', () => { resolve(); });
-          });
-        })
-        .then(() => fs.remove(file.path))
-        .then(() => {
-          const attrs = { notebookId: req.params.id, filename: file.originalname };
-          return models('File').forge(attrs).where(attrs).upsert();
-        });
-    })
-    .then(() => res.status(200).send({}))
-    .catch((err) => errorResponse(res, err));
+const appendNotebookFile = handleFileUploadRequest((file, destDir) => {
+  const destFile = path.join(destDir, file.originalname);
+  const readStream = fs.createReadStream(file.path);
+  const writeStream = fs.createWriteStream(destFile, { flags: 'a' });
+  readStream.pipe(writeStream);
+  readStream.on('end', () => {
+    writeStream.end();
+  });
+  return new Promise((resolve) => {
+    writeStream.on('finish', () => { resolve(); });
+  });
+});
 
 const router = express.Router();
 

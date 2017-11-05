@@ -4,6 +4,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import * as reactRouter from 'react-router';
+import { RouterContext } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 import DocumentTitle from 'react-document-title';
 import fs from 'fs-extra';
@@ -11,11 +12,14 @@ import mime from 'mime';
 import React from 'react';
 import reactDomServer from 'react-dom/server';
 import { Provider } from 'react-redux';
-import { RouterContext } from 'react-router';
+
 import controllerRoutes from './config/routes';
 import reactAsync from './helpers/reactAsync';
 import routes from './routes';
 import createStore from './redux/createStore';
+import showoffConfig from './config/showoff';
+
+const { uploadDir } = showoffConfig;
 
 // Create a new Express app
 const app = express();
@@ -44,6 +48,9 @@ app.use('/assets/bundle', (req, res, next) => {
 
 // Serve up our static assets from 'dist'
 app.use('/assets/bundle', express.static(distDir));
+
+// Serve uploaded static files for notebooks
+app.use('/notebooks', express.static(path.join(uploadDir, 'notebooks')));
 
 const shouldCompress = (req, res) =>
   (req.headers['x-no-compression'] ? false : compression.filter(req, res));

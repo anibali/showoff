@@ -15,12 +15,12 @@ describe('API V2 Notebooks', () => {
 
   beforeEach(() => {
     clock = sinon.useFakeTimers();
-    return models('Notebook').where('id', '!=', 0).destroy();
   });
 
   afterEach(() => {
     clock.restore();
     return factory.cleanUp()
+      .then(() => models.knex.raw('ALTER SEQUENCE files_id_seq RESTART WITH 1;'))
       .then(() => models.knex.raw('ALTER SEQUENCE notebooks_id_seq RESTART WITH 1;'));
   });
 
@@ -111,6 +111,8 @@ describe('API V2 Notebooks', () => {
           },
         },
       };
+
+      afterEach(() => models('Notebook').forge({ id: 1 }).destroy());
 
       it('should return HTTP status 201', () =>
         expect(sendRequest(reqBody)).to.eventually.have.status(201)
@@ -330,14 +332,13 @@ describe('API V2 Notebooks', () => {
         method: 'PUT',
         body: formData,
       });
-      return factory.create('notebook', { id: 1 })
-        .then(() => fs.remove(path.join(showoffConfig.uploadDir, 'notebooks')));
+      return factory.create('notebook', { id: 1 });
     });
 
-    describe('when the file does not exist yet', () => {
-      const filePath = path.join(showoffConfig.uploadDir,
-        'notebooks', '1', 'files', 'test.txt');
+    const filePath = path.join(showoffConfig.uploadDir,
+      'notebooks', '1', 'files', 'test.txt');
 
+    describe('when the file does not exist yet', () => {
       it('should create the file in the uploads directory', () =>
         sendRequest()
           .then(() => fs.readFile(filePath, 'utf8'))
@@ -345,14 +346,20 @@ describe('API V2 Notebooks', () => {
             expect(content).to.equal('Hello');
           })
       );
+
+      it('should create a File record in the database', () =>
+        sendRequest()
+          .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
+          .then((count) => {
+            expect(parseInt(count, 10)).to.equal(1);
+          })
+      );
     });
 
     describe('when the file already exists', () => {
-      const filePath = path.join(showoffConfig.uploadDir,
-        'notebooks', '1', 'files', 'test.txt');
-
-      beforeEach(() => fs.ensureDir(path.dirname(filePath))
-        .then(() => fs.writeFile(filePath, 'Ciao', 'utf8')));
+      beforeEach(() => fs.remove(path.join(showoffConfig.uploadDir, 'notebooks'))
+        .then(() => factory.create('file', { notebookId: 1, filename: 'test.txt' }))
+      );
 
       it('should replace the file in the uploads directory', () =>
         fs.readFile(filePath, 'utf8')
@@ -363,6 +370,14 @@ describe('API V2 Notebooks', () => {
           .then(() => fs.readFile(filePath, 'utf8'))
           .then((content) => {
             expect(content).to.equal('Hello');
+          })
+      );
+
+      it('should not create another File record in the database', () =>
+        sendRequest()
+          .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
+          .then((count) => {
+            expect(parseInt(count, 10)).to.equal(1);
           })
       );
     });
@@ -377,14 +392,13 @@ describe('API V2 Notebooks', () => {
         method: 'PATCH',
         body: formData,
       });
-      return factory.create('notebook', { id: 1 })
-        .then(() => fs.remove(path.join(showoffConfig.uploadDir, 'notebooks')));
+      return factory.create('notebook', { id: 1 });
     });
 
-    describe('when the file does not exist yet', () => {
-      const filePath = path.join(showoffConfig.uploadDir,
-        'notebooks', '1', 'files', 'test.txt');
+    const filePath = path.join(showoffConfig.uploadDir,
+      'notebooks', '1', 'files', 'test.txt');
 
+    describe('when the file does not exist yet', () => {
       it('should create the file in the uploads directory', () =>
         sendRequest()
           .then(() => fs.readFile(filePath, 'utf8'))
@@ -392,14 +406,20 @@ describe('API V2 Notebooks', () => {
             expect(content).to.equal('Hello');
           })
       );
+
+      it('should create a File record in the database', () =>
+        sendRequest()
+          .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
+          .then((count) => {
+            expect(parseInt(count, 10)).to.equal(1);
+          })
+      );
     });
 
     describe('when the file already exists', () => {
-      const filePath = path.join(showoffConfig.uploadDir,
-        'notebooks', '1', 'files', 'test.txt');
-
-      beforeEach(() => fs.ensureDir(path.dirname(filePath))
-        .then(() => fs.writeFile(filePath, 'Ciao', 'utf8')));
+      beforeEach(() => fs.remove(path.join(showoffConfig.uploadDir, 'notebooks'))
+        .then(() => factory.create('file', { notebookId: 1, filename: 'test.txt' }))
+      );
 
       it('should append to the file in the uploads directory', () =>
         fs.readFile(filePath, 'utf8')
@@ -410,6 +430,14 @@ describe('API V2 Notebooks', () => {
           .then(() => fs.readFile(filePath, 'utf8'))
           .then((content) => {
             expect(content).to.equal('CiaoHello');
+          })
+      );
+
+      it('should not create another File record in the database', () =>
+        sendRequest()
+          .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
+          .then((count) => {
+            expect(parseInt(count, 10)).to.equal(1);
           })
       );
     });

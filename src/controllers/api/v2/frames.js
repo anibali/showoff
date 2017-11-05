@@ -167,7 +167,7 @@ const updateFrame = (req, res) => {
 const destroyFrame = (req, res) => {
   const id = parseInt(req.params.id, 10);
 
-  models('Frame').where({ id }).destroy({ require: true })
+  models('Frame').forge({ id }).destroy({ require: true })
     .then(() => res.status(204).send())
     .catch(err => errorResponse(res, err));
 };

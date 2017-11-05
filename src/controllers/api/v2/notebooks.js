@@ -116,8 +116,7 @@ const updateNotebook = (req, res) =>
 // DELETE /api/v2/notebooks/50
 const destroyNotebook = (req, res) =>
   new Promise(resolve => resolve(parseInt(req.params.id, 10)))
-    .then((id) => models('Notebook').where({ pinned: false, id }).destroy({ require: true })
-      .then(() => fs.remove(path.join(uploadDir, 'notebooks', req.params.id)))
+    .then((id) => models('Notebook').forge({ pinned: false, id }).destroy({ require: true })
       .then(() => res.status(204).send())
       .catch(err => {
         if(err.message.indexOf('No Rows Deleted') < 0) {
@@ -153,7 +152,11 @@ const replaceNotebookFile = (req, res) =>
       const destDir = path.join(uploadDir, 'notebooks', req.params.id, 'files');
       return fs.ensureDir(destDir)
         .then(() => fs.copy(file.path, path.join(destDir, file.originalname)))
-        .then(() => fs.remove(file.path));
+        .then(() => fs.remove(file.path))
+        .then(() => {
+          const attrs = { notebookId: req.params.id, filename: file.originalname };
+          return models('File').forge(attrs).where(attrs).upsert();
+        });
     })
     .then(() => res.status(200).send({}))
     .catch((err) => errorResponse(res, err));
@@ -184,7 +187,11 @@ const appendNotebookFile = (req, res) =>
             writeStream.on('finish', () => { resolve(); });
           });
         })
-        .then(() => fs.remove(file.path));
+        .then(() => fs.remove(file.path))
+        .then(() => {
+          const attrs = { notebookId: req.params.id, filename: file.originalname };
+          return models('File').forge(attrs).where(attrs).upsert();
+        });
     })
     .then(() => res.status(200).send({}))
     .catch((err) => errorResponse(res, err));

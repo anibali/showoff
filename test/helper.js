@@ -1,6 +1,3 @@
-// Use Babel to provide support for JSX
-require('babel-core/register');
-
 const { factory, BookshelfAdapter } = require('factory-girl');
 const Must = require('must');
 const mockWs = require('mock-socket');
@@ -23,6 +20,13 @@ const adapter = new BookshelfAdapter();
 factory.setAdapter(adapter);
 fixtures(factory, models);
 
+const modelNames = ['Notebook', 'Tag', 'Frame', 'File'];
+
+const assertDatabaseEmpty = () => Promise.all(modelNames.map(modelName =>
+  models(modelName).where('id', '!=', 0).count()
+    .then(count => console.assert(parseInt(count, 10) === 0, `left-over data in DB for ${modelName}`))
+));
+
 let server = null;
 
 before(() =>
@@ -36,6 +40,8 @@ before(() =>
       global.wss = new WebSocketServer(new mockWs.Server('ws://localhost:3000'));
     })
 );
+
+afterEach(assertDatabaseEmpty);
 
 after(() => {
   server.close();

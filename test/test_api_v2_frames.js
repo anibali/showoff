@@ -9,10 +9,6 @@ describe('API V2 Frames', () => {
 
   beforeEach(() => {
     clock = sinon.useFakeTimers();
-    return Promise.all([
-      models('Frame').where('id', '!=', 0).destroy(),
-      models('Notebook').where('id', '!=', 0).destroy(),
-    ]);
   });
 
   afterEach(() => {

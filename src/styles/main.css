@@ -83,8 +83,11 @@
   cursor: se-resize;
 }
 
+.list-group-item {
+  padding: 6px 9px;
+}
+
 .nli {
-  padding: 6px;
   display: flex;
   align-items: center;
 }
@@ -129,4 +132,11 @@
   color: #666;
   background-color: #ccc;
   border-color: #ccc;
+}
+
+.nli-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 6px;
 }

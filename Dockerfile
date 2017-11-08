@@ -37,6 +37,9 @@ ENV NODE_PATH=/deps/node_modules \
 # Copy our application files into the image.
 COPY . /app
 
+# Set environment to "production"
+ENV NODE_ENV=production
+
 # Bundle client-side assets.
 RUN rm -rf dist && npm run build
 

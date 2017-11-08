@@ -57,19 +57,24 @@ actionCreators.updateNotebook = (notebook) => (dispatch) =>
   });
 
 actionCreators.loadNotebook = (notebookId) => (dispatch) =>
-  new Promise((resolve, reject) => {
-    fetch(`/api/notebook/${notebookId}`).then((res) => {
+  fetch(`/api/v2/notebooks/${notebookId}`)
+    .then((res) => {
       if(!res.ok) throw new Error(res.statusText);
-      res.json().then((data) => {
-        dispatch(actionCreators.addNotebook(data.notebook));
-        resolve(data.notebook);
-      }).catch(reject);
-    }).catch((err) => {
-      console.error(err);
+      return res.json();
+    })
+    .then((data) => {
+      const notebook = flattenResource(data.data);
+      notebook.frames = data.included
+        .filter(f => f.type === 'frames')
+        .map(flattenResource)
+        .map(f => _.assign({}, f, { content: f.renderedContent }));
+      dispatch(actionCreators.addNotebook(notebook));
+      return notebook;
+    })
+    .catch((err) => {
       alert('Failed to load notebook');
-      reject(err);
+      throw err;
     });
-  });
 
 actionCreators.loadNotebooksShallow = () => (dispatch) =>
   new Promise((resolve, reject) => {

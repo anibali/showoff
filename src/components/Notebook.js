@@ -63,7 +63,7 @@ class Notebook extends React.Component {
 export default ReactRedux.connect(
   // Map store state to props
   (state, ownProps) => {
-    const id = parseInt(ownProps.params.id, 10);
+    const { id } = ownProps.params;
     const notebook = _.find(state.notebooks, { id }) || {};
     return { id, title: notebook.title, frames: notebook.frames };
   },

@@ -34,6 +34,7 @@ const tagDataSchema = Joi.object().keys({
 
 const postTagSchema = Joi.object().keys({
   data: tagDataSchema,
+  meta: Joi.object().optional(),
 });
 
 const mapTagToJson = (tag) => {

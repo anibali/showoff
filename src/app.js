@@ -57,6 +57,7 @@ const shouldCompress = (req, res) =>
 app.use(compression({ filter: shouldCompress }));
 
 app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.json({ limit: '50mb', type: 'application/vnd.api+json' }));
 
 controllerRoutes.connect(app);
 

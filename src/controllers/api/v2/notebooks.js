@@ -46,7 +46,10 @@ const postNotebookSchema = Joi.object().keys({
       progress: Joi.number().optional(),
       title: Joi.string(),
     }),
+    // TODO: Schema for relationships
+    relationships: Joi.object().optional(),
   }),
+  meta: Joi.object().optional(),
 });
 
 const patchNotebookSchema = Joi.object().keys({
@@ -58,12 +61,16 @@ const patchNotebookSchema = Joi.object().keys({
       progress: Joi.number().optional(),
       title: Joi.string().optional(),
     }),
+    // TODO: Schema for relationships
+    relationships: Joi.object().optional(),
   }),
+  // TODO: Validate the "included" field
+  meta: Joi.object().optional(),
 });
 
 const broadcastNotebook = (notebook) => {
   const flatNotebook = _.assign({}, notebook.data.attributes, {
-    id: parseInt(notebook.data.id, 10),
+    id: notebook.data.id,
   });
   global.wss.fireNotebookUpdate(flatNotebook);
   return notebook;
@@ -105,15 +112,45 @@ const showNotebook = (req, res) =>
 // PATCH /api/v2/notebooks/104
 const updateNotebook = (req, res) =>
   Joi.validate(req.body, patchNotebookSchema, { presence: 'required' })
-    .then((body) => {
+    .then((body) => models.bookshelf.transaction((t) => {
       const id = parseInt(req.params.id, 10);
-      return models('Notebook').where({ id }).fetch({ require: true })
-        .then(notebook => notebook.save(body.data.attributes))
+      return models('Notebook').where({ id }).fetch({ require: true, transacting: t })
+        .then(notebook => notebook.save(body.data.attributes, { transacting: t }))
+        .then(() => {
+          if(!body.meta || !body.meta.included) {
+            return null;
+          }
+          const tags = body.meta.included
+            .filter(inc => inc.type === 'tags')
+            .map(tag => ({ name: tag.attributes.name, notebookId: id }));
+          return models('Tag').where({ notebookId: id }).destroy({ transacting: t })
+            .then(() => Promise.all(tags.map(tag => models('Tag').forge(tag).save(null, { transacting: t }))));
+        })
+        .then(() => {
+          const withRelated = [];
+          if(req.query.include === 'tags') {
+            withRelated.push('tags');
+          }
+          return models('Notebook')
+            .where({ id })
+            .fetch({ withRelated, require: true, transacting: t });
+        })
         .then(notebook => mapper.map(notebook, 'notebooks', { enableLinks: false }))
+        .then(notebook => {
+          if(notebook.included) {
+            notebook.included.forEach(inc => {
+              delete inc.attributes.notebookId;
+            });
+          }
+          return notebook;
+        })
         .then(broadcastNotebook)
         .then(notebook => res.json(notebook))
-        .catch(err => errorResponse(res, err));
-    })
+        .catch(err => {
+          errorResponse(res, err);
+          return t.rollback().then(() => { throw err; });
+        });
+    }))
     .catch((err) => res.status(400).json({ error: err.message }));
 
 // DELETE /api/v2/notebooks/50

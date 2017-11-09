@@ -246,7 +246,7 @@ describe('API V2 Frames', () => {
             type: 'notebooks/MODIFY_FRAME',
             payload: {
               frame: {
-                id: 1,
+                id: '1',
                 title: 'New frame',
                 type: 'text',
                 content: '<pre>Lorem ipsum</pre>',
@@ -255,7 +255,7 @@ describe('API V2 Frames', () => {
                 width: 800,
                 height: 600,
                 renderedContent: '<pre>Lorem ipsum</pre>',
-                notebookId: 1,
+                notebookId: '1',
                 createdAt: new Date('1970-01-01T00:00:00.000Z'),
                 updatedAt: new Date('1970-01-01T00:00:00.000Z'),
               }
@@ -459,7 +459,7 @@ describe('API V2 Frames', () => {
             type: 'notebooks/MODIFY_FRAME',
             payload: {
               frame: {
-                id: 1,
+                id: '1',
                 title: 'Updated frame',
                 type: 'text',
                 content: '<pre>Lorem ipsum</pre>',
@@ -468,7 +468,7 @@ describe('API V2 Frames', () => {
                 width: 800,
                 height: 600,
                 renderedContent: '<pre>Lorem ipsum</pre>',
-                notebookId: 1,
+                notebookId: '1',
                 createdAt: new Date('1970-01-01T00:00:00.000Z'),
                 updatedAt: new Date('1970-01-01T00:00:00.000Z'),
               }

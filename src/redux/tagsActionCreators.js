@@ -7,37 +7,20 @@
 
 import _ from 'lodash';
 
-import fetch from '../helpers/fetch';
+import jsonApi from '../helpers/jsonApiClient';
 import simpleActionCreators from './simpleActionCreators';
 
 
 const actionCreators = _.clone(simpleActionCreators.tags);
 
-const flattenResource = (resource) => {
-  const flat = _.assign({ id: parseInt(resource.id, 10) }, resource.attributes);
-  if(resource.relationships) {
-    _.assign(flat, ..._.map(resource.relationships, (v, k) =>
-      ({ [`${k}Id`]: parseInt(v.data.id, 10) })
-    ));
-  }
-  return flat;
-};
-
 actionCreators.loadTagsShallow = () => (dispatch) =>
-  new Promise((resolve, reject) => {
-    fetch('/api/v2/tags').then((res) => {
-      if(!res.ok) throw new Error(res.statusText);
-      res.json().then((data) => {
-        const tags = data.data.map(flattenResource);
-        dispatch(actionCreators.addTags(tags));
-        resolve(tags);
-      }).catch(reject);
-    }).catch((err) => {
-      console.error(err);
-      alert('Failed to load tags');
-      reject(err);
+  jsonApi.findAll('tags', { include: 'notebook' })
+    .then(res => {
+      const tags = res.data;
+      tags.forEach(tag => { tag.notebookId = tag.notebook.id; });
+      dispatch(actionCreators.addTags(tags));
+      return tags;
     });
-  });
 
 
 export default actionCreators;

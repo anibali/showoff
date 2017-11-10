@@ -34,6 +34,7 @@ const tagDataSchema = Joi.object().keys({
 
 const postTagSchema = Joi.object().keys({
   data: tagDataSchema,
+  meta: Joi.object().optional(),
 });
 
 const mapTagToJson = (tag) => {
@@ -51,11 +52,12 @@ const mapTagToJson = (tag) => {
 // GET /api/v2/tags
 const indexTags = (req, res) => {
   models('Tag').fetchJsonApi({ include: ['notebook'] })
-    .then(tags => res.json(mapper.map(tags, 'tags', {
+    .then(tags => mapper.map(tags, 'tags', {
       enableLinks: false,
       attributes: { omit: ['id', 'notebookId'] },
-      relations: { included: false },
-    })))
+      relations: { included: req.query.include === 'notebook' },
+    }))
+    .then(tags => res.json(tags))
     .catch(err => errorResponse(res, err));
 };
 

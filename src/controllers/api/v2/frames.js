@@ -31,6 +31,7 @@ const postFrameSchema = Joi.object().keys({
       })
     }),
   }),
+  meta: Joi.object().optional(),
 });
 
 const patchFrameSchema = Joi.object().keys({
@@ -55,6 +56,7 @@ const patchFrameSchema = Joi.object().keys({
       })
     }),
   }),
+  meta: Joi.object().optional(),
 });
 
 const errorResponse = (res, err) => {
@@ -92,8 +94,8 @@ const mapFrameToJson = (frame) => {
 
 const broadcastFrame = (frame) => {
   const flatFrame = _.assign({}, frame.data.attributes, {
-    id: parseInt(frame.data.id, 10),
-    notebookId: parseInt(frame.data.relationships.notebook.data.id, 10),
+    id: frame.data.id,
+    notebookId: frame.data.relationships.notebook.data.id,
     content: frame.data.attributes.renderedContent,
   });
   global.wss.fireFrameUpdate(flatFrame);

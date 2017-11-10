@@ -15,6 +15,13 @@ import createStore from './redux/createStore';
 import routes from './routes';
 import WebSocketClient from './webSocketClient';
 
+import jsonApi from './helpers/jsonApiClient';
+
+if(process.env.NODE_ENV === 'development') {
+  // Expose globally for debugging purposes
+  window.jsonApi = jsonApi;
+}
+
 window.main = (initialState) => {
   // Create a Redux store
   const store = createStore(initialState);

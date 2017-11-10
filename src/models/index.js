@@ -28,5 +28,6 @@ File(bookshelf);
 
 const models = modelName => bookshelf.model(modelName);
 models.knex = knex;
+models.bookshelf = bookshelf;
 
 export default models;

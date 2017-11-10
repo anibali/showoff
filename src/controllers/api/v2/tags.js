@@ -54,15 +54,9 @@ const indexTags = (req, res) => {
   models('Tag').fetchJsonApi({ include: ['notebook'] })
     .then(tags => mapper.map(tags, 'tags', {
       enableLinks: false,
-      // attributes: { omit: ['id', 'notebookId'] },
-      relations: { included: false },
+      attributes: { omit: ['id', 'notebookId'] },
+      relations: { included: req.query.include === 'notebook' },
     }))
-    .then(tags => {
-      tags.data.forEach(tag => {
-        tag.attributes.notebookId = tag.attributes.notebookId.toString();
-      });
-      return tags;
-    })
     .then(tags => res.json(tags))
     .catch(err => errorResponse(res, err));
 };

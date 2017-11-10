@@ -60,7 +60,6 @@ describe('API V2 Tags', () => {
               id: '1',
               attributes: {
                 name: 'test-tag-1',
-                notebookId: '1',
                 createdAt: '1970-01-01T00:00:00.000Z',
                 updatedAt: '1970-01-01T00:00:00.000Z',
               },
@@ -78,7 +77,6 @@ describe('API V2 Tags', () => {
               id: '2',
               attributes: {
                 name: 'test-tag-2',
-                notebookId: '2',
                 createdAt: '1970-01-01T00:00:00.000Z',
                 updatedAt: '1970-01-01T00:00:00.000Z',
               },

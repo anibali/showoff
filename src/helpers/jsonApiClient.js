@@ -42,7 +42,6 @@ jsonApi.define('frames', {
 
 jsonApi.define('tags', {
   name: '',
-  notebookId: '0',
   notebook: {
     jsonApi: 'hasOne',
     type: 'notebooks',

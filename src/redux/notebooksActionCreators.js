@@ -15,7 +15,7 @@ const actionCreators = _.clone(simpleActionCreators.notebooks);
 
 actionCreators.updateFrame = (frame) => (dispatch) =>
   jsonApi.update(
-    'frame',
+    'frames',
     _.omit(frame, ['createdAt', 'updatedAt', 'notebookId', 'renderedContent', 'content']),
   )
     .then((res) => {
@@ -25,10 +25,10 @@ actionCreators.updateFrame = (frame) => (dispatch) =>
 
 actionCreators.updateNotebook = (notebook) => (dispatch) =>
   jsonApi.update(
-    'notebook',
+    'notebooks',
     _.omit(notebook, ['createdAt', 'updatedAt']),
     { include: 'tags' },
-    { included: jsonApi.serialize.collection.call(jsonApi, 'tag', notebook.tags) }
+    { included: jsonApi.serialize.collection.call(jsonApi, 'tags', notebook.tags) }
   )
     .then((res) => {
       const updatedNotebook = res.data;
@@ -41,21 +41,21 @@ actionCreators.updateNotebook = (notebook) => (dispatch) =>
     });
 
 actionCreators.loadNotebook = (notebookId) => (dispatch) =>
-  jsonApi.find('notebook', notebookId)
+  jsonApi.find('notebooks', notebookId)
     .then(res => {
       dispatch(actionCreators.addNotebook(res.data));
       return res.data;
     });
 
 actionCreators.loadNotebooksShallow = () => (dispatch) =>
-  jsonApi.findAll('notebook')
+  jsonApi.findAll('notebooks')
     .then(res => {
       dispatch(actionCreators.addNotebooks(res.data));
       return res.data;
     });
 
 actionCreators.deleteNotebook = (notebookId) => (dispatch) =>
-  jsonApi.destroy('notebook', notebookId)
+  jsonApi.destroy('notebooks', notebookId)
     .then(() => {
       dispatch(simpleActionCreators.tags.removeTagsFromNotebook(notebookId));
       dispatch(actionCreators.removeNotebook(notebookId));

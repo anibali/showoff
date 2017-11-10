@@ -3,9 +3,10 @@ import Devour from 'devour-client';
 
 const jsonApi = new Devour({
   apiUrl: process.env.IN_BROWSER ? '/api/v2' : 'http://localhost:3000/api/v2',
+  pluralize: false,
 });
 
-jsonApi.define('notebook', {
+jsonApi.define('notebooks', {
   title: '',
   pinned: false,
   progress: -1,
@@ -21,7 +22,7 @@ jsonApi.define('notebook', {
   updatedAt: '',
 });
 
-jsonApi.define('frame', {
+jsonApi.define('frames', {
   title: '',
   type: '',
   content: {},
@@ -39,7 +40,7 @@ jsonApi.define('frame', {
   updatedAt: '',
 });
 
-jsonApi.define('tag', {
+jsonApi.define('tags', {
   name: '',
   notebookId: '0',
   notebook: {

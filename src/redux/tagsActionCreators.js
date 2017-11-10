@@ -14,7 +14,7 @@ import simpleActionCreators from './simpleActionCreators';
 const actionCreators = _.clone(simpleActionCreators.tags);
 
 actionCreators.loadTagsShallow = () => (dispatch) =>
-  jsonApi.findAll('tag')
+  jsonApi.findAll('tags')
     .then(res => {
       const tags = res.data;
       dispatch(actionCreators.addTags(tags));

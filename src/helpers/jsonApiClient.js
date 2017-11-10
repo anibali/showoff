@@ -1,5 +1,6 @@
 import Devour from 'devour-client';
 
+
 const jsonApi = new Devour({
   apiUrl: process.env.IN_BROWSER ? '/api/v2' : 'http://localhost:3000/api/v2',
 });
@@ -30,6 +31,10 @@ jsonApi.define('frame', {
   y: 0,
   width: 800,
   height: 600,
+  notebook: {
+    jsonApi: 'hasOne',
+    type: 'notebooks',
+  },
   createdAt: '',
   updatedAt: '',
 });
@@ -37,8 +42,13 @@ jsonApi.define('frame', {
 jsonApi.define('tag', {
   name: '',
   notebookId: '0',
+  notebook: {
+    jsonApi: 'hasOne',
+    type: 'notebooks',
+  },
   createdAt: '',
   updatedAt: '',
 });
+
 
 export default jsonApi;

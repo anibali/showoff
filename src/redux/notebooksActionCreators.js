@@ -8,31 +8,20 @@
 import _ from 'lodash';
 
 import jsonApi from '../helpers/jsonApiClient';
-import fetch from '../helpers/fetch';
 import simpleActionCreators from './simpleActionCreators';
 
 
 const actionCreators = _.clone(simpleActionCreators.notebooks);
 
 actionCreators.updateFrame = (frame) => (dispatch) =>
-  new Promise((resolve, reject) => {
-    fetch(`/api/frame/${frame.id}`, {
-      method: 'put',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ frame: _.pick(frame, ['x', 'y', 'width', 'height']) })
-    }).then((res) => {
-      if(!res.ok) throw new Error(res.statusText);
-      res.json().then((data) => {
-        data.id = data.id.toString();
-        dispatch(actionCreators.modifyFrame(data));
-        resolve(data.frame);
-      }).catch(reject);
-    }).catch((err) => {
-      console.error(err);
-      alert('Failed to update frame');
-      reject(err);
+  jsonApi.update(
+    'frame',
+    _.omit(frame, ['createdAt', 'updatedAt', 'notebookId', 'renderedContent', 'content']),
+  )
+    .then((res) => {
+      dispatch(actionCreators.modifyFrame(res.data));
+      return res.data;
     });
-  });
 
 actionCreators.updateNotebook = (notebook) => (dispatch) =>
   jsonApi.update(

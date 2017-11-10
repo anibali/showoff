@@ -52,11 +52,18 @@ const mapTagToJson = (tag) => {
 // GET /api/v2/tags
 const indexTags = (req, res) => {
   models('Tag').fetchJsonApi({ include: ['notebook'] })
-    .then(tags => res.json(mapper.map(tags, 'tags', {
+    .then(tags => mapper.map(tags, 'tags', {
       enableLinks: false,
-      attributes: { omit: ['id', 'notebookId'] },
+      // attributes: { omit: ['id', 'notebookId'] },
       relations: { included: false },
-    })))
+    }))
+    .then(tags => {
+      tags.data.forEach(tag => {
+        tag.attributes.notebookId = tag.attributes.notebookId.toString();
+      });
+      return tags;
+    })
+    .then(tags => res.json(tags))
     .catch(err => errorResponse(res, err));
 };
 

@@ -1,6 +1,7 @@
 import expect from 'must';
 import sinon from 'sinon';
 import _ from 'lodash';
+import axios from 'axios';
 import { factory } from 'factory-girl';
 import models from '../src/models';
 
@@ -19,7 +20,7 @@ describe('API V2 Tags', () => {
   });
 
   describe('GET /tags', () => {
-    const sendRequest = () => fetch('http://localhost:3000/api/v2/tags');
+    const sendRequest = () => axios.get('http://localhost:3000/api/v2/tags');
 
     describe('when there are no tags in the database', () => {
       it('should return HTTP status 200', () =>
@@ -36,7 +37,7 @@ describe('API V2 Tags', () => {
         };
 
         return sendRequest()
-          .then(res => res.json())
+          .then(res => res.data)
           .then(res => expect(res).to.eql(expected));
       });
     });
@@ -93,7 +94,7 @@ describe('API V2 Tags', () => {
         };
 
         return sendRequest()
-          .then(res => res.json())
+          .then(res => res.data)
           .then(res => Object.assign({}, res, { data: _.sortBy(res.data, 'id') }))
           .then(res => expect(res).to.eql(expected));
       });
@@ -101,26 +102,14 @@ describe('API V2 Tags', () => {
   });
 
   describe('POST /tags', () => {
-    const sendRequest = body => fetch('http://localhost:3000/api/v2/tags', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+    const sendRequest = body => axios.post('http://localhost:3000/api/v2/tags', body);
 
     describe('when the request body is incorrectly structured JSON', () => {
       const reqBody = {
       };
 
-      it('should return HTTP status 400', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.status(400)
-      );
-
-      it('should have JSON content type', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.jsonContent()
-      );
-
-      it('should return an error message', () =>
-        expect(sendRequest(reqBody).then(res => res.json())).to.eventually.have.property('error')
+      it('should return a status 400 error response', () =>
+        expect(sendRequest(reqBody)).to.reject.with.errorResponse(400)
       );
     });
 
@@ -142,16 +131,8 @@ describe('API V2 Tags', () => {
         }
       };
 
-      it('should return HTTP status 400', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.status(400)
-      );
-
-      it('should have JSON content type', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.jsonContent()
-      );
-
-      it('should return an error message', () =>
-        expect(sendRequest(reqBody).then(res => res.json())).to.eventually.have.property('error')
+      it('should return a status 400 error response', () =>
+        expect(sendRequest(reqBody)).to.reject.with.errorResponse(400)
       );
     });
 
@@ -207,7 +188,7 @@ describe('API V2 Tags', () => {
         };
 
         return sendRequest(reqBody)
-          .then(res => res.json())
+          .then(res => res.data)
           .then((body) => {
             expect(body).to.eql(expected);
           });

@@ -71,7 +71,6 @@
     "form-data": "2.3.1",
     "file-loader": "1.1.5",
     "glob": "7.1.2",
-    "isomorphic-fetch": "2.2.1",
     "mocha": "4.0.1",
     "mock-socket": "7.0.0",
     "must": "0.13.4",

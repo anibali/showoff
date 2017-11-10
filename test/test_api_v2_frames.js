@@ -1,6 +1,7 @@
 import expect from 'must';
 import sinon from 'sinon';
 import _ from 'lodash';
+import axios from 'axios';
 import { factory } from 'factory-girl';
 import models from '../src/models';
 
@@ -19,7 +20,7 @@ describe('API V2 Frames', () => {
   });
 
   describe('GET /frames', () => {
-    const sendRequest = () => fetch('http://localhost:3000/api/v2/frames');
+    const sendRequest = () => axios.get('http://localhost:3000/api/v2/frames');
 
     describe('when there are two frames in the database', () => {
       beforeEach(() => factory.createMany('frame', 2));
@@ -85,7 +86,7 @@ describe('API V2 Frames', () => {
         };
 
         return sendRequest()
-          .then(res => res.json())
+          .then(res => res.data)
           .then(res => Object.assign({}, res, { data: _.sortBy(res.data, 'id') }))
           .then(res => expect(res).to.eql(expected));
       });
@@ -103,26 +104,13 @@ describe('API V2 Frames', () => {
       broadcastStub.restore();
     });
 
-    const sendRequest = body => fetch('http://localhost:3000/api/v2/frames', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+    const sendRequest = body => axios.post('http://localhost:3000/api/v2/frames', body);
 
     describe('when the request body is incorrectly structured JSON', () => {
-      const reqBody = {
-      };
+      const reqBody = {};
 
-      it('should return HTTP status 400', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.status(400)
-      );
-
-      it('should have JSON content type', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.jsonContent()
-      );
-
-      it('should return an error message', () =>
-        expect(sendRequest(reqBody).then(res => res.json())).to.eventually.have.property('error')
+      it('should return a status 400 error response', () =>
+        expect(sendRequest(reqBody)).to.reject.with.errorResponse(400)
       );
     });
 
@@ -150,16 +138,8 @@ describe('API V2 Frames', () => {
         }
       };
 
-      it('should return HTTP status 400', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.status(400)
-      );
-
-      it('should have JSON content type', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.jsonContent()
-      );
-
-      it('should return an error message', () =>
-        expect(sendRequest(reqBody).then(res => res.json())).to.eventually.have.property('error')
+      it('should return a status 400 error response', () =>
+        expect(sendRequest(reqBody)).to.reject.with.errorResponse(400)
       );
     });
 
@@ -234,7 +214,7 @@ describe('API V2 Frames', () => {
         };
 
         return sendRequest(reqBody)
-          .then(res => res.json())
+          .then(res => res.data)
           .then((body) => {
             expect(body).to.eql(expected);
           });
@@ -270,23 +250,15 @@ describe('API V2 Frames', () => {
     beforeEach(() => factory.create('frame', { id: 1 }));
 
     describe('when the frame does not exist', () => {
-      const sendRequest = () => fetch('http://localhost:3000/api/v2/frames/1337');
+      const sendRequest = () => axios.get('http://localhost:3000/api/v2/frames/1337');
 
-      it('should return HTTP status 404', () =>
-        expect(sendRequest()).to.eventually.have.status(404)
-      );
-
-      it('should have JSON content type', () =>
-        expect(sendRequest()).to.eventually.have.jsonContent()
-      );
-
-      it('should return an error message', () =>
-        expect(sendRequest().then(res => res.json())).to.eventually.have.property('error')
+      it('should return a status 404 error response', () =>
+        expect(sendRequest()).to.reject.with.errorResponse(404)
       );
     });
 
     describe('when the frame exists', () => {
-      const sendRequest = () => fetch('http://localhost:3000/api/v2/frames/1');
+      const sendRequest = () => axios.get('http://localhost:3000/api/v2/frames/1');
 
       it('should return HTTP status 200', () =>
         expect(sendRequest()).to.eventually.have.status(200)
@@ -325,7 +297,7 @@ describe('API V2 Frames', () => {
         };
 
         return sendRequest()
-          .then(res => res.json())
+          .then(res => res.data)
           .then(res => expect(res).to.eql(expected));
       });
     });
@@ -335,27 +307,15 @@ describe('API V2 Frames', () => {
     beforeEach(() => factory.create('frame', { id: 1 }));
 
     describe('when the frame does not exist', () => {
-      const sendRequest = () => fetch('http://localhost:3000/api/v2/frames/1337', {
-        method: 'DELETE',
-      });
+      const sendRequest = () => axios.delete('http://localhost:3000/api/v2/frames/1337');
 
-      it('should return HTTP status 404', () =>
-        expect(sendRequest()).to.eventually.have.status(404)
-      );
-
-      it('should have JSON content type', () =>
-        expect(sendRequest()).to.eventually.have.jsonContent()
-      );
-
-      it('should return an error message', () =>
-        expect(sendRequest().then(res => res.json())).to.eventually.have.property('error')
+      it('should return a status 404 error response', () =>
+        expect(sendRequest()).to.reject.with.errorResponse(404)
       );
     });
 
     describe('when the frame exists', () => {
-      const sendRequest = () => fetch('http://localhost:3000/api/v2/frames/1', {
-        method: 'DELETE',
-      });
+      const sendRequest = () => axios.delete('http://localhost:3000/api/v2/frames/1');
 
       it('should return HTTP status 204', () =>
         expect(sendRequest()).to.eventually.have.status(204)
@@ -375,27 +335,15 @@ describe('API V2 Frames', () => {
       broadcastStub.restore();
     });
 
-    const sendRequest = body => fetch('http://localhost:3000/api/v2/frames/1', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+    const sendRequest = body => axios.patch('http://localhost:3000/api/v2/frames/1', body);
 
     describe('when the request body is incorrectly structured JSON', () => {
       const reqBody = {
         title: 'Updated frame',
       };
 
-      it('should return HTTP status 400', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.status(400)
-      );
-
-      it('should have JSON content type', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.jsonContent()
-      );
-
-      it('should return an error message', () =>
-        expect(sendRequest(reqBody).then(res => res.json())).to.eventually.have.property('error')
+      it('should return a status 400 error response', () =>
+        expect(sendRequest(reqBody)).to.reject.with.errorResponse(400)
       );
     });
 
@@ -447,7 +395,7 @@ describe('API V2 Frames', () => {
         };
 
         return sendRequest(reqBody)
-          .then(res => res.json())
+          .then(res => res.data)
           .then((body) => {
             expect(body).to.eql(expected);
           });

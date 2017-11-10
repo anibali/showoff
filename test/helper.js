@@ -1,7 +1,6 @@
 const { factory, BookshelfAdapter } = require('factory-girl');
 const Must = require('must');
 const mockWs = require('mock-socket');
-require('isomorphic-fetch');
 
 const MustHttp = require('./mustHttp').default;
 const fixtures = require('./fixtures');

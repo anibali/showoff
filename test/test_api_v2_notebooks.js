@@ -1,6 +1,7 @@
 import expect from 'must';
 import sinon from 'sinon';
 import _ from 'lodash';
+import axios from 'axios';
 import { factory } from 'factory-girl';
 import FormData from 'form-data';
 import path from 'path';
@@ -25,7 +26,7 @@ describe('API V2 Notebooks', () => {
   });
 
   describe('GET /notebooks', () => {
-    const sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks');
+    const sendRequest = () => axios.get('http://localhost:3000/api/v2/notebooks');
 
     describe('when there are two notebooks in the database', () => {
       beforeEach(() => factory.createMany('notebook', 2));
@@ -67,7 +68,7 @@ describe('API V2 Notebooks', () => {
         };
 
         return sendRequest()
-          .then(res => res.json())
+          .then(res => res.data)
           .then(res => Object.assign({}, res, { data: _.sortBy(res.data, 'id') }))
           .then(res => expect(res).to.eql(expected));
       });
@@ -75,11 +76,7 @@ describe('API V2 Notebooks', () => {
   });
 
   describe('POST /notebooks', () => {
-    const sendRequest = body => fetch('http://localhost:3000/api/v2/notebooks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+    const sendRequest = body => axios.post('http://localhost:3000/api/v2/notebooks', body);
 
     describe('when the request body is incorrectly structured JSON', () => {
       const reqBody = {
@@ -87,16 +84,8 @@ describe('API V2 Notebooks', () => {
         title: 'New notebook',
       };
 
-      it('should return HTTP status 400', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.status(400)
-      );
-
-      it('should have JSON content type', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.jsonContent()
-      );
-
-      it('should return an error message', () =>
-        expect(sendRequest(reqBody).then(res => res.json())).to.eventually.have.property('error')
+      it('should return a status 400 error response', () =>
+        expect(sendRequest(reqBody)).to.reject.with.errorResponse(400)
       );
     });
 
@@ -144,7 +133,7 @@ describe('API V2 Notebooks', () => {
         };
 
         return sendRequest(reqBody)
-          .then(res => res.json())
+          .then(res => res.data)
           .then((body) => {
             expect(body).to.eql(expected);
           });
@@ -156,23 +145,15 @@ describe('API V2 Notebooks', () => {
     beforeEach(() => factory.create('notebook', { id: 1 }));
 
     describe('when the notebook does not exist', () => {
-      const sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1337');
+      const sendRequest = () => axios.get('http://localhost:3000/api/v2/notebooks/1337');
 
-      it('should return HTTP status 404', () =>
-        expect(sendRequest()).to.eventually.have.status(404)
-      );
-
-      it('should have JSON content type', () =>
-        expect(sendRequest()).to.eventually.have.jsonContent()
-      );
-
-      it('should return an error message', () =>
-        expect(sendRequest().then(res => res.json())).to.eventually.have.property('error')
+      it('should return a status 404 error response', () =>
+        expect(sendRequest()).to.reject.with.errorResponse(404)
       );
     });
 
     describe('when the notebook exists', () => {
-      const sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1');
+      const sendRequest = () => axios.get('http://localhost:3000/api/v2/notebooks/1');
 
       it('should return HTTP status 200', () =>
         expect(sendRequest()).to.eventually.have.status(200)
@@ -204,7 +185,7 @@ describe('API V2 Notebooks', () => {
         };
 
         return sendRequest()
-          .then(res => res.json())
+          .then(res => res.data)
           .then(res => expect(res).to.eql(expected));
       });
     });
@@ -214,27 +195,15 @@ describe('API V2 Notebooks', () => {
     beforeEach(() => factory.create('notebook', { id: 1 }));
 
     describe('when the notebook does not exist', () => {
-      const sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1337', {
-        method: 'DELETE',
-      });
+      const sendRequest = () => axios.delete('http://localhost:3000/api/v2/notebooks/1337');
 
-      it('should return HTTP status 404', () =>
-        expect(sendRequest()).to.eventually.have.status(404)
-      );
-
-      it('should have JSON content type', () =>
-        expect(sendRequest()).to.eventually.have.jsonContent()
-      );
-
-      it('should return an error message', () =>
-        expect(sendRequest().then(res => res.json())).to.eventually.have.property('error')
+      it('should return a status 404 error response', () =>
+        expect(sendRequest()).to.reject.with.errorResponse(404)
       );
     });
 
     describe('when the notebook exists', () => {
-      const sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1', {
-        method: 'DELETE',
-      });
+      const sendRequest = () => axios.delete('http://localhost:3000/api/v2/notebooks/1');
 
       it('should return HTTP status 204', () =>
         expect(sendRequest()).to.eventually.have.status(204)
@@ -254,11 +223,7 @@ describe('API V2 Notebooks', () => {
       broadcastStub.restore();
     });
 
-    const sendRequest = body => fetch('http://localhost:3000/api/v2/notebooks/1', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+    const sendRequest = body => axios.patch('http://localhost:3000/api/v2/notebooks/1', body);
 
     describe('when the request body is incorrectly structured JSON', () => {
       const reqBody = {
@@ -266,16 +231,8 @@ describe('API V2 Notebooks', () => {
         title: 'New notebook',
       };
 
-      it('should return HTTP status 400', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.status(400)
-      );
-
-      it('should have JSON content type', () =>
-        expect(sendRequest(reqBody)).to.eventually.have.jsonContent()
-      );
-
-      it('should return an error message', () =>
-        expect(sendRequest(reqBody).then(res => res.json())).to.eventually.have.property('error')
+      it('should return a status 400 error response', () =>
+        expect(sendRequest(reqBody)).to.reject.with.errorResponse(400)
       );
     });
 
@@ -315,7 +272,7 @@ describe('API V2 Notebooks', () => {
         };
 
         return sendRequest(reqBody)
-          .then(res => res.json())
+          .then(res => res.data)
           .then((body) => {
             expect(body).to.eql(expected);
           });
@@ -324,37 +281,30 @@ describe('API V2 Notebooks', () => {
   });
 
   describe('PUT /notebooks/:id/files', () => {
+    const sendRequest = formData => axios.put(
+      'http://localhost:3000/api/v2/notebooks/1/files',
+      formData,
+      { headers: formData.getHeaders() },
+    );
+
     describe('when the filename contains illegal characters', () => {
-      let sendRequest;
+      let formData;
       beforeEach(() => {
-        const formData = new FormData();
+        formData = new FormData();
         formData.append('file', 'Hello', '..');
-        sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
-          method: 'PUT',
-          body: formData,
-        });
         return factory.create('notebook', { id: 1 });
       });
 
-      it('should return HTTP status 400', () =>
-        expect(sendRequest()).to.eventually.have.status(400)
-      );
-
-      it('should return an informative error message', () =>
-        expect(sendRequest().then(res => res.json()))
-          .to.eventually.eql({ error: 'invalid filename' })
+      it('should return a status 400 error response', () =>
+        expect(sendRequest(formData)).to.reject.with.errorResponse(400, 'invalid filename')
       );
     });
 
     describe('when the request is valid', () => {
-      let sendRequest;
+      let formData;
       beforeEach(() => {
-        const formData = new FormData();
+        formData = new FormData();
         formData.append('file', 'Hello', 'test.txt');
-        sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
-          method: 'PUT',
-          body: formData,
-        });
         return factory.create('notebook', { id: 1 });
       });
 
@@ -363,7 +313,7 @@ describe('API V2 Notebooks', () => {
 
       describe('when the file does not exist yet', () => {
         it('should create the file in the uploads directory', () =>
-          sendRequest()
+          sendRequest(formData)
             .then(() => fs.readFile(filePath, 'utf8'))
             .then((content) => {
               expect(content).to.equal('Hello');
@@ -371,7 +321,7 @@ describe('API V2 Notebooks', () => {
         );
 
         it('should create a File record in the database', () =>
-          sendRequest()
+          sendRequest(formData)
             .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
             .then((count) => {
               expect(parseInt(count, 10)).to.equal(1);
@@ -389,7 +339,7 @@ describe('API V2 Notebooks', () => {
             .then((content) => {
               expect(content).to.equal('Ciao');
             })
-            .then(() => sendRequest())
+            .then(() => sendRequest(formData))
             .then(() => fs.readFile(filePath, 'utf8'))
             .then((content) => {
               expect(content).to.equal('Hello');
@@ -397,7 +347,7 @@ describe('API V2 Notebooks', () => {
         );
 
         it('should not create another File record in the database', () =>
-          sendRequest()
+          sendRequest(formData)
             .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
             .then((count) => {
               expect(parseInt(count, 10)).to.equal(1);
@@ -408,37 +358,30 @@ describe('API V2 Notebooks', () => {
   });
 
   describe('PATCH /notebooks/:id/files', () => {
+    const sendRequest = formData => axios.patch(
+      'http://localhost:3000/api/v2/notebooks/1/files',
+      formData,
+      { headers: formData.getHeaders() },
+    );
+
     describe('when the filename contains illegal characters', () => {
-      let sendRequest;
+      let formData;
       beforeEach(() => {
-        const formData = new FormData();
+        formData = new FormData();
         formData.append('file', 'Hello', '..');
-        sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
-          method: 'PATCH',
-          body: formData,
-        });
         return factory.create('notebook', { id: 1 });
       });
 
-      it('should return HTTP status 400', () =>
-        expect(sendRequest()).to.eventually.have.status(400)
-      );
-
-      it('should return an informative error message', () =>
-        expect(sendRequest().then(res => res.json()))
-          .to.eventually.eql({ error: 'invalid filename' })
+      it('should return a status 400 error response', () =>
+        expect(sendRequest(formData)).to.reject.with.errorResponse(400, 'invalid filename')
       );
     });
 
     describe('when the request is valid', () => {
-      let sendRequest;
+      let formData;
       beforeEach(() => {
-        const formData = new FormData();
+        formData = new FormData();
         formData.append('file', 'Hello', 'test.txt');
-        sendRequest = () => fetch('http://localhost:3000/api/v2/notebooks/1/files', {
-          method: 'PATCH',
-          body: formData,
-        });
         return factory.create('notebook', { id: 1 });
       });
 
@@ -447,7 +390,7 @@ describe('API V2 Notebooks', () => {
 
       describe('when the file does not exist yet', () => {
         it('should create the file in the uploads directory', () =>
-          sendRequest()
+          sendRequest(formData)
             .then(() => fs.readFile(filePath, 'utf8'))
             .then((content) => {
               expect(content).to.equal('Hello');
@@ -455,7 +398,7 @@ describe('API V2 Notebooks', () => {
         );
 
         it('should create a File record in the database', () =>
-          sendRequest()
+          sendRequest(formData)
             .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
             .then((count) => {
               expect(parseInt(count, 10)).to.equal(1);
@@ -473,7 +416,7 @@ describe('API V2 Notebooks', () => {
             .then((content) => {
               expect(content).to.equal('Ciao');
             })
-            .then(() => sendRequest())
+            .then(() => sendRequest(formData))
             .then(() => fs.readFile(filePath, 'utf8'))
             .then((content) => {
               expect(content).to.equal('CiaoHello');
@@ -481,7 +424,7 @@ describe('API V2 Notebooks', () => {
         );
 
         it('should not create another File record in the database', () =>
-          sendRequest()
+          sendRequest(formData)
             .then(() => models('File').where({ notebookId: 1, filename: 'test.txt' }).count())
             .then((count) => {
               expect(parseInt(count, 10)).to.equal(1);

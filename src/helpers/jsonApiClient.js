@@ -1,4 +1,4 @@
-import Devour from 'devour-client';
+import Devour from '../../vendor/devour-client/src';
 
 
 const jsonApi = new Devour({

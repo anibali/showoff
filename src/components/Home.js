@@ -5,7 +5,6 @@ import { Typeahead } from 'react-bootstrap-typeahead';
 import NotebookListItem from './NotebookListItem';
 import notebookActionCreators from '../redux/notebooksActionCreators';
 import tagActionCreators from '../redux/tagsActionCreators';
-import reactAsync from '../helpers/reactAsync';
 
 class Home extends React.Component {
   constructor(props) {
@@ -13,11 +12,19 @@ class Home extends React.Component {
     this.state = { filterTags: [] };
   }
 
+  // Called during server-side rendering
+  static preloadData(dispatch) {
+    return Promise.all([
+      notebookActionCreators.loadNotebooksShallow()(dispatch),
+      tagActionCreators.loadTagsShallow()(dispatch),
+    ]);
+  }
+
   componentWillMount() {
     // TODO: Skip doing this if it has already been done (probably
     // requires a boolean flag in the store or something)
-    reactAsync.addPromise(this.props.loadNotebooksShallow());
-    reactAsync.addPromise(this.props.loadTagsShallow());
+    this.props.loadNotebooksShallow();
+    this.props.loadTagsShallow();
   }
 
   // Describe how to render the component

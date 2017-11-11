@@ -3,13 +3,19 @@ import React from 'react';
 import * as ReactRedux from 'react-redux';
 import DocumentTitle from 'react-document-title';
 import notebookActionCreators from '../redux/notebooksActionCreators';
-import reactAsync from '../helpers/reactAsync';
 import Frame from './Frame';
 
 class Notebook extends React.Component {
+  // Called during server-side rendering
+  static preloadData(dispatch, match) {
+    return Promise.all([
+      notebookActionCreators.loadNotebook(match.params.id)(dispatch),
+    ]);
+  }
+
   componentWillMount() {
     if(!this.props.frames) {
-      reactAsync.addPromise(this.props.loadNotebook(this.props.id));
+      this.props.loadNotebook(this.props.id);
     }
   }
 
@@ -63,7 +69,7 @@ class Notebook extends React.Component {
 export default ReactRedux.connect(
   // Map store state to props
   (state, ownProps) => {
-    const { id } = ownProps.params;
+    const { id } = ownProps.match.params;
     const notebook = _.find(state.notebooks, { id }) || {};
     return { id, title: notebook.title, frames: notebook.frames };
   },

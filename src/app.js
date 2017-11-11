@@ -1,22 +1,20 @@
 import path from 'path';
-import _ from 'lodash';
 import express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
-import { RouterContext, createMemoryHistory, match as matchRoute } from 'react-router';
-import { syncHistoryWithStore } from 'react-router-redux';
+import { StaticRouter } from 'react-router';
+import { matchPath } from 'react-router-dom';
 import DocumentTitle from 'react-document-title';
 import fs from 'fs-extra';
 import mime from 'mime';
 import React from 'react';
 import reactDomServer from 'react-dom/server';
-import { Provider } from 'react-redux';
 
+import frontendRoutes from './components/frontendRoutes';
 import controllerRoutes from './config/routes';
-import reactAsync from './helpers/reactAsync';
-import routes from './routes';
 import createStore from './redux/createStore';
 import showoffConfig from './config/showoff';
+import Root from './components/Root';
 
 const { uploadDir } = showoffConfig;
 
@@ -61,65 +59,68 @@ app.use(bodyParser.json({ limit: '50mb', type: 'application/vnd.api+json' }));
 
 controllerRoutes.connect(app);
 
+// Sanitise a JSON string so that it can be safely inserted inside
+// <script> tags
+const sanitiseJson = (jsonString) =>
+  jsonString.replace(/</g, '\\u003c').replace(/-->/g, '--\\>');
+
 app.use((req, res) => {
+  const context = { status: 200 };
   const store = createStore();
-  const history = syncHistoryWithStore(createMemoryHistory(), store);
 
-  const matchOpts = { history, routes, location: req.url };
-  matchRoute(matchOpts, (matchError, redirectLocation, renderProps) => {
-    if(matchError) {
-      res.status(500).send(matchError.message);
-    } else if(redirectLocation) {
-      res.redirect(302, redirectLocation.pathname + redirectLocation.search);
-    } else if(!renderProps) {
-      res.status(404).send('Not found');
-    } else {
-      const Root = () => (
-        <Provider store={store}>
-          <RouterContext {...renderProps} />
-        </Provider>
-      );
+  const promises = [];
 
-      // First render will kick off asynchronous calls
-      reactDomServer.renderToString(<Root />);
-
-      // Try to complete all asynchronous calls on the server
-      Promise.race([
-        Promise.all(reactAsync.promises),
-        new Promise((resolve) => setTimeout(resolve, 200)) // Timeout after 200ms
-      ]).then(() => {
-        // Render a second time, but hopefully this time including the data
-        // returned from asynchronous calls
-        const reactHtml = reactDomServer.renderToString(<Root />);
-
-        const title = DocumentTitle.rewind();
-
-        // The HTML is pretty barebones, it just provides a mount point
-        // for React and links to our styles and scripts.
-        const htmlContent = `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>${title}</title>
-              <link rel="stylesheet" type="text/css" href="/assets/bundle/vendor.css">
-              <link rel="stylesheet" type="text/css" href="/assets/bundle/app.css">
-            </head>
-            <body>
-              <div class="fill-space" id="root">${reactHtml}</div>
-              <script src="/assets/bundle/app.js"></script>
-              <script>
-                main(${JSON.stringify(_.omit(store.getState(), 'routing'))})
-              </script>
-            </body>
-          </html>`;
-
-        // Respond with the HTML
-        res.send(htmlContent);
-      }).catch((error) => {
-        console.error(error);
-        res.status(500).send(error.message);
-      });
+  frontendRoutes.some(route => {
+    const match = matchPath(req.path, route);
+    if(match && route.component.preloadData) {
+      promises.push(route.component.preloadData(store.dispatch, match));
     }
+    return match;
+  });
+
+  const promise = Promise.race([
+    Promise.all(promises),
+    new Promise((resolve) => setTimeout(resolve, 200)) // Timeout after 200ms
+  ]);
+
+  promise.then(() => {
+    const Router = props => (
+      <StaticRouter location={req.url} context={context}>
+        {props.children}
+      </StaticRouter>
+    );
+
+    // Server-side rendering
+    const reactHtml = reactDomServer.renderToString(<Root store={store} Router={Router} />);
+
+    const storeState = sanitiseJson(JSON.stringify(store.getState()));
+
+    const title = DocumentTitle.rewind();
+
+    // The HTML is pretty barebones, it just provides a mount point
+    // for React and links to our styles and scripts.
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${title}</title>
+          <link rel="stylesheet" type="text/css" href="/assets/bundle/vendor.css">
+          <link rel="stylesheet" type="text/css" href="/assets/bundle/app.css">
+        </head>
+        <body>
+          <div class="fill-space" id="root">${reactHtml}</div>
+          <script src="/assets/bundle/app.js"></script>
+          <script>
+            main(${storeState})
+          </script>
+        </body>
+      </html>`;
+
+    // Respond with the HTML
+    res.status(context.status).send(htmlContent);
+  }).catch((error) => {
+    console.error(error);
+    res.status(500).send(error.message);
   });
 });
 

@@ -22,6 +22,7 @@ import simpleActionCreators from './redux/simpleActionCreators';
 import showoffConfig from './config/showoff';
 import Root from './components/Root';
 import jsonApi from './helpers/jsonApiClient';
+import models from './models';
 
 const { uploadDir } = showoffConfig;
 
@@ -29,27 +30,26 @@ const { uploadDir } = showoffConfig;
 const app = express();
 
 app.use(session({
-  // FIXME: Use better settings
   // FIXME: Use connect-session-knex to store sessions in DB
-  secret: 'some_secret',
+  secret: process.env.COOKIE_SECRET,
   saveUninitialized: false,
   resave: false,
   cookie: {},
 }));
 
-// FIXME: Obviously these shouldn't be hardcoded, replace with DB table
-const credentials = {
-  username: 'admin',
-  password: 'password',
-};
-
 passport.use(new LocalStrategy(
   (username, password, done) => {
-    if(username !== credentials.username || password !== credentials.password) {
-      return done(null, false);
-    }
-    const user = { id: username }; // FIXME
-    return done(null, user);
+    models('User').where({ username }).fetch({ require: true })
+      .then(user => {
+        const { passwordSalt, passwordHash } = user.attributes;
+        const queryPasswordHash =
+          crypto.pbkdf2Sync(password, passwordSalt, 100000, 72, 'sha512').toString('base64');
+        if(queryPasswordHash !== passwordHash) {
+          throw new Error('incorrect password');
+        }
+        done(null, user);
+      })
+      .catch(() => done(null, false));
   }
 ));
 
@@ -65,15 +65,22 @@ passport.use(new BasicStrategy(
     if(username !== jsonApi.auth.username || password !== jsonApi.auth.password) {
       return done(null, false);
     }
-    const user = { id: username }; // FIXME
+    const user = { id: -1 }; // FIXME: Handle the internal user better
     return done(null, user);
   }
 ));
 
 passport.serializeUser((user, done) => done(null, user.id));
 
-// TODO: Get user from DB
-passport.deserializeUser((id, done) => done(null, { id }));
+passport.deserializeUser((id, done) => {
+  if(id === -1) {
+    done(null, { id }); // FIXME: Handle the internal user better
+    return;
+  }
+  models('User').where({ id }).fetch({ require: true })
+    .then(user => { done(null, user); return null; })
+    .catch(err => { done(err); });
+});
 
 app.use(passport.initialize());
 app.use(passport.session());

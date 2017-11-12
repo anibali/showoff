@@ -1,18 +1,20 @@
+import axios from 'axios';
+
 class Auth {
   constructor() {
     this.isAuthenticated = false;
   }
 
-  signIn() {
-    // TODO: Sign in via backend
-    this.isAuthenticated = true;
-    return new Promise((resolve) => setTimeout(resolve, 100));
+  signIn(username, password) {
+    return axios.post('/auth/signin', { username, password }).then(() => {
+      this.isAuthenticated = true;
+    });
   }
 
   signOut() {
-    // TODO: Sign out via backend
-    this.isAuthenticated = false;
-    return new Promise((resolve) => setTimeout(resolve, 100));
+    return axios.post('/auth/signout').then(() => {
+      this.isAuthenticated = false;
+    });
   }
 }
 

@@ -5,11 +5,27 @@ import auth from '../auth';
 export default class extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { redirect: false };
-    this.login = () => {
-      auth.signIn().then(() => {
-        this.setState({ redirect: true });
-      });
+    this.state = {
+      username: '',
+      password: '',
+      redirect: false,
+      error: false,
+    };
+    this.login = (event) => {
+      event.preventDefault();
+      auth.signIn(this.state.username, this.state.password)
+        .then(() => {
+          this.setState({ redirect: true });
+        })
+        .catch(() => {
+          this.setState({ error: true, password: '' });
+        });
+    };
+    this.onUsernameChange = (event) => {
+      this.setState({ username: event.target.value });
+    };
+    this.onPasswordChange = (event) => {
+      this.setState({ password: event.target.value });
     };
   }
 
@@ -20,10 +36,45 @@ export default class extends React.Component {
       return <Redirect to={from} />;
     }
 
+    let errorNotice = null;
+    if(this.state.error) {
+      errorNotice = (
+        <div className="alert alert-danger" role="alert">
+          Log in failed, please try again.
+        </div>
+      );
+    }
+
     return (
-      <div>
-        <p>You must log in to view the page at {from.pathname}</p>
-        <button onClick={this.login}>Log in</button>
+      <div className="container">
+        <div className="row">
+          <div className="col-md-offset-4 col-md-4">
+            <h1>Please log in</h1>
+            <p>You must log in to view the page at <code>{from.pathname}</code>.</p>
+            {errorNotice}
+            <form onSubmit={this.login}>
+              <div className="form-group">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Username"
+                  value={this.state.username}
+                  onChange={this.onUsernameChange}
+                />
+              </div>
+              <div className="form-group">
+                <input
+                  type="password"
+                  className="form-control"
+                  placeholder="Password"
+                  value={this.state.password}
+                  onChange={this.onPasswordChange}
+                />
+              </div>
+              <button type="submit" className="btn btn-primary btn-block">Log in</button>
+            </form>
+          </div>
+        </div>
       </div>
     );
   }

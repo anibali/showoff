@@ -1,7 +1,12 @@
 import path from 'path';
 import express from 'express';
+import session from 'express-session';
 import bodyParser from 'body-parser';
 import compression from 'compression';
+import passport from 'passport';
+import crypto from 'crypto';
+import { Strategy as LocalStrategy } from 'passport-local';
+import { BasicStrategy } from 'passport-http';
 import { StaticRouter } from 'react-router';
 import { matchPath } from 'react-router-dom';
 import DocumentTitle from 'react-document-title';
@@ -13,13 +18,65 @@ import reactDomServer from 'react-dom/server';
 import frontendRoutes from './components/frontendRoutes';
 import controllerRoutes from './config/routes';
 import createStore from './redux/createStore';
+import simpleActionCreators from './redux/simpleActionCreators';
 import showoffConfig from './config/showoff';
 import Root from './components/Root';
+import jsonApi from './helpers/jsonApiClient';
 
 const { uploadDir } = showoffConfig;
 
 // Create a new Express app
 const app = express();
+
+app.use(session({
+  // FIXME: Use better settings
+  // FIXME: Use connect-session-knex to store sessions in DB
+  secret: 'some_secret',
+  saveUninitialized: false,
+  resave: false,
+  cookie: {},
+}));
+
+// FIXME: Obviously these shouldn't be hardcoded, replace with DB table
+const credentials = {
+  username: 'admin',
+  password: 'password',
+};
+
+passport.use(new LocalStrategy(
+  (username, password, done) => {
+    if(username !== credentials.username || password !== credentials.password) {
+      return done(null, false);
+    }
+    const user = { id: username }; // FIXME
+    return done(null, user);
+  }
+));
+
+// Basic HTTP auth is used to authenticate internal (server-side) API requests.
+// These credentials should never leave server RAM.
+jsonApi.auth = {
+  username: crypto.randomBytes(24).toString('base64'),
+  password: crypto.randomBytes(192).toString('base64'),
+};
+
+passport.use(new BasicStrategy(
+  (username, password, done) => {
+    if(username !== jsonApi.auth.username || password !== jsonApi.auth.password) {
+      return done(null, false);
+    }
+    const user = { id: username }; // FIXME
+    return done(null, user);
+  }
+));
+
+passport.serializeUser((user, done) => done(null, user.id));
+
+// TODO: Get user from DB
+passport.deserializeUser((id, done) => done(null, { id }));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 const distDir = path.resolve(__dirname, '..', 'dist');
 
@@ -68,12 +125,17 @@ app.use((req, res) => {
   const context = { status: 200 };
   const store = createStore();
 
+  store.dispatch(simpleActionCreators.auth.setAuthenticated(req.isAuthenticated()));
+
   const promises = [];
 
   frontendRoutes.some(route => {
     const match = matchPath(req.path, route);
     if(match && route.component.preloadData) {
-      promises.push(route.component.preloadData(store.dispatch, match));
+      const satisfiesAuth = !route.requiresAuth || req.isAuthenticated();
+      if(satisfiesAuth) {
+        promises.push(route.component.preloadData(store.dispatch, match));
+      }
     }
     return match;
   });
@@ -81,7 +143,10 @@ app.use((req, res) => {
   const promise = Promise.race([
     Promise.all(promises),
     new Promise((resolve) => setTimeout(resolve, 200)) // Timeout after 200ms
-  ]);
+  ]).catch((err) => {
+    console.error('Failed to preload data:');
+    console.error(err);
+  });
 
   promise.then(() => {
     const Router = props => (

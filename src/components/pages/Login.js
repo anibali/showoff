@@ -1,8 +1,11 @@
 import React from 'react';
 import { Redirect } from 'react-router';
-import auth from '../auth';
+import * as ReactRedux from 'react-redux';
+import _ from 'lodash';
 
-export default class extends React.Component {
+import authActionCreators from '../../redux/authActionCreators';
+
+class Login extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -13,7 +16,7 @@ export default class extends React.Component {
     };
     this.login = (event) => {
       event.preventDefault();
-      auth.signIn(this.state.username, this.state.password)
+      this.props.signIn(this.state.username, this.state.password)
         .then(() => {
           this.setState({ redirect: true });
         })
@@ -79,3 +82,11 @@ export default class extends React.Component {
     );
   }
 }
+
+
+export default ReactRedux.connect(
+  null,
+  (dispatch) => ({
+    signIn: _.flow(authActionCreators.signIn, dispatch),
+  })
+)(Login);

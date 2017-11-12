@@ -1,31 +1,28 @@
 import { Router } from 'express';
+import passport from 'passport';
 
-
-// TODO: Obviously these shouldn't be hardcoded
-const credentials = {
-  username: 'admin',
-  password: 'password',
-};
 
 const signIn = (req, res) => {
-  const { username, password } = req.body;
-  if(username === credentials.username && password === credentials.password) {
-    // TODO: Start session
-    res.send();
-    return;
-  }
-  res.status(401).send();
+  res.send();
 };
 
 const signOut = (req, res) => {
-  // TODO: End session
+  req.logOut();
+  res.send();
+};
+
+const verify = (req, res) => {
+  if(!req.isAuthenticated()) {
+    res.status(401);
+  }
   res.send();
 };
 
 const router = Router();
 
-router.route('/signin').post(signIn);
+router.route('/signin').post(passport.authenticate('local'), signIn);
 router.route('/signout').post(signOut);
+router.route('/verify').post(verify);
 
 
 export default router;

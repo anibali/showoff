@@ -20,6 +20,9 @@ const simpleActionCreators = createActions({
     ADD_TAGS: tags => ({ tags }),
     REMOVE_TAGS_FROM_NOTEBOOK: notebookId => ({ notebookId }),
   },
+  auth: {
+    SET_AUTHENTICATED: authenticated => ({ authenticated }),
+  }
 });
 
 

@@ -2,9 +2,9 @@ import React from 'react';
 import * as ReactRedux from 'react-redux';
 import _ from 'lodash';
 import { Typeahead } from 'react-bootstrap-typeahead';
-import NotebookListItem from './NotebookListItem';
-import notebookActionCreators from '../redux/notebooksActionCreators';
-import tagActionCreators from '../redux/tagsActionCreators';
+import NotebookListItem from '../NotebookListItem';
+import notebookActionCreators from '../../redux/notebooksActionCreators';
+import tagActionCreators from '../../redux/tagsActionCreators';
 
 class Home extends React.Component {
   constructor(props) {

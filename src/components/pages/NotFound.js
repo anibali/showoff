@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import Status from './Status';
+import Status from '../Status';
 
 export default () => (
   <Status code={404}>

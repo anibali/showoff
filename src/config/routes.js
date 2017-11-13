@@ -13,7 +13,7 @@ const authenticate = (req, res, next) => {
     return;
   }
 
-  passport.authenticate(['local', 'basic'])(req, res, next);
+  passport.authenticate('basic')(req, res, next);
 };
 
 routes.connect = (app) => {

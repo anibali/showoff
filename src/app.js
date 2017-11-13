@@ -1,12 +1,7 @@
 import path from 'path';
 import express from 'express';
-import session from 'express-session';
 import bodyParser from 'body-parser';
 import compression from 'compression';
-import passport from 'passport';
-import crypto from 'crypto';
-import { Strategy as LocalStrategy } from 'passport-local';
-import { BasicStrategy } from 'passport-http';
 import { StaticRouter } from 'react-router';
 import { matchPath } from 'react-router-dom';
 import DocumentTitle from 'react-document-title';
@@ -15,75 +10,21 @@ import mime from 'mime';
 import React from 'react';
 import reactDomServer from 'react-dom/server';
 
+import appAuth from './config/appAuth';
 import frontendRoutes from './components/frontendRoutes';
 import controllerRoutes from './config/routes';
 import createStore from './redux/createStore';
 import simpleActionCreators from './redux/simpleActionCreators';
 import showoffConfig from './config/showoff';
 import Root from './components/Root';
-import jsonApi from './helpers/jsonApiClient';
-import models from './models';
+
 
 const { uploadDir } = showoffConfig;
 
 // Create a new Express app
 const app = express();
 
-app.use(session({
-  // FIXME: Use connect-session-knex to store sessions in DB
-  secret: process.env.COOKIE_SECRET,
-  saveUninitialized: false,
-  resave: false,
-  cookie: {},
-}));
-
-passport.use(new LocalStrategy(
-  (username, password, done) => {
-    models('User').where({ username }).fetch({ require: true })
-      .then(user => {
-        const { passwordSalt, passwordHash } = user.attributes;
-        const queryPasswordHash =
-          crypto.pbkdf2Sync(password, passwordSalt, 100000, 72, 'sha512').toString('base64');
-        if(queryPasswordHash !== passwordHash) {
-          throw new Error('incorrect password');
-        }
-        done(null, user);
-      })
-      .catch(() => done(null, false));
-  }
-));
-
-// Basic HTTP auth is used to authenticate internal (server-side) API requests.
-// These credentials should never leave server RAM.
-jsonApi.auth = {
-  username: crypto.randomBytes(24).toString('base64'),
-  password: crypto.randomBytes(192).toString('base64'),
-};
-
-passport.use(new BasicStrategy(
-  (username, password, done) => {
-    if(username !== jsonApi.auth.username || password !== jsonApi.auth.password) {
-      return done(null, false);
-    }
-    const user = { id: -1 }; // FIXME: Handle the internal user better
-    return done(null, user);
-  }
-));
-
-passport.serializeUser((user, done) => done(null, user.id));
-
-passport.deserializeUser((id, done) => {
-  if(id === -1) {
-    done(null, { id }); // FIXME: Handle the internal user better
-    return;
-  }
-  models('User').where({ id }).fetch({ require: true })
-    .then(user => { done(null, user); return null; })
-    .catch(err => { done(err); });
-});
-
-app.use(passport.initialize());
-app.use(passport.session());
+appAuth(app);
 
 const distDir = path.resolve(__dirname, '..', 'dist');
 
@@ -195,6 +136,7 @@ app.use((req, res) => {
     res.status(500).send(error.message);
   });
 });
+
 
 // Export the Express app
 export default app;

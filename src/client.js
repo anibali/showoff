@@ -3,7 +3,7 @@
  * When the web page is loaded, this code will run on the client.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line
 import 'babel-polyfill';
 
 import React from 'react';

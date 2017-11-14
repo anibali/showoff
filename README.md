@@ -2,7 +2,7 @@
 
 ## Setup
 
-Requires Docker Engine and Docker Compose.
+Requires Docker Engine (17.09+) and Docker Compose (1.12.0+).
 
 ```sh
 $ sed "s/\(POSTGRES_PASSWORD=\).*/\1$(openssl rand -hex 32)/" \

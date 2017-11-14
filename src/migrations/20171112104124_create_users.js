@@ -9,19 +9,34 @@ exports.up = function(knex) {
     table.string('passwordHash').notNullable();
     table.string('passwordSalt').notNullable();
   }).then(() => {
-    const password = process.env.ADMIN_PASSWORD;
-    const passwordSalt = crypto.randomBytes(24).toString('base64');
-    const passwordHash =
-      crypto.pbkdf2Sync(password, passwordSalt, 100000, 72, 'sha512').toString('base64');
     const now = new Date();
-    const adminUser = {
-      username: 'admin',
-      passwordHash,
-      passwordSalt,
+
+    // Internal user for requests within the backend.
+    // Log in is disabled for this user.
+    const internalUser = {
+      username: '_internal',
+      passwordHash: '',
+      passwordSalt: '',
       createdAt: now,
       updatedAt: now,
     };
-    return knex('users').insert(adminUser);
+
+    // Admin user.
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    const adminPasswordSalt = crypto.randomBytes(24).toString('base64');
+    const adminPasswordHash =
+      crypto.pbkdf2Sync(adminPassword, adminPasswordSalt, 100000, 72, 'sha512').toString('base64');
+    const adminUser = {
+      username: 'admin',
+      passwordHash: adminPasswordHash,
+      passwordSalt: adminPasswordSalt,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const users = [internalUser, adminUser];
+
+    return Promise.all(users.map(u => knex('users').insert(u)));
   });
 };
 

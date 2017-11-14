@@ -20,6 +20,7 @@ passport.use(new LocalStrategy(
           throw new Error('incorrect password');
         }
         done(null, user);
+        return null;
       })
       .catch(() => done(null, false));
   }
@@ -28,28 +29,29 @@ passport.use(new LocalStrategy(
 // Basic HTTP auth is used to authenticate internal (server-side) API requests.
 // These credentials should never leave server RAM.
 jsonApi.auth = {
-  username: crypto.randomBytes(24).toString('base64'),
-  password: crypto.randomBytes(192).toString('base64'),
+  username: 'api-user',
+  password: crypto.randomBytes(64).toString('base64'),
 };
 
 // The "basic" strategy is for client program access to the REST API.
 passport.use(new BasicStrategy(
   (username, password, done) => {
-    if(username !== jsonApi.auth.username || password !== jsonApi.auth.password) {
-      return done(null, false);
-    }
-    const user = { id: -1 }; // FIXME: Handle the internal user better
-    return done(null, user);
+    // TODO: Generalize this when there are tokens for each user
+    models('User').where({ username: '_internal' }).fetch({ require: true })
+      .then(user => {
+        if(username !== jsonApi.auth.username || password !== jsonApi.auth.password) {
+          throw new Error('incorrect credentials');
+        }
+        done(null, user);
+        return null;
+      })
+      .catch(() => done(null, false));
   }
 ));
 
 passport.serializeUser((user, done) => done(null, user.id));
 
 passport.deserializeUser((id, done) => {
-  if(id === -1) {
-    done(null, { id }); // FIXME: Handle the internal user better
-    return;
-  }
   models('User').where({ id }).fetch({ require: true })
     .then(user => { done(null, user); return null; })
     .catch(err => { done(err); });

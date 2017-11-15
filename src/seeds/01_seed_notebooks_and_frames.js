@@ -155,7 +155,10 @@ exports.seed = function(knex, Promise) {
     .then(() => knex.raw('ALTER SEQUENCE frames_id_seq RESTART WITH 1;'))
     .then(() => knex('notebooks').del())
     .then(() => knex.raw('ALTER SEQUENCE notebooks_id_seq RESTART WITH 1;'))
-    .then(() => Promise.all(notebooks.map((notebook) => knex('notebooks').insert(notebook))))
+    .then(() => notebooks.reduce(
+      (p, notebook) => p.then(() => knex('notebooks').insert(notebook)),
+      Promise.resolve()
+    ))
     .then(() => Promise.all(frames.map((frame) => knex('frames').insert(frame))))
   );
 };

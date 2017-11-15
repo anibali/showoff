@@ -1,14 +1,14 @@
 # This Dockerfile uses a multi-stage build to keep the output image size small.
 # Building requires Docker Engine 17.09 or newer.
 
+################################################################################
 
-### Stage 1: Download and build NPM dependencies
-
-FROM node:8.9.1-alpine as deps
+FROM node:8.9.1-alpine as builder
 
 # Install build requirements.
-RUN apk add --no-cache build-base python pkgconfig cairo-dev jpeg-dev pango-dev
-RUN apk add --no-cache autoconf libtool automake
+RUN apk add --no-cache \
+    build-base python pkgconfig cairo-dev jpeg-dev pango-dev \
+    autoconf libtool automake git
 
 # Set up the directory structure.
 RUN mkdir /app \
@@ -16,53 +16,82 @@ RUN mkdir /app \
 WORKDIR /app
 
 # Install Node header files for use with node-gyp.
-RUN yarn global add node-gyp-install && node-gyp-install
+RUN npm install -g node-gyp-install && node-gyp-install
 
-# Download and build NPM dependencies.
-COPY package.json yarn.lock ./
-COPY subpackages ./subpackages
-RUN yarn install --frozen-lockfile
+################################################################################
 
-
-### Stage 2: Build the Showoff image
-
-FROM node:8.9.1-alpine
+FROM node:8.9.1-alpine as app
 
 # Install some additional packages that we need.
-RUN apk add --no-cache tini curl bash sudo
+RUN apk add --no-cache tini curl bash
 
 # Use Tini as the init process. Tini will take care of important system stuff
 # for us, like forwarding signals and reaping zombie processes.
 ENTRYPOINT ["/sbin/tini", "--"]
 
-# Install native dependencies
+# Install native dependencies.
 RUN apk add --no-cache cairo libjpeg-turbo pango
 
 # Set up the directory structure.
-RUN mkdir -p /app /deps \
- && chown -R node:node /app /deps
+RUN mkdir -p /app \
+ && chown -R node:node /app
 WORKDIR /app
 
 # Switch to a non-root user
+USER node
+
+# Set path to include node module executables.
+ENV PATH=/app/node_modules/.bin:$PATH
+
+# Expose port 3000.
+EXPOSE 3000
+
+# Set default command to start the server.
+CMD [ "npm", "start" ]
+
+################################################################################
+
+FROM app as app-dev
+
+# Set environment to "development".
+ENV NODE_ENV=development
+
+# Make the "node" user a sudoer.
+USER root
+RUN apk add --no-cache sudo
 RUN echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-node
 USER node
 
-# Copy in the project's NPM dependencies.
-COPY --chown=node:node --from=deps /app/node_modules /deps/node_modules
+################################################################################
 
-# Set environment variables to point to the installed NPM modules.
-ENV NODE_PATH=/deps/node_modules \
-    PATH=/deps/node_modules/.bin:$PATH
+FROM builder as builder-prod
+
+# Set environment to "production".
+ENV NODE_ENV=production
+
+# Download and build NPM dependencies.
+COPY package.json package-lock.json ./
+COPY subpackages ./subpackages
+RUN NODE_ENV=development npm install
 
 # Copy our application files into the image.
-COPY --chown=node:node . /app
-
-# Set environment to "production"
-ENV NODE_ENV=production
+COPY --chown=node:node . /tmp/app
+RUN mv node_modules /tmp/app/node_modules \
+ && rm -rf /app \
+ && mv /tmp/app /
 
 # Bundle client-side assets.
 RUN rm -rf dist && npm run build
 
-# Start the server on exposed port 3000.
-EXPOSE 3000
-CMD [ "npm", "start" ]
+# Remove dev dependencies.
+RUN npm prune
+
+################################################################################
+
+FROM app as app-prod
+
+# Set environment to "production".
+ENV NODE_ENV=production
+
+# Copy our application files into the image.
+COPY --chown=node:node --from=builder-prod /app /app

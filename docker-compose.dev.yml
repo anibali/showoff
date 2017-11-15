@@ -1,16 +1,23 @@
-version: '3.2'
+version: '3.4'
 
 services:
-  web:
-    build: .
+  builder:
+    build:
+      context: .
+      target: builder
     volumes:
       - ".:/app"
-      - type: tmpfs
-        target: /app/node_modules
+      - "node_modules:/app/node_modules"
+      - "npm_cache:/root/.npm"
+  app:
+    build:
+      context: .
+      target: app-dev
+    volumes:
+      - ".:/app"
+      - "node_modules:/app/node_modules"
     ports:
       - "3001:3000"
-    environment:
-      - NODE_ENV=development
     env_file:
       - ./env/postgres.env
     links:
@@ -33,4 +40,8 @@ services:
 
 volumes:
   db_data:
+    external: false
+  node_modules:
+    external: false
+  npm_cache:
     external: false

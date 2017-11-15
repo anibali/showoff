@@ -16,7 +16,41 @@ RUN mkdir /app \
 WORKDIR /app
 
 # Install Node header files for use with node-gyp.
-RUN npm install -g node-gyp-install && node-gyp-install
+RUN yarn global add node-gyp-install && node-gyp-install
+
+################################################################################
+
+FROM builder as builder-dev
+
+# Set environment to "development".
+ENV NODE_ENV=development
+
+RUN mkdir -p /home/user/.cache/yarn \
+ && chmod -R 777 /home/user
+
+################################################################################
+
+FROM builder as builder-prod
+
+# Set environment to "production".
+ENV NODE_ENV=production
+
+# Download and build NPM dependencies.
+COPY package.json yarn.lock ./
+COPY subpackages ./subpackages
+RUN NODE_ENV=development yarn install --frozen-lockfile
+
+# Copy our application files into the image.
+COPY . /tmp/app
+RUN mv node_modules /tmp/app/node_modules \
+ && rm -rf /app \
+ && mv /tmp/app /
+
+# Bundle client-side assets.
+RUN rm -rf dist && npm run build
+
+# Remove dev dependencies.
+RUN yarn install --frozen-lockfile --production --ignore-scripts --prefer-offline
 
 ################################################################################
 
@@ -51,18 +85,6 @@ CMD [ "npm", "start" ]
 
 ################################################################################
 
-FROM builder as builder-dev
-
-RUN mkdir -p /home/user/.npm \
- && chmod -R 777 /home/user
-
-# Make the "node" user a sudoer, and switch to that user.
-RUN apk add --no-cache sudo
-RUN echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-node
-USER node
-
-################################################################################
-
 FROM app as app-dev
 
 # Set environment to "development".
@@ -73,30 +95,6 @@ USER root
 RUN apk add --no-cache sudo
 RUN echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-node
 USER node
-
-################################################################################
-
-FROM builder as builder-prod
-
-# Set environment to "production".
-ENV NODE_ENV=production
-
-# Download and build NPM dependencies.
-COPY package.json package-lock.json ./
-COPY subpackages ./subpackages
-RUN NODE_ENV=development npm install
-
-# Copy our application files into the image.
-COPY --chown=node:node . /tmp/app
-RUN mv node_modules /tmp/app/node_modules \
- && rm -rf /app \
- && mv /tmp/app /
-
-# Bundle client-side assets.
-RUN rm -rf dist && npm run build
-
-# Remove dev dependencies.
-RUN npm prune
 
 ################################################################################
 

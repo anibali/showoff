@@ -1,3 +1,5 @@
 #!/bin/bash
 
-docker-compose -f docker-compose.dev.yml run --rm builder npm $@
+mkdir -p node_modules
+docker-compose -f docker-compose.dev.yml run \
+  -e HOME=/home/user --user=$UID --rm builder npm $@

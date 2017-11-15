@@ -51,6 +51,18 @@ CMD [ "npm", "start" ]
 
 ################################################################################
 
+FROM builder as builder-dev
+
+RUN mkdir -p /home/user/.npm \
+ && chmod -R 777 /home/user
+
+# Make the "node" user a sudoer, and switch to that user.
+RUN apk add --no-cache sudo
+RUN echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-node
+USER node
+
+################################################################################
+
 FROM app as app-dev
 
 # Set environment to "development".

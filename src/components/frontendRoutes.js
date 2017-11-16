@@ -1,4 +1,4 @@
-import { Home, Notebook, Login, NotFound } from './pages';
+import { Home, Notebook, Login, NotFound, Account } from './pages';
 
 export default [
   {
@@ -6,6 +6,12 @@ export default [
     component: Login,
     exact: true,
     requiresAuth: false,
+  },
+  {
+    path: '/account',
+    component: Account,
+    exact: true,
+    requiresAuth: true,
   },
   {
     path: '/',

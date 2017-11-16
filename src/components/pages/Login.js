@@ -63,6 +63,7 @@ class Login extends React.Component {
                   placeholder="Username"
                   value={this.state.username}
                   onChange={this.onUsernameChange}
+                  autoFocus
                 />
               </div>
               <div className="form-group">

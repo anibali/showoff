@@ -31,19 +31,22 @@ export const verifyApiKey = (secretKey, expectedPublicKey) =>
       return actualPublicKey === expectedPublicKey;
     });
 
-export const resetApiKey = (userId) => {
+export const createApiKey = (userId) => {
   const { secretKey: secretKeyBuf, publicKey: publicKeyBuf } =
     sodium.api.crypto_sign_keypair();
   const publicKey = publicKeyBuf.toString('base64');
   const secretKey = secretKeyBuf.toString('base64');
 
-  const id = crypto.randomBytes(16).toString('base64');
+  const id = crypto.randomBytes(12).toString('base64');
 
-  return models('ApiKey').where({ userId }).destroy()
-    .then(() => models('ApiKey').forge({ id, publicKey, userId }).save(null, { method: 'insert' }))
-    .then(() => ({ keyId: id, secretKey }));
+  return Promise.resolve(models('ApiKey').forge({ id, publicKey, userId }))
+    .then((apiKey) => apiKey.save(null, { method: 'insert' }))
+    .then((apiKey) => ({ apiKey, secretKey }));
 };
+
+export const destroyApiKeys = (userId) =>
+  models('ApiKey').where({ userId }).destroy();
 
 export const resetInternalApiKey = () =>
   models('User').where({ username: '_internal' }).fetch({ require: true })
-    .then(internalUser => resetApiKey(internalUser.id));
+    .then(user => destroyApiKeys(user.id).then(() => createApiKey(user.id)));

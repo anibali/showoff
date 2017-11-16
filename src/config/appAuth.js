@@ -12,10 +12,10 @@ import models from '../models';
 const KnexSessionStore = KnexSessionStoreFactory(session);
 
 // Generate an API key pair for internal use on server start up.
-resetInternalApiKey().then(({ keyId, secretKey }) => {
+resetInternalApiKey().then(({ apiKey, secretKey }) => {
   // These credentials should never leave server RAM.
   jsonApi.auth = {
-    username: keyId,
+    username: apiKey.id,
     password: secretKey,
   };
 });

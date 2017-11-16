@@ -1,51 +1,49 @@
 import session from 'express-session';
 import passport from 'passport';
-import crypto from 'crypto';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { BasicStrategy } from 'passport-http';
 
 import jsonApi from '../helpers/jsonApiClient';
+import { resetInternalApiKeyPair, verifyHash } from '../helpers/authHelpers';
 import models from '../models';
 
+
+// Generate an API key pair for internal use on server start up.
+resetInternalApiKeyPair().then(({ publicKey, secretKey }) => {
+  // These credentials should never leave server RAM.
+  jsonApi.auth = {
+    username: publicKey,
+    password: secretKey,
+  };
+});
 
 // The "local" strategy is for user log in using the web form.
 passport.use(new LocalStrategy(
   (username, password, done) => {
     models('User').where({ username }).fetch({ require: true })
-      .then(user => {
-        const { passwordSalt, passwordHash } = user.attributes;
-        const queryPasswordHash =
-          crypto.pbkdf2Sync(password, passwordSalt, 100000, 72, 'sha512').toString('base64');
-        if(queryPasswordHash !== passwordHash) {
-          throw new Error('incorrect password');
-        }
-        done(null, user);
-        return null;
-      })
-      .catch(() => done(null, false));
+      .then(user =>
+        verifyHash(password, user.get('passwordSalt'), user.get('passwordHash'))
+          .then(correctPassword => {
+            done(null, correctPassword && user);
+            return null;
+          })
+      )
+      .catch(err => done(err));
   }
 ));
 
-// Basic HTTP auth is used to authenticate internal (server-side) API requests.
-// These credentials should never leave server RAM.
-jsonApi.auth = {
-  username: 'api-user',
-  password: crypto.randomBytes(64).toString('base64'),
-};
-
 // The "basic" strategy is for client program access to the REST API.
 passport.use(new BasicStrategy(
-  (username, password, done) => {
-    // TODO: Generalize this when there are tokens for each user
-    models('User').where({ username: '_internal' }).fetch({ require: true })
-      .then(user => {
-        if(username !== jsonApi.auth.username || password !== jsonApi.auth.password) {
-          throw new Error('incorrect credentials');
-        }
-        done(null, user);
-        return null;
-      })
-      .catch(() => done(null, false));
+  (publicKey, secretKey, done) => {
+    models('ApiKeyPair').where({ publicKey }).fetch({ require: true, withRelated: ['user'] })
+      .then(apiKeyPair =>
+        verifyHash(secretKey, apiKeyPair.get('secretKeySalt'), apiKeyPair.get('secretKeyHash'))
+          .then(correctSecret => {
+            done(null, correctSecret && apiKeyPair.related('user'));
+            return null;
+          })
+      )
+      .catch(err => done(err));
   }
 ));
 

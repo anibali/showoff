@@ -4233,6 +4233,10 @@ node-forge@0.6.33:
   version "0.6.33"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.6.33.tgz#463811879f573d45155ad6a9f43dc296e8e85ebc"
 
+node-gyp-build@^3.0.0:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-3.2.2.tgz#f78a9f84834b1dbd293b0719fee48635d2789c27"
+
 node-libs-browser@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/node-libs-browser/-/node-libs-browser-2.0.0.tgz#a3a59ec97024985b46e958379646f96c4b616646"
@@ -5912,6 +5916,13 @@ sockjs@0.3.18:
   dependencies:
     faye-websocket "^0.10.0"
     uuid "^2.0.2"
+
+sodium-native@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/sodium-native/-/sodium-native-2.0.0.tgz#56916050577ee05f59942529b536787b060aeab2"
+  dependencies:
+    nan "^2.4.0"
+    node-gyp-build "^3.0.0"
 
 sort-keys@^1.0.0:
   version "1.1.2"

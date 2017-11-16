@@ -1,6 +1,6 @@
 export default (bookshelf) =>
-  bookshelf.model('ApiKeyPair', {
-    tableName: 'apikeypairs',
+  bookshelf.model('ApiKey', {
+    tableName: 'api_keys',
     hasTimestamps: ['createdAt', 'updatedAt'],
     user: function() {
       return this.belongsTo('User', 'userId');

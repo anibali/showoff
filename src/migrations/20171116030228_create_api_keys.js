@@ -1,11 +1,9 @@
 exports.up = function(knex) {
-  return knex.schema.createTable('apikeypairs', (table) => {
-    table.increments('id').primary();
+  return knex.schema.createTable('api_keys', (table) => {
+    table.string('id').notNullable().primary();
     table.dateTime('createdAt').notNullable();
     table.dateTime('updatedAt').notNullable();
     table.string('publicKey').notNullable();
-    table.string('secretKeyHash').notNullable();
-    table.string('secretKeySalt').notNullable();
     table.integer('userId')
       .unsigned()
       .references('id')
@@ -15,5 +13,5 @@ exports.up = function(knex) {
 };
 
 exports.down = function(knex) {
-  return knex.schema.dropTable('apikeypairs');
+  return knex.schema.dropTable('api_keys');
 };

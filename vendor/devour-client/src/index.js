@@ -282,7 +282,18 @@ class JsonApi {
         return this.applyResponseMiddleware(responsePromise)
       })
       .catch((err) => {
-        Logger.error(err)
+        const ErrorCloner = function() {}
+        ErrorCloner.prototype = err
+        const errorWithFilteredOwnProps = new ErrorCloner()
+        if (err.config) {
+          errorWithFilteredOwnProps.config =
+            _.pick(err.config, ['method', 'url', 'model', 'params', 'headers'])
+        }
+        if (err.response) {
+          errorWithFilteredOwnProps.response =
+            _.pick(err.response, ['data', 'status', 'headers'])
+        }
+        Logger.error(errorWithFilteredOwnProps)
         let errorPromise = Promise.resolve(err)
         return this.applyErrorMiddleware(errorPromise).then(err => {
           return Promise.reject(err)

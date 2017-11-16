@@ -55,7 +55,7 @@
     "redux": "^3.7.2",
     "redux-actions": "^2.2.1",
     "redux-thunk": "^2.2.0",
-    "sodium-native": "^2.0.0",
+    "sodium": "anibali/node-sodium#fix-nan-version",
     "vega": "^3.0.7",
     "vega-2": "file:./subpackages/vega-2",
     "vega-lite": "^2.0.0",

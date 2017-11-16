@@ -5,17 +5,17 @@ import { BasicStrategy } from 'passport-http';
 import KnexSessionStoreFactory from 'connect-session-knex';
 
 import jsonApi from '../helpers/jsonApiClient';
-import { resetInternalApiKeyPair, verifyHash } from '../helpers/authHelpers';
+import { resetInternalApiKey, verifyHash, verifyApiKey } from '../helpers/authHelpers';
 import models from '../models';
 
 
 const KnexSessionStore = KnexSessionStoreFactory(session);
 
 // Generate an API key pair for internal use on server start up.
-resetInternalApiKeyPair().then(({ publicKey, secretKey }) => {
+resetInternalApiKey().then(({ keyId, secretKey }) => {
   // These credentials should never leave server RAM.
   jsonApi.auth = {
-    username: publicKey,
+    username: keyId,
     password: secretKey,
   };
 });
@@ -37,12 +37,12 @@ passport.use(new LocalStrategy(
 
 // The "basic" strategy is for client program access to the REST API.
 passport.use(new BasicStrategy(
-  (publicKey, secretKey, done) => {
-    models('ApiKeyPair').where({ publicKey }).fetch({ require: true, withRelated: ['user'] })
-      .then(apiKeyPair =>
-        verifyHash(secretKey, apiKeyPair.get('secretKeySalt'), apiKeyPair.get('secretKeyHash'))
+  (keyId, secretKey, done) => {
+    models('ApiKey').where({ id: keyId }).fetch({ require: true, withRelated: ['user'] })
+      .then(apiKey =>
+        verifyApiKey(secretKey, apiKey.get('publicKey'))
           .then(correctSecret => {
-            done(null, correctSecret && apiKeyPair.related('user'));
+            done(null, correctSecret && apiKey.related('user'));
             return null;
           })
       )

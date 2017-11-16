@@ -2,9 +2,9 @@ import React from 'react';
 import * as ReactRedux from 'react-redux';
 import _ from 'lodash';
 import { Typeahead } from 'react-bootstrap-typeahead';
-import { Link } from 'react-router-dom';
 
 import NotebookListItem from '../NotebookListItem';
+import Header from '../Header';
 import notebookActionCreators from '../../redux/notebooksActionCreators';
 import tagActionCreators from '../../redux/tagsActionCreators';
 
@@ -60,31 +60,25 @@ class Home extends React.Component {
 
     return (
       <div>
-        <header className="header-bar">
+        <Header />
+        <div className="offset-scrollbar">
           <div className="container">
             <div className="row">
-              <Link to="/account">
-                Account
-              </Link>
-            </div>
-          </div>
-        </header>
-        <div className="container">
-          <div className="row">
-            <h1>Notebooks</h1>
-            <Typeahead
-              clearButton
-              labelKey="name"
-              multiple
-              options={tagOptions}
-              defaultSelected={this.state.filterTags}
-              placeholder="Filter tags..."
-              highlightOnlyResult
-              onChange={onChange}
-            />
-            <div style={{ height: 8 }} />
-            <div className="list-group">
-              {notebooks.map(createListItem)}
+              <h1>Notebooks</h1>
+              <Typeahead
+                clearButton
+                labelKey="name"
+                multiple
+                options={tagOptions}
+                defaultSelected={this.state.filterTags}
+                placeholder="Filter tags..."
+                highlightOnlyResult
+                onChange={onChange}
+              />
+              <div style={{ height: 8 }} />
+              <div className="list-group">
+                {notebooks.map(createListItem)}
+              </div>
             </div>
           </div>
         </div>

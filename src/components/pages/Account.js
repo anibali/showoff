@@ -3,6 +3,7 @@ import { Redirect } from 'react-router';
 import * as ReactRedux from 'react-redux';
 import _ from 'lodash';
 
+import Header from '../Header';
 import authActionCreators from '../../redux/authActionCreators';
 
 class Account extends React.Component {
@@ -26,16 +27,19 @@ class Account extends React.Component {
     }
 
     return (
-      <div className="container">
-        <div className="row">
-          <h1>User account</h1>
-          <button
-            type="submit"
-            className="btn btn-default"
-            onClick={this.logout}
-          >
-            Log out
-          </button>
+      <div>
+        <Header />
+        <div className="container">
+          <div className="row">
+            <h1>User account</h1>
+            <button
+              type="submit"
+              className="btn btn-default"
+              onClick={this.logout}
+            >
+              Log out
+            </button>
+          </div>
         </div>
       </div>
     );

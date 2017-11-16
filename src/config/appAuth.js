@@ -2,11 +2,14 @@ import session from 'express-session';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { BasicStrategy } from 'passport-http';
+import KnexSessionStoreFactory from 'connect-session-knex';
 
 import jsonApi from '../helpers/jsonApiClient';
 import { resetInternalApiKeyPair, verifyHash } from '../helpers/authHelpers';
 import models from '../models';
 
+
+const KnexSessionStore = KnexSessionStoreFactory(session);
 
 // Generate an API key pair for internal use on server start up.
 resetInternalApiKeyPair().then(({ publicKey, secretKey }) => {
@@ -58,13 +61,16 @@ passport.deserializeUser((id, done) => {
 
 export default (app) => {
   app.use(session({
-    // FIXME: Use connect-session-knex to store sessions in DB
     secret: process.env.COOKIE_SECRET,
     saveUninitialized: false,
     resave: false,
     cookie: {
       maxAge: 31 * 24 * 60 * 60 * 1000,
     },
+    store: new KnexSessionStore({
+      knex: models.knex,
+      tablename: 'sessions',
+    }),
   }));
 
   app.use(passport.initialize());

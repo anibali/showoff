@@ -11,7 +11,7 @@ const showoffConfig = require('../src/config/showoff').default;
 showoffConfig.uploadDir = '/tmp/showofftest_uploads';
 
 const models = require('../src/models').default;
-const app = require('../src/app').default;
+const createApp = require('../src/createApp').default;
 const WebSocketServer = require('../src/webSocketServer').default;
 
 MustHttp.register(Must);
@@ -27,11 +27,26 @@ const assertDatabaseEmpty = () => Promise.all(modelNames.map(modelName =>
     .then(count => console.assert(parseInt(count, 10) === 0, `left-over data in DB for ${modelName}`))
 ));
 
+const runMigrations = (attempts = 5, delay = 1000) =>
+  models.knex.migrate.latest()
+    .catch(err => {
+      if(attempts <= 0) {
+        throw err;
+      }
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve();
+        }, delay);
+      }).then(() => runMigrations(attempts - 1));
+    });
+
 let server = null;
 
 before(() =>
-  models.knex.migrate.latest()
-    .then(() => new Promise((resolve) => {
+  runMigrations()
+    .then(() => createApp())
+    .then((app) => new Promise((resolve) => {
+      global.auth = app.auth;
       server = app.listen(3000, () => {
         resolve();
       });

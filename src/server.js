@@ -9,16 +9,14 @@ require('babel-core/register');
 const http = require('http');
 const ws = require('ws');
 
-const app = require('./app').default;
+const createApp = require('./createApp').default;
 const WebSocketServer = require('./webSocketServer').default;
 
 
-const server = http.createServer(app);
-server.listen(3000, () => {
-  console.log('Server started.');
+createApp().then((app) => {
+  const server = http.createServer(app);
+  server.listen(3000, () => {
+    console.log('Server started.');
+    global.wss = new WebSocketServer(new ws.Server({ server }));
+  });
 });
-
-global.wss = new WebSocketServer(new ws.Server({ server }));
-
-
-module.exports = server;

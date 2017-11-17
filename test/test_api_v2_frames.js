@@ -6,9 +6,15 @@ import { factory } from 'factory-girl';
 import models from '../src/models';
 
 describe('API V2 Frames', () => {
+  let client = null;
   let clock = null;
 
   beforeEach(() => {
+    client = axios.create({
+      baseURL: 'http://localhost:3000/api/v2',
+      auth: global.auth,
+    });
+
     clock = sinon.useFakeTimers();
   });
 
@@ -20,7 +26,7 @@ describe('API V2 Frames', () => {
   });
 
   describe('GET /frames', () => {
-    const sendRequest = () => axios.get('http://localhost:3000/api/v2/frames');
+    const sendRequest = () => client.get('http://localhost:3000/api/v2/frames');
 
     describe('when there are two frames in the database', () => {
       beforeEach(() => factory.createMany('frame', 2));
@@ -104,7 +110,7 @@ describe('API V2 Frames', () => {
       broadcastStub.restore();
     });
 
-    const sendRequest = body => axios.post('http://localhost:3000/api/v2/frames', body);
+    const sendRequest = body => client.post('http://localhost:3000/api/v2/frames', body);
 
     describe('when the request body is incorrectly structured JSON', () => {
       const reqBody = {};
@@ -250,7 +256,7 @@ describe('API V2 Frames', () => {
     beforeEach(() => factory.create('frame', { id: 1 }));
 
     describe('when the frame does not exist', () => {
-      const sendRequest = () => axios.get('http://localhost:3000/api/v2/frames/1337');
+      const sendRequest = () => client.get('http://localhost:3000/api/v2/frames/1337');
 
       it('should return a status 404 error response', () =>
         expect(sendRequest()).to.reject.with.errorResponse(404)
@@ -258,7 +264,7 @@ describe('API V2 Frames', () => {
     });
 
     describe('when the frame exists', () => {
-      const sendRequest = () => axios.get('http://localhost:3000/api/v2/frames/1');
+      const sendRequest = () => client.get('http://localhost:3000/api/v2/frames/1');
 
       it('should return HTTP status 200', () =>
         expect(sendRequest()).to.eventually.have.status(200)
@@ -307,7 +313,7 @@ describe('API V2 Frames', () => {
     beforeEach(() => factory.create('frame', { id: 1 }));
 
     describe('when the frame does not exist', () => {
-      const sendRequest = () => axios.delete('http://localhost:3000/api/v2/frames/1337');
+      const sendRequest = () => client.delete('http://localhost:3000/api/v2/frames/1337');
 
       it('should return a status 404 error response', () =>
         expect(sendRequest()).to.reject.with.errorResponse(404)
@@ -315,7 +321,7 @@ describe('API V2 Frames', () => {
     });
 
     describe('when the frame exists', () => {
-      const sendRequest = () => axios.delete('http://localhost:3000/api/v2/frames/1');
+      const sendRequest = () => client.delete('http://localhost:3000/api/v2/frames/1');
 
       it('should return HTTP status 204', () =>
         expect(sendRequest()).to.eventually.have.status(204)
@@ -335,7 +341,7 @@ describe('API V2 Frames', () => {
       broadcastStub.restore();
     });
 
-    const sendRequest = body => axios.patch('http://localhost:3000/api/v2/frames/1', body);
+    const sendRequest = body => client.patch('http://localhost:3000/api/v2/frames/1', body);
 
     describe('when the request body is incorrectly structured JSON', () => {
       const reqBody = {

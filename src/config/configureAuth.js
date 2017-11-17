@@ -11,15 +11,6 @@ import models from '../models';
 
 const KnexSessionStore = KnexSessionStoreFactory(session);
 
-// Generate an API key pair for internal use on server start up.
-resetInternalApiKey().then(({ apiKey, secretKey }) => {
-  // These credentials should never leave server RAM.
-  jsonApi.auth = {
-    username: apiKey.id,
-    password: secretKey,
-  };
-});
-
 // The "local" strategy is for user log in using the web form.
 passport.use(new LocalStrategy(
   (username, password, done) => {
@@ -70,9 +61,22 @@ export default (app) => {
     store: new KnexSessionStore({
       knex: models.knex,
       tablename: 'sessions',
+      createtable: false,
     }),
   }));
 
   app.use(passport.initialize());
   app.use(passport.session());
+
+  // Generate an API key pair for internal use on server start up.
+  return resetInternalApiKey().then(({ apiKey, secretKey }) => {
+    // These credentials should never leave server RAM.
+    jsonApi.auth = {
+      username: apiKey.id,
+      password: secretKey,
+    };
+
+    app.auth = jsonApi.auth;
+    return app;
+  });
 };

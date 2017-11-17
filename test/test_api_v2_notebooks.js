@@ -12,9 +12,15 @@ import showoffConfig from '../src/config/showoff';
 
 
 describe('API V2 Notebooks', () => {
+  let client = null;
   let clock = null;
 
   beforeEach(() => {
+    client = axios.create({
+      baseURL: 'http://localhost:3000/api/v2',
+      auth: global.auth,
+    });
+
     clock = sinon.useFakeTimers();
   });
 
@@ -26,7 +32,7 @@ describe('API V2 Notebooks', () => {
   });
 
   describe('GET /notebooks', () => {
-    const sendRequest = () => axios.get('http://localhost:3000/api/v2/notebooks');
+    const sendRequest = () => client.get('http://localhost:3000/api/v2/notebooks');
 
     describe('when there are two notebooks in the database', () => {
       beforeEach(() => factory.createMany('notebook', 2));
@@ -76,7 +82,7 @@ describe('API V2 Notebooks', () => {
   });
 
   describe('POST /notebooks', () => {
-    const sendRequest = body => axios.post('http://localhost:3000/api/v2/notebooks', body);
+    const sendRequest = body => client.post('http://localhost:3000/api/v2/notebooks', body);
 
     describe('when the request body is incorrectly structured JSON', () => {
       const reqBody = {
@@ -145,7 +151,7 @@ describe('API V2 Notebooks', () => {
     beforeEach(() => factory.create('notebook', { id: 1 }));
 
     describe('when the notebook does not exist', () => {
-      const sendRequest = () => axios.get('http://localhost:3000/api/v2/notebooks/1337');
+      const sendRequest = () => client.get('http://localhost:3000/api/v2/notebooks/1337');
 
       it('should return a status 404 error response', () =>
         expect(sendRequest()).to.reject.with.errorResponse(404)
@@ -153,7 +159,7 @@ describe('API V2 Notebooks', () => {
     });
 
     describe('when the notebook exists', () => {
-      const sendRequest = () => axios.get('http://localhost:3000/api/v2/notebooks/1');
+      const sendRequest = () => client.get('http://localhost:3000/api/v2/notebooks/1');
 
       it('should return HTTP status 200', () =>
         expect(sendRequest()).to.eventually.have.status(200)
@@ -195,7 +201,7 @@ describe('API V2 Notebooks', () => {
     beforeEach(() => factory.create('notebook', { id: 1 }));
 
     describe('when the notebook does not exist', () => {
-      const sendRequest = () => axios.delete('http://localhost:3000/api/v2/notebooks/1337');
+      const sendRequest = () => client.delete('http://localhost:3000/api/v2/notebooks/1337');
 
       it('should return a status 404 error response', () =>
         expect(sendRequest()).to.reject.with.errorResponse(404)
@@ -203,7 +209,7 @@ describe('API V2 Notebooks', () => {
     });
 
     describe('when the notebook exists', () => {
-      const sendRequest = () => axios.delete('http://localhost:3000/api/v2/notebooks/1');
+      const sendRequest = () => client.delete('http://localhost:3000/api/v2/notebooks/1');
 
       it('should return HTTP status 204', () =>
         expect(sendRequest()).to.eventually.have.status(204)
@@ -223,7 +229,7 @@ describe('API V2 Notebooks', () => {
       broadcastStub.restore();
     });
 
-    const sendRequest = body => axios.patch('http://localhost:3000/api/v2/notebooks/1', body);
+    const sendRequest = body => client.patch('http://localhost:3000/api/v2/notebooks/1', body);
 
     describe('when the request body is incorrectly structured JSON', () => {
       const reqBody = {
@@ -281,7 +287,7 @@ describe('API V2 Notebooks', () => {
   });
 
   describe('PUT /notebooks/:id/files', () => {
-    const sendRequest = formData => axios.put(
+    const sendRequest = formData => client.put(
       'http://localhost:3000/api/v2/notebooks/1/files',
       formData,
       { headers: formData.getHeaders() },
@@ -358,7 +364,7 @@ describe('API V2 Notebooks', () => {
   });
 
   describe('PATCH /notebooks/:id/files', () => {
-    const sendRequest = formData => axios.patch(
+    const sendRequest = formData => client.patch(
       'http://localhost:3000/api/v2/notebooks/1/files',
       formData,
       { headers: formData.getHeaders() },

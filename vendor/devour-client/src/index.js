@@ -282,7 +282,19 @@ class JsonApi {
         return this.applyResponseMiddleware(responsePromise)
       })
       .catch((err) => {
+        const errOwnProps = _.assign({}, err)
+        _.keys(err).forEach(key => { delete err[key] })
+        if (errOwnProps.config) {
+          err.config =
+            _.pick(errOwnProps.config, ['method', 'url', 'model', 'params', 'headers'])
+        }
+        if (errOwnProps.response) {
+          err.response =
+            _.pick(errOwnProps.response, ['data', 'status', 'headers'])
+        }
         Logger.error(err)
+        _.keys(err).forEach(key => { delete err[key] })
+        _.assign(err, errOwnProps)
         let errorPromise = Promise.resolve(err)
         return this.applyErrorMiddleware(errorPromise).then(err => {
           return Promise.reject(err)

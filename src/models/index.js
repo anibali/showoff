@@ -9,6 +9,8 @@ import Notebook from './Notebook';
 import Frame from './Frame';
 import Tag from './Tag';
 import File from './File';
+import User from './User';
+import ApiKey from './ApiKey';
 
 const knexConf = require('../../knexfile')[process.env.NODE_ENV || 'development'];
 
@@ -25,6 +27,8 @@ Notebook(bookshelf);
 Frame(bookshelf);
 Tag(bookshelf);
 File(bookshelf);
+User(bookshelf);
+ApiKey(bookshelf);
 
 const models = modelName => bookshelf.model(modelName);
 models.knex = knex;

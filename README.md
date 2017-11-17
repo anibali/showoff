@@ -1,28 +1,30 @@
 # Showoff
 
+WARNING: Showoff is still under heavy development. Use at own risk.
+
 ## Setup
 
 Requires Docker Engine (17.09+) and Docker Compose (1.17.0+).
 
-```sh
-$ sed "s/\(POSTGRES_PASSWORD=\).*/\1$(openssl rand -hex 32)/" \
-  env/postgres.env.example > env/postgres.env
-$ docker-compose build
-$ docker-compose up
-```
-
-You can also seed the database with some example notebooks.
-
-```sh
-$ docker-compose run --rm web knex seed:run
-```
+1.  Create the environment variable configuration files. A script is provided to
+    guide you through this process.
+    ```sh
+    $ scripts/config
+    ```
+2.  Start the Showoff server.
+    ```sh
+    $ docker-compose up
+    ```
+3.  [Optional] Seed the database with some dummy data.
+    ```sh
+    $ docker-compose run --rm web knex seed:run
+    ```
 
 ## Upgrading
 
 ```sh
 $ git pull
-$ docker-compose build
-$ docker-compose up -d
+$ docker-compose up --build -d
 ```
 
 ## License

@@ -79,9 +79,8 @@ const broadcastNotebook = (notebook) => {
 // GET /api/v2/notebooks
 const indexNotebooks = (req, res) =>
   models('Notebook').fetchAll()
-    .then(notebooks => {
-      res.json(mapper.map(notebooks, 'notebooks', { enableLinks: false }));
-    })
+    .then(notebooks => mapper.map(notebooks, 'notebooks', { enableLinks: false }))
+    .then(notebooks => res.json(notebooks))
     .catch(err => errorResponse(res, err));
 
 // POST /api/v2/notebooks

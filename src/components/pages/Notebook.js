@@ -2,8 +2,8 @@ import _ from 'lodash';
 import React from 'react';
 import * as ReactRedux from 'react-redux';
 import DocumentTitle from 'react-document-title';
-import notebookActionCreators from '../redux/notebooksActionCreators';
-import Frame from './Frame';
+import notebookActionCreators from '../../redux/notebooksActionCreators';
+import Frame from '../Frame';
 
 class Notebook extends React.Component {
   // Called during server-side rendering

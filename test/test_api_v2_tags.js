@@ -3,12 +3,19 @@ import sinon from 'sinon';
 import _ from 'lodash';
 import axios from 'axios';
 import { factory } from 'factory-girl';
+
 import models from '../src/models';
 
 describe('API V2 Tags', () => {
+  let client = null;
   let clock = null;
 
   beforeEach(() => {
+    client = axios.create({
+      baseURL: 'http://localhost:3000/api/v2',
+      auth: global.auth,
+    });
+
     clock = sinon.useFakeTimers();
   });
 
@@ -20,7 +27,7 @@ describe('API V2 Tags', () => {
   });
 
   describe('GET /tags', () => {
-    const sendRequest = () => axios.get('http://localhost:3000/api/v2/tags');
+    const sendRequest = () => client.get('/tags');
 
     describe('when there are no tags in the database', () => {
       it('should return HTTP status 200', () =>
@@ -102,7 +109,7 @@ describe('API V2 Tags', () => {
   });
 
   describe('POST /tags', () => {
-    const sendRequest = body => axios.post('http://localhost:3000/api/v2/tags', body);
+    const sendRequest = body => client.post('http://localhost:3000/api/v2/tags', body);
 
     describe('when the request body is incorrectly structured JSON', () => {
       const reqBody = {

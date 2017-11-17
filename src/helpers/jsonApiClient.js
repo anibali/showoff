@@ -50,5 +50,12 @@ jsonApi.define('tags', {
   updatedAt: '',
 });
 
+jsonApi.define('apiKeys', {
+  publicKey: '',
+  secretKey: '',
+  createdAt: '',
+  updatedAt: '',
+});
+
 
 export default jsonApi;

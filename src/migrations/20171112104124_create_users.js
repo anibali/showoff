@@ -3,7 +3,7 @@ exports.up = function(knex) {
     table.increments('id').primary();
     table.dateTime('createdAt').notNullable();
     table.dateTime('updatedAt').notNullable();
-    table.string('username').notNullable();
+    table.string('username').notNullable().unique();
     table.string('passwordHash').notNullable();
     table.string('passwordSalt').notNullable();
   });

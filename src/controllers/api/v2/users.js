@@ -1,5 +1,6 @@
 import express from 'express';
 import * as Mapper from 'jsonapi-mapper';
+import _ from 'lodash';
 
 import models from '../../../models';
 import { createApiKey, destroyApiKeys } from '../../../helpers/authHelpers';
@@ -29,7 +30,7 @@ const showCurrentUser = (req, res) => {
     .catch(err => errorResponse(res, err));
 };
 
-// GET /api/v2/users/current/api-keys
+// GET /api/v2/users/current/apiKeys
 const showCurrentUserApiKeys = (req, res) => {
   models('ApiKey').where({ userId: req.user.id }).fetchAll()
     .then(apiKeys => mapper.map(apiKeys, 'apiKeys', {
@@ -40,31 +41,50 @@ const showCurrentUserApiKeys = (req, res) => {
     .catch(err => errorResponse(res, err));
 };
 
-// POST /api/v2/users/current/api-keys
+// POST /api/v2/users/current/apiKeys
 const createCurrentUserApiKey = (req, res) => {
   createApiKey(req.user.id)
-    .then(({ apiKey }) => mapper.map(apiKey, 'apiKeys', {
-      enableLinks: false,
-      attributes: { omit: ['id', 'userId'] },
-    }))
+    .then(({ apiKey, secretKey }) => {
+      apiKey.attributes.secretKey = secretKey;
+      return apiKey;
+    })
+    .then((apiKey) =>
+      mapper.map(apiKey, 'apiKeys', {
+        enableLinks: false,
+        attributes: { omit: ['id', 'userId'] },
+      })
+    )
     .then(apiKey => res.json(apiKey))
     .catch(err => errorResponse(res, err));
 };
 
-// DELETE /api/v2/users/current/api-keys
+// DELETE /api/v2/users/current/apiKeys
 const destroyCurrentUserApiKeys = (req, res) => {
   destroyApiKeys(req.user.id)
     .then(() => res.status(204).send())
     .catch(err => errorResponse(res, err));
 };
 
-const router = express.Router();
+const currentUserRouter = express.Router();
 
-router.route('/current')
+currentUserRouter.route('/')
   .get(showCurrentUser);
-router.route('/current/api-keys')
+currentUserRouter.route('/apiKeys')
   .get(showCurrentUserApiKeys)
   .post(createCurrentUserApiKey)
   .delete(destroyCurrentUserApiKeys);
+
+const router = express.Router();
+
+const forbidInternalUser = (req, res, next) => {
+  if(!req.isAuthenticated() || req.user.get('username') === '_internal') {
+    res.status(401).send('_internal user is forbidden here');
+  }
+
+  next();
+};
+
+router.use('/current', forbidInternalUser, currentUserRouter);
+
 
 export default router;

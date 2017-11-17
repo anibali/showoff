@@ -22,6 +22,8 @@ const simpleActionCreators = createActions({
   },
   auth: {
     SET_AUTHENTICATED: authenticated => ({ authenticated }),
+    SET_CURRENT_USER_API_KEYS: apiKeys => ({ apiKeys }),
+    ADD_CURRENT_USER_API_KEYS: apiKeys => ({ apiKeys }),
   }
 });
 

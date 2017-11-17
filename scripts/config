@@ -1,0 +1,34 @@
+#!/bin/bash
+
+ENV_DIR=env
+
+if test -n "$(find "$ENV_DIR" -name '*.env' -print -quit)"
+then
+  echo 'Existing config file(s) found. What should I do?'
+  select ans in 'Overwrite' 'Abort'; do
+    case $ans in
+      Overwrite ) break;;
+      Abort ) exit;;
+    esac
+  done
+fi
+
+postgres_env="$ENV_DIR/postgres.env"
+rm -f "$postgres_env"
+echo "POSTGRES_USER=admin" >> "$postgres_env"
+echo "POSTGRES_PASSWORD=$(openssl rand -base64 36)" >> "$postgres_env"
+
+showoff_env="$ENV_DIR/showoff.env"
+rm -f "$showoff_env"
+echo 'Please enter a password to use for then admin user.'
+echo 'Warning: this password will be written to a plain text file.'
+while true; do
+  read -s -p "Password: " password
+  echo
+  read -s -p "Password (again): " password2
+  echo
+  [ "$password" = "$password2" ] && break
+  echo "Passwords don't match, please try again"
+done
+echo "ADMIN_PASSWORD=$password" >> "$showoff_env"
+echo "COOKIE_SECRET=$(openssl rand -base64 36)" >> "$showoff_env"

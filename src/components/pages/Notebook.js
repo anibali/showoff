@@ -2,8 +2,21 @@ import _ from 'lodash';
 import React from 'react';
 import * as ReactRedux from 'react-redux';
 import DocumentTitle from 'react-document-title';
+import { withStyles } from 'material-ui/styles';
+import { CircularProgress } from 'material-ui/Progress';
+
 import notebookActionCreators from '../../redux/notebooksActionCreators';
 import Frame from '../Frame';
+
+
+const styles = {
+  bigSpinner: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+  }
+};
 
 class Notebook extends React.Component {
   // Called during server-side rendering
@@ -41,17 +54,9 @@ class Notebook extends React.Component {
 
       children = this.props.frames.map(createFrame);
     } else {
-      const style = {
-        color: 'white',
-        fontSize: 128,
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)'
-      };
       children = (
-        <div style={style}>
-          <span className="fa fa-spinner fa-pulse" />
+        <div className={this.props.classes.bigSpinner}>
+          <CircularProgress color="accent" size={150} />
         </div>
       );
     }
@@ -66,7 +71,7 @@ class Notebook extends React.Component {
   }
 }
 
-export default ReactRedux.connect(
+export default withStyles(styles)(ReactRedux.connect(
   // Map store state to props
   (state, ownProps) => {
     const { id } = ownProps.match.params;
@@ -77,4 +82,4 @@ export default ReactRedux.connect(
     loadNotebook: _.flow(notebookActionCreators.loadNotebook, dispatch),
     updateFrame: _.flow(notebookActionCreators.updateFrame, dispatch)
   })
-)(Notebook);
+)(Notebook));

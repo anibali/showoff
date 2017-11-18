@@ -55,7 +55,7 @@ body {
 }
 
 .notebook {
-  background: #363330;
+  background: #004d40;
   font-size: 12px;
 }
 
@@ -71,7 +71,6 @@ body {
   height: 22px;
   line-height: 22px;
   background: black;
-  background: linear-gradient(#012, #001);
   color: white;
   overflow: hidden;
   cursor: move;

@@ -10,11 +10,13 @@ import LockOpenIcon from 'material-ui-icons/LockOpen';
 import ModeEditIcon from 'material-ui-icons/ModeEdit';
 import DeleteForeverIcon from 'material-ui-icons/DeleteForever';
 import Avatar from 'material-ui/Avatar';
+import { CircularProgress } from 'material-ui/Progress';
+import DoneIcon from 'material-ui-icons/Done';
 
 import TagList from './TagList';
 
 
-const styles = () => ({
+const styles = (theme) => ({
   disabled: {
     opacity: 0.3,
     filter: 'grayscale(100%)',
@@ -26,10 +28,34 @@ const styles = () => ({
   orangeAvatar: {
     backgroundColor: orange[500],
   },
+  progressStackedOuter: {
+    position: 'relative',
+  },
+  progressStackedInner: {
+    color: theme.palette.primary[500],
+    position: 'absolute',
+    top: 8,
+    left: 8,
+  }
 });
 
 const absorbClick = (event) => {
   event.preventDefault();
+};
+
+const Progress = ({ value, classes }) => {
+  if(value < 0) {
+    return <CircularProgress />;
+  }
+  if(value >= 100) {
+    return (
+      <div className={classes.progressStackedOuter}>
+        <DoneIcon className={classes.progressStackedInner} />
+        <CircularProgress mode="determinate" value={100} />
+      </div>
+    );
+  }
+  return <CircularProgress mode="determinate" value={value} />;
 };
 
 class NotebookListItemView extends React.Component {
@@ -51,11 +77,12 @@ class NotebookListItemView extends React.Component {
 
     return (
       <ListItem dense button component={Link} to={`/notebooks/${notebook.id}`}>
+        <Progress classes={classes} value={notebook.progress * 100} />
+        <ListItemText primary={notebook.title} secondary={new Date(notebook.createdAt).toUTCString()} />
+        <TagList tags={tags} />
         <IconButton onClick={onChangePinned} onKeyDown={this.onPinnedKeyDown}>
           {notebook.pinned ? <LockIcon /> : <LockOpenIcon />}
         </IconButton>
-        <ListItemText primary={notebook.title} secondary={new Date(notebook.createdAt).toUTCString()} />
-        <TagList tags={tags} />
         <IconButton title="Edit notebook title" onClick={onClickEdit}>
           <Avatar className={classes.orangeAvatar}>
             <ModeEditIcon />

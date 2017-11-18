@@ -2,10 +2,12 @@ const notebooks = [
   {
     title: 'My notebook',
     progress: 0.33,
+    pinned: true,
   },
   {
     title: 'My other notebook',
     progress: 0.56,
+    pinned: true,
   }
 ];
 
@@ -16,7 +18,8 @@ for(let i = 0; i < 10; ++i) {
 notebooks.push({
   title: 'This notebook has a very long title that just seems to go on and on' +
     ' and on and on and on, with little point except to test that the' +
-    ' interface can handle long titles'
+    ' interface can handle long titles',
+  progress: 1.0,
 });
 
 const frames = [

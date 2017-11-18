@@ -16,9 +16,6 @@ const styles = theme => ({
   paper: {
     padding: theme.spacing.unit * 4,
   },
-  control: {
-    marginBottom: theme.spacing.unit * 2,
-  },
 });
 
 class Login extends React.Component {
@@ -76,7 +73,7 @@ class Login extends React.Component {
               {errorNotice ? <p>{errorNotice}</p> : null}
               <form onSubmit={this.login}>
                 <TextField
-                  className={classes.control}
+                  margin="normal"
                   fullWidth
                   label="Username"
                   type="text"
@@ -85,7 +82,7 @@ class Login extends React.Component {
                   autoFocus
                 />
                 <TextField
-                  className={classes.control}
+                  margin="normal"
                   fullWidth
                   label="Password"
                   type="password"

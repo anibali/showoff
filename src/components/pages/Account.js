@@ -6,7 +6,10 @@ import Typography from 'material-ui/Typography';
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
 import IconButton from 'material-ui/IconButton';
 import DeleteForeverIcon from 'material-ui-icons/DeleteForever';
+import ContentCopyIcon from 'material-ui-icons/ContentCopy';
 import TextField from 'material-ui/TextField';
+import { FormControl } from 'material-ui/Form';
+import Input, { InputAdornment, InputLabel } from 'material-ui/Input';
 import Dialog, {
   DialogActions,
   DialogContent,
@@ -30,6 +33,46 @@ const createApiKeyItem = apiKey => (
     </TableCell>
   </TableRow>
 );
+
+class CopyField extends React.Component {
+  constructor(props) {
+    super(props);
+    this.setInputRef = (ref) => { this.inputRef = ref; };
+    this.selectAll = () => {
+      this.inputRef.select();
+    };
+    this.copyToClipboard = () => {
+      this.selectAll();
+      document.execCommand('copy');
+    };
+  }
+
+  render() {
+    const { id, label, value } = this.props;
+    let endAdornment = null;
+    if(document.queryCommandSupported('copy')) {
+      endAdornment = (
+        <InputAdornment position="end">
+          <IconButton onClick={this.copyToClipboard}>
+            <ContentCopyIcon />
+          </IconButton>
+        </InputAdornment>
+      );
+    }
+    return (
+      <FormControl fullWidth margin="normal">
+        <InputLabel htmlFor={id}>{label}</InputLabel>
+        <Input
+          id={id}
+          inputRef={this.setInputRef}
+          value={value}
+          onFocus={this.selectAll}
+          endAdornment={endAdornment}
+        />
+      </FormControl>
+    );
+  }
+}
 
 class Account extends React.Component {
   constructor(props) {
@@ -103,20 +146,20 @@ class Account extends React.Component {
               secret part of this API key. If you lose it, you will need
               to create a new key.
             </DialogContentText>
-            <TextField
+            <CopyField
+              id="keyIdField"
               label="API key ID"
               value={this.state.newApiKey.id}
-              fullWidth
             />
-            <TextField
+            <CopyField
+              id="secretKeyField"
               label="Secret key"
               value={this.state.newApiKey.secretKey}
-              fullWidth
             />
           </DialogContent>
           <DialogActions>
             <Button onClick={this.hideKeyCreatedDialog} color="primary" autoFocus>
-              I have noted the secret key
+              I have copied the secret key
             </Button>
           </DialogActions>
         </Dialog>

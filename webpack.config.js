@@ -6,13 +6,6 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 
-// List of styles to put into vendor.css
-const vendorStyles = [
-  require.resolve('bootstrap/dist/css/bootstrap.css'),
-  require.resolve('font-awesome/css/font-awesome.css'),
-  require.resolve('react-bootstrap-typeahead/css/Typeahead.css'),
-];
-
 // Plugins to use for each environment
 const plugins = {
   any: [
@@ -57,7 +50,6 @@ module.exports = {
   entry: {
     app: ['./src/client.js']
       .concat(glob.sync(path.join(__dirname, 'src', 'styles', '**/*.css'))),
-    vendor: vendorStyles
   },
   output: {
     path: path.join(__dirname, 'dist'),

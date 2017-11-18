@@ -2,7 +2,6 @@ import path from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
-import { StaticRouter } from 'react-router';
 import { matchPath } from 'react-router-dom';
 import DocumentTitle from 'react-document-title';
 import fs from 'fs-extra';
@@ -10,16 +9,41 @@ import mime from 'mime';
 import React from 'react';
 import reactDomServer from 'react-dom/server';
 
+import { SheetsRegistry } from 'react-jss/lib/jss';
+
 import configureAuth from './config/configureAuth';
 import frontendRoutes from './components/frontendRoutes';
 import controllerRoutes from './config/routes';
 import createStore from './redux/createStore';
 import simpleActionCreators from './redux/simpleActionCreators';
 import showoffConfig from './config/showoff';
-import Root from './components/Root';
+import ServerRoot from './components/ServerRoot';
 
 
-const createApp = () => Promise.resolve()
+/**
+ * The HTML is pretty barebones, it just provides a mount point
+ * for React and links to our styles and scripts.
+ */
+const renderHtmlPage = (title, reactHtml, storeState, css) => (`
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title>${title}</title>
+      <link rel="stylesheet" type="text/css" href="/assets/bundle/app.css">
+    </head>
+    <body>
+      <div class="fill-space" id="root">${reactHtml}</div>
+      <style id="jss-server-side">${css}</style>
+      <script src="/assets/bundle/app.js"></script>
+      <script>
+        main(${storeState})
+      </script>
+    </body>
+  </html>
+`);
+
+
+export default () => Promise.resolve()
   .then(() => express())
   .then(configureAuth)
   .then((app) => {
@@ -96,39 +120,23 @@ const createApp = () => Promise.resolve()
       });
 
       promise.then(() => {
-        const Router = props => (
-          <StaticRouter location={req.url} context={context}>
-            {props.children}
-          </StaticRouter>
-        );
+        const sheetsRegistry = new SheetsRegistry();
 
         // Server-side rendering
-        const reactHtml = reactDomServer.renderToString(<Root store={store} Router={Router} />);
-
+        const reactHtml = reactDomServer.renderToString(
+          <ServerRoot
+            store={store}
+            location={req.url}
+            context={context}
+            sheetsRegistry={sheetsRegistry}
+          />
+        );
         const storeState = sanitiseJson(JSON.stringify(store.getState()));
-
         const title = DocumentTitle.rewind();
-
-        // The HTML is pretty barebones, it just provides a mount point
-        // for React and links to our styles and scripts.
-        const htmlContent = `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>${title}</title>
-              <link rel="stylesheet" type="text/css" href="/assets/bundle/vendor.css">
-              <link rel="stylesheet" type="text/css" href="/assets/bundle/app.css">
-            </head>
-            <body>
-              <div class="fill-space" id="root">${reactHtml}</div>
-              <script src="/assets/bundle/app.js"></script>
-              <script>
-                main(${storeState})
-              </script>
-            </body>
-          </html>`;
+        const css = sheetsRegistry.toString();
 
         // Respond with the HTML
+        const htmlContent = renderHtmlPage(title, reactHtml, storeState, css);
         res.status(context.status).send(htmlContent);
       }).catch((error) => {
         console.error(error);
@@ -138,5 +146,3 @@ const createApp = () => Promise.resolve()
 
     return app;
   });
-
-export default createApp;

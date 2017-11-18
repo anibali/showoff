@@ -2,8 +2,24 @@ import React from 'react';
 import { Redirect } from 'react-router';
 import * as ReactRedux from 'react-redux';
 import _ from 'lodash';
+import { withStyles } from 'material-ui/styles';
+import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper';
+import TextField from 'material-ui/TextField';
+import Button from 'material-ui/Button';
+import Typography from 'material-ui/Typography';
 
 import authActionCreators from '../../redux/authActionCreators';
+
+
+const styles = theme => ({
+  paper: {
+    padding: theme.spacing.unit * 4,
+  },
+  control: {
+    marginBottom: theme.spacing.unit * 2,
+  },
+});
 
 class Login extends React.Component {
   constructor(props) {
@@ -33,6 +49,7 @@ class Login extends React.Component {
   }
 
   render() {
+    const { classes } = this.props;
     const { from } = this.props.location.state || { from: { pathname: '/' } };
 
     if(this.state.redirect) {
@@ -49,36 +66,39 @@ class Login extends React.Component {
     }
 
     return (
-      <div className="container">
-        <div className="row">
-          <div className="col-md-offset-4 col-md-4">
-            <h1>Please log in</h1>
-            <p>You must log in to view the page at <code>{from.pathname}</code>.</p>
-            {errorNotice}
-            <form onSubmit={this.login}>
-              <div className="form-group">
-                <input
+      <div className="container" style={{ padding: 16 }}>
+        <Grid container justify="center" spacing={24}>
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper className={classes.paper}>
+              <Typography type="headline" gutterBottom>
+                Please log in
+              </Typography>
+              {errorNotice ? <p>{errorNotice}</p> : null}
+              <form onSubmit={this.login}>
+                <TextField
+                  className={classes.control}
+                  fullWidth
+                  label="Username"
                   type="text"
-                  className="form-control"
-                  placeholder="Username"
                   value={this.state.username}
                   onChange={this.onUsernameChange}
                   autoFocus
                 />
-              </div>
-              <div className="form-group">
-                <input
+                <TextField
+                  className={classes.control}
+                  fullWidth
+                  label="Password"
                   type="password"
-                  className="form-control"
-                  placeholder="Password"
                   value={this.state.password}
                   onChange={this.onPasswordChange}
                 />
-              </div>
-              <button type="submit" className="btn btn-primary btn-block">Log in</button>
-            </form>
-          </div>
-        </div>
+                <Button raised color="primary" type="submit">
+                  Log in
+                </Button>
+              </form>
+            </Paper>
+          </Grid>
+        </Grid>
       </div>
     );
   }
@@ -90,4 +110,4 @@ export default ReactRedux.connect(
   (dispatch) => ({
     signIn: _.flow(authActionCreators.signIn, dispatch),
   })
-)(Login);
+)(withStyles(styles)(Login));

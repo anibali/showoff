@@ -1,28 +1,28 @@
 import React from 'react';
 import * as ReactRedux from 'react-redux';
+import _ from 'lodash';
 import { Link } from 'react-router-dom';
+import AppBar from 'material-ui/AppBar';
+import Toolbar from 'material-ui/Toolbar';
+import Button from 'material-ui/Button';
+
+import authActionCreators from '../redux/authActionCreators';
 
 
-const Header = () => (
-  <header className="header-bar offset-scrollbar">
-    <div className="container">
-      <div className="row">
-        <ul className="nav nav-pills">
-          <li role="presentation">
-            <Link to="/">Home</Link>
-          </li>
-          <li role="presentation">
-            <Link to="/account">Account</Link>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </header>
+const Header = ({ signOut }) => (
+  <AppBar position="static">
+    <Toolbar>
+      <Button color="contrast" to="/" component={Link}>Home</Button>
+      <Button color="contrast" to="/account" component={Link}>Account</Button>
+      <Button color="contrast" onClick={signOut}>Sign out</Button>
+    </Toolbar>
+  </AppBar>
 );
 
 
 export default ReactRedux.connect(
-  (state) => ({
-    username: state.auth.username,
+  null,
+  (dispatch) => ({
+    signOut: _.flow(authActionCreators.signOut, dispatch),
   })
 )(Header);

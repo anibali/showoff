@@ -20,11 +20,13 @@ actionCreators.signOut = () => (dispatch) =>
 actionCreators.loadCurrentUserApiKeys = () => (dispatch) =>
   jsonApi.one('users', 'current').all('apiKeys').get().then((apiKeys) => {
     dispatch(actionCreators.setCurrentUserApiKeys(apiKeys.data));
+    return apiKeys;
   });
 
 actionCreators.createCurrentUserApiKey = () => (dispatch) =>
   jsonApi.one('users', 'current').all('apiKeys').post({}).then((apiKey) => {
     dispatch(actionCreators.addCurrentUserApiKeys([apiKey.data]));
+    return apiKey;
   });
 
 actionCreators.destroyCurrentUserApiKeys = () => (dispatch) =>

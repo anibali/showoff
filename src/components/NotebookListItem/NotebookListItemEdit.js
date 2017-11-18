@@ -1,7 +1,20 @@
 import React from 'react';
 import _ from 'lodash';
-import { Typeahead } from 'react-bootstrap-typeahead';
+import { withStyles } from 'material-ui/styles';
+import { ListItem } from 'material-ui/List';
+import TextField from 'material-ui/TextField';
+import { InputLabel } from 'material-ui/Input';
+import { FormControl } from 'material-ui/Form';
+import Button from 'material-ui/Button';
 
+import TagInput from '../TagInput';
+
+
+const styles = theme => ({
+  button: {
+    margin: theme.spacing.unit,
+  },
+});
 
 class NotebookListItemEdit extends React.Component {
   constructor(props) {
@@ -11,7 +24,7 @@ class NotebookListItemEdit extends React.Component {
 
   // Describe how to render the component
   render() {
-    const { notebook, onConfirmEdit, onCancelEdit } = this.props;
+    const { notebook, onConfirmEdit, onCancelEdit, classes } = this.props;
 
     const onChangeTitle = (event) => {
       event.preventDefault();
@@ -28,69 +41,48 @@ class NotebookListItemEdit extends React.Component {
       onCancelEdit();
     };
 
-    const onTagsChange = (selectedItems) => {
-      this.setState({ tags: selectedItems.map(item => _.pick(item, 'name')) });
+    const onTagsChange = (tags) => {
+      this.setState({ tags: tags.map(item => _.pick(item, 'name')) });
     };
 
     const tags = notebook.tags || [];
     const tagOptions = this.props.tagOptions || [];
 
-    const titleFieldId = `notebook-title-field-${notebook.id}`;
     const tagFieldId = `notebook-tags-field-${notebook.id}`;
 
     return (
-      <div className="list-group-item">
-        <form className="form-horizontal" onSubmit={onSubmitForm}>
-          <div className="form-group">
-            <label htmlFor={titleFieldId} className="col-md-1 control-label">
-              Title
-            </label>
-            <div className="col-md-11">
-              <input
-                type="text"
-                id={titleFieldId}
-                className="form-control"
-                value={this.state.title}
-                onChange={onChangeTitle}
-              />
-            </div>
-          </div>
-          <div className="form-group">
-            <label htmlFor={tagFieldId} className="col-md-1 control-label">
-              Tags
-            </label>
-            <div className="col-md-11">
-              <Typeahead
-                id={tagFieldId}
-                clearButton
-                labelKey="name"
-                multiple
-                options={tagOptions}
-                defaultSelected={tags}
-                placeholder="Choose tags..."
-                onChange={onTagsChange}
-                allowNew
-              />
-            </div>
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <div className="col-md-offset-1 col-md-11">
-              <div className="btn-toolbar">
-                <input
-                  type="submit"
-                  value="Save"
-                  className="btn btn-success"
-                />
-                <button className="btn btn-default" onClick={onClickCancel}>
-                  Cancel
-                </button>
-              </div>
-            </div>
+      <ListItem dense>
+        <form onSubmit={onSubmitForm} style={{ width: '100%' }}>
+          <TextField
+            fullWidth
+            label="Title"
+            type="text"
+            value={this.state.title}
+            onChange={onChangeTitle}
+            autoFocus
+          />
+          <FormControl fullWidth>
+            <TagInput
+              id={tagFieldId}
+              suggestions={tagOptions}
+              initialTags={tags}
+              onChange={onTagsChange}
+              placeholder="Add tag"
+              allowNew
+            />
+          </FormControl>
+          <div>
+            <Button className={classes.button} dense raised color="primary" type="submit">
+              Save
+            </Button>
+            <Button className={classes.button} dense raised onClick={onClickCancel}>
+              Cancel
+            </Button>
           </div>
         </form>
-      </div>
+      </ListItem>
     );
   }
 }
 
-export default NotebookListItemEdit;
+export default withStyles(styles)(NotebookListItemEdit);

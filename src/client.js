@@ -8,11 +8,10 @@ import 'babel-polyfill';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter } from 'react-router-dom';
 
 import createStore from './redux/createStore';
 import WebSocketClient from './webSocketClient';
-import Root from './components/Root';
+import ClientRoot from './components/ClientRoot';
 
 import jsonApi from './helpers/jsonApiClient';
 
@@ -30,5 +29,5 @@ window.main = (initialState) => {
 
   // Mount our React root component in the DOM
   const mountPoint = document.getElementById('root');
-  ReactDOM.hydrate(<Root store={store} Router={BrowserRouter} />, mountPoint);
+  ReactDOM.hydrate(<ClientRoot store={store} />, mountPoint);
 };

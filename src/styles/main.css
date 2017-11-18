@@ -38,6 +38,7 @@ body {
   margin: 2px;
   border-radius: 2px;
   font-size: 13px;
+  white-space: nowrap;
 }
 
 .fill-space {

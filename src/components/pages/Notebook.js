@@ -7,6 +7,7 @@ import { CircularProgress } from 'material-ui/Progress';
 
 import notebookActionCreators from '../../redux/notebooksActionCreators';
 import Frame from '../Frame';
+import BodyClass from '../BodyClass';
 
 
 const styles = {
@@ -63,9 +64,11 @@ class Notebook extends React.Component {
 
     return (
       <DocumentTitle title={this.props.title || 'Untitled notebook'}>
-        <div className="fill-space notebook">
-          {children}
-        </div>
+        <BodyClass className="notebook">
+          <div className="fill-space">
+            {children}
+          </div>
+        </BodyClass>
       </DocumentTitle>
     );
   }

@@ -12,6 +12,7 @@ import reactDomServer from 'react-dom/server';
 import { SheetsRegistry } from 'react-jss/lib/jss';
 
 import configureAuth from './config/configureAuth';
+import BodyClass from './components/BodyClass';
 import frontendRoutes from './components/frontendRoutes';
 import controllerRoutes from './config/routes';
 import createStore from './redux/createStore';
@@ -24,14 +25,14 @@ import ServerRoot from './components/ServerRoot';
  * The HTML is pretty barebones, it just provides a mount point
  * for React and links to our styles and scripts.
  */
-const renderHtmlPage = (title, reactHtml, storeState, css) => (`
+const renderHtmlPage = (title, bodyClassName, reactHtml, storeState, css) => (`
   <!DOCTYPE html>
   <html>
     <head>
       <title>${title}</title>
       <link rel="stylesheet" type="text/css" href="/assets/bundle/app.css">
     </head>
-    <body>
+    <body class="${bodyClassName}">
       <div class="fill-space" id="root">${reactHtml}</div>
       <style id="jss-server-side">${css}</style>
       <script src="/assets/bundle/app.js"></script>
@@ -133,10 +134,11 @@ export default () => Promise.resolve()
         );
         const storeState = sanitiseJson(JSON.stringify(store.getState()));
         const title = DocumentTitle.rewind();
+        const bodyClassName = BodyClass.rewind() || '';
         const css = sheetsRegistry.toString();
 
         // Respond with the HTML
-        const htmlContent = renderHtmlPage(title, reactHtml, storeState, css);
+        const htmlContent = renderHtmlPage(title, bodyClassName, reactHtml, storeState, css);
         res.status(context.status).send(htmlContent);
       }).catch((error) => {
         console.error(error);

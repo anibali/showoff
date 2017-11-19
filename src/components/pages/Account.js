@@ -81,7 +81,7 @@ class ApiKeyTableRow extends React.Component {
   render() {
     const { apiKey } = this.props;
     return (
-      <TableRow key={apiKey.id}>
+      <TableRow>
         <TableCell>{apiKey.id}</TableCell>
         <TableCell>{new Date(apiKey.createdAt).toUTCString()}</TableCell>
         <TableCell>
@@ -121,7 +121,7 @@ class Account extends React.Component {
       });
     };
     this.createApiKeyTableRow = apiKey =>
-      <ApiKeyTableRow apiKey={apiKey} onDelete={this.props.destroyApiKey} />;
+      <ApiKeyTableRow key={apiKey.id} apiKey={apiKey} onDelete={this.props.destroyApiKey} />;
   }
 
   componentWillMount() {

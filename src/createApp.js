@@ -43,6 +43,28 @@ const renderHtmlPage = (title, bodyClassName, reactHtml, storeState, css) => (`
   </html>
 `);
 
+// Use gzipped version of assets if they are available and acceptable
+const preferGzippedAssets = (req, res, next) => {
+  const distDir = path.resolve(__dirname, '..', 'dist');
+
+  // Do nothing if client doesn't accept gzip encoding
+  const accepts = req.headers['accept-encoding'];
+  if(!(accepts && accepts.search(/[^\w]gzip[^\w]/))) {
+    next();
+    return;
+  }
+
+  const gzPath = `${req.url}.gz`;
+  fs.access(path.join(distDir, gzPath), fs.constants.R_OK)
+    .then(() => {
+      res.set('Content-Type', mime.getType(req.url));
+      res.set('Content-Encoding', 'gzip');
+      req.url = gzPath;
+    })
+    .catch(() => {})
+    .then(() => next());
+};
+
 
 export default () => Promise.resolve()
   .then(() => express())
@@ -52,28 +74,8 @@ export default () => Promise.resolve()
 
     const distDir = path.resolve(__dirname, '..', 'dist');
 
-    // Use gzipped version of assets if they are available and acceptable
-    app.use('/assets/bundle', (req, res, next) => {
-      // Do nothing if client doesn't accept gzip encoding
-      const accepts = req.headers['accept-encoding'];
-      if(!(accepts && accepts.search(/[^\w]gzip[^\w]/))) {
-        next();
-        return;
-      }
-
-      const gzPath = `${req.url}.gz`;
-      fs.access(path.join(distDir, gzPath), fs.constants.R_OK)
-        .then(() => {
-          res.set('Content-Type', mime.lookup(req.url));
-          res.set('Content-Encoding', 'gzip');
-          req.url = gzPath;
-        })
-        .catch(() => {})
-        .then(() => next());
-    });
-
     // Serve up our static assets from 'dist'
-    app.use('/assets/bundle', express.static(distDir));
+    app.use('/assets/bundle', preferGzippedAssets, express.static(distDir));
 
     // Serve uploaded static files for notebooks
     app.use('/notebooks', express.static(path.join(uploadDir, 'notebooks')));

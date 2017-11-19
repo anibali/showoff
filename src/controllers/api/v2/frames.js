@@ -1,10 +1,13 @@
-import express from 'express';
+import Router from 'express-promise-router';
 import _ from 'lodash';
 import * as Mapper from 'jsonapi-mapper';
 import Joi from 'joi';
 import escape from 'escape-html';
+import httpErrors from 'http-errors';
+
 import models from '../../../models';
 import frameViews from '../../../frameViews';
+
 
 const mapper = new Mapper.Bookshelf();
 
@@ -59,15 +62,19 @@ const patchFrameSchema = Joi.object().keys({
   meta: Joi.object().optional(),
 });
 
-const errorResponse = (res, err) => {
-  if(err.message === 'EmptyResponse' || err.message.indexOf('No Rows Deleted') > -1) {
-    res.status(404).json({ error: 'not found' });
-  } else if(err.message.indexOf('violates foreign key constraint') > -1) {
-    res.status(400).json({ error: 'invalid foreign key' });
-  } else {
-    console.error(err);
-    res.status(500).json({ error: 'internal server error' });
+const wrapBookshelfErrors = (err) => {
+  if(
+    err instanceof models.bookshelf.NotFoundError ||
+    err instanceof models.bookshelf.EmptyError ||
+    err instanceof models.bookshelf.NoRowsUpdatedError ||
+    err instanceof models.bookshelf.NoRowsDeletedError
+  ) {
+    throw httpErrors.NotFound();
   }
+  if(err.message.indexOf('violates foreign key constraint') > -1) {
+    throw httpErrors.BadRequest('invalid foreign key');
+  }
+  throw err;
 };
 
 const renderFrame = (frameJson) =>
@@ -103,39 +110,38 @@ const broadcastFrame = (frame) => {
 };
 
 // GET /api/v2/frames
-const indexFrames = (req, res) => {
+const indexFrames = (req, res) =>
   models('Frame').fetchJsonApi({ include: ['notebook'] })
     .then(frames => res.json(mapper.map(frames, 'frames', {
       enableLinks: false,
       attributes: { omit: ['id', 'notebookId'] },
       relations: { included: false },
-    })))
-    .catch(err => errorResponse(res, err));
-};
+    })));
 
 // POST /api/v2/frames
-const createFrame = (req, res) => {
+const createFrame = (req, res) =>
   Joi.validate(req.body, postFrameSchema, { presence: 'required' })
+    .catch(err => { throw httpErrors.BadRequest(err.message); })
     .then((body) =>
       new Promise((resolve) => resolve(_.assign({}, body.data.attributes,
         { notebookId: parseInt(body.data.relationships.notebook.data.id, 10) })))
         .then(attrs => models('Frame').forge(attrs).save())
+        .catch(wrapBookshelfErrors)
         .then(mapFrameToJson)
         .then(frame => renderFrame(frame.data)
           .then(renderedContent => _.assign({}, frame, { data: renderedContent })))
         .then(broadcastFrame)
         .then(frameJson => res.status(201).json(frameJson))
-        .catch(err => errorResponse(res, err))
-    )
-    .catch((err) => res.status(400).json({ error: err.message }));
-};
+    );
 
 // GET /api/v2/frames/1
-const showFrame = (req, res) => {
-  const id = parseInt(req.params.id, 10);
-
-  models('Frame').where({ id })
-    .fetchJsonApi({ include: ['notebook'], require: true }, false)
+const showFrame = (req, res) =>
+  new Promise(resolve => resolve(parseInt(req.params.id, 10)))
+    .then(id =>
+      models('Frame').where({ id })
+        .fetchJsonApi({ include: ['notebook'], require: true }, false)
+    )
+    .catch(wrapBookshelfErrors)
     .then(frame => mapper.map(frame, 'frames', {
       enableLinks: false,
       attributes: { omit: ['id', 'notebookId'] },
@@ -144,37 +150,32 @@ const showFrame = (req, res) => {
     .then(frameJson =>
       renderFrame(frameJson.data)
         .then(data => _.assign({}, frameJson, { data })))
-    .then(frameJson => res.json(frameJson))
-    .catch(err => errorResponse(res, err));
-};
+    .then(frameJson => res.json(frameJson));
 
 // PATCH /api/v2/frames/3
-const updateFrame = (req, res) => {
+const updateFrame = (req, res) =>
   Joi.validate(req.body, patchFrameSchema, { presence: 'required' })
+    .catch(err => { throw httpErrors.BadRequest(err.message); })
     .then((body) => {
       const id = parseInt(req.params.id, 10);
-      models('Frame').where({ id }).fetch({ require: true })
+      return models('Frame').where({ id }).fetch({ require: true })
+        .catch(wrapBookshelfErrors)
         .then(frame => frame.save(body.data.attributes))
         .then(mapFrameToJson)
         .then(frame => renderFrame(frame.data)
           .then(renderedContent => _.assign({}, frame, { data: renderedContent })))
         .then(broadcastFrame)
-        .then(frameJson => res.json(frameJson))
-        .catch(err => errorResponse(res, err));
-    })
-    .catch((err) => res.status(400).json({ error: err.message }));
-};
+        .then(frameJson => res.json(frameJson));
+    });
 
 // DELETE /api/v2/frames/3
-const destroyFrame = (req, res) => {
-  const id = parseInt(req.params.id, 10);
+const destroyFrame = (req, res) =>
+  new Promise(resolve => resolve(parseInt(req.params.id, 10)))
+    .then(id => models('Frame').forge({ id }).destroy({ require: true }))
+    .catch(wrapBookshelfErrors)
+    .then(() => res.status(204).send());
 
-  models('Frame').forge({ id }).destroy({ require: true })
-    .then(() => res.status(204).send())
-    .catch(err => errorResponse(res, err));
-};
-
-const router = express.Router();
+const router = Router();
 
 router.route('/')
   .get(indexFrames)

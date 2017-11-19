@@ -1,21 +1,13 @@
-import express from 'express';
+import Router from 'express-promise-router';
 import * as Mapper from 'jsonapi-mapper';
 import Joi from 'joi';
 import _ from 'lodash';
+import httpErrors from 'http-errors';
+
 import models from '../../../models';
 
-const mapper = new Mapper.Bookshelf();
 
-const errorResponse = (res, err) => {
-  if(err.message === 'EmptyResponse' || err.message.indexOf('No Rows Deleted') > -1) {
-    res.status(404).json({ error: 'not found' });
-  } else if(err.message.indexOf('violates foreign key constraint') > -1) {
-    res.status(400).json({ error: 'invalid foreign key' });
-  } else {
-    console.error(err);
-    res.status(500).json({ error: 'internal server error' });
-  }
-};
+const mapper = new Mapper.Bookshelf();
 
 const tagDataSchema = Joi.object().keys({
   type: Joi.string().valid(['tags']),
@@ -50,32 +42,29 @@ const mapTagToJson = (tag) => {
 };
 
 // GET /api/v2/tags
-const indexTags = (req, res) => {
+const indexTags = (req, res) =>
   models('Tag').fetchJsonApi({ include: ['notebook'] })
     .then(tags => mapper.map(tags, 'tags', {
       enableLinks: false,
       attributes: { omit: ['id', 'notebookId'] },
       relations: { included: req.query.include === 'notebook' },
     }))
-    .then(tags => res.json(tags))
-    .catch(err => errorResponse(res, err));
-};
+    .then(tags => res.json(tags));
 
 // POST /api/v2/tags
-const createTag = (req, res) => {
+const createTag = (req, res) =>
   Joi.validate(req.body, postTagSchema, { presence: 'required' })
+    .catch(err => { throw httpErrors.BadRequest(err.message); })
     .then((body) =>
       new Promise((resolve) => resolve(_.assign({}, body.data.attributes,
         { notebookId: parseInt(body.data.relationships.notebook.data.id, 10) })))
         .then(attrs => models('Tag').forge(attrs).save())
+        .catch(err => { throw httpErrors.BadRequest(err.message); })
         .then(mapTagToJson)
         .then(tagJson => res.status(201).json(tagJson))
-        .catch(err => errorResponse(res, err))
-    )
-    .catch((err) => res.status(400).json({ error: err.message }));
-};
+    );
 
-const router = express.Router();
+const router = Router();
 
 router.route('/')
   .get(indexTags)

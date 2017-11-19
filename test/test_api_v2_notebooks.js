@@ -21,7 +21,7 @@ describe('API V2 Notebooks', () => {
       auth: global.auth,
     });
 
-    clock = sinon.useFakeTimers();
+    clock = sinon.useFakeTimers({ toFake: ['Date'] });
   });
 
   afterEach(() => {

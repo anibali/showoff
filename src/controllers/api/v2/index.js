@@ -34,9 +34,9 @@ const handleErrors = (err, req, res, next) => {
 const router = express.Router();
 
 controllers.forEach(([path, controller]) => {
-  controller.use(handleErrors);
   router.use(path, controller);
 });
+router.use(handleErrors);
 
 
 export default router;

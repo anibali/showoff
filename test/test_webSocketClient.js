@@ -10,7 +10,7 @@ describe('WebSocketClient', () => {
   let mockServer = null;
 
   beforeEach(() => {
-    clock = sinon.useFakeTimers();
+    clock = sinon.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     mockServer = new Server(wsUrl);
   });
 

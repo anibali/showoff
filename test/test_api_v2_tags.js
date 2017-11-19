@@ -16,7 +16,7 @@ describe('API V2 Tags', () => {
       auth: global.auth,
     });
 
-    clock = sinon.useFakeTimers();
+    clock = sinon.useFakeTimers({ toFake: ['Date'] });
   });
 
   afterEach(() => {

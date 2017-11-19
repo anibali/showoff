@@ -13,7 +13,8 @@ const defaultState = {
 const {
   setAuthenticated,
   setCurrentUserApiKeys,
-  addCurrentUserApiKeys
+  addCurrentUserApiKeys,
+  removeCurrentUserApiKey,
 } = simpleActionCreators.auth;
 
 export default handleActions({
@@ -32,6 +33,13 @@ export default handleActions({
     return _.assign({}, state, {
       user: _.assign({}, state.user, {
         apiKeys: state.user.apiKeys.concat(apiKeys),
+      }),
+    });
+  },
+  [removeCurrentUserApiKey](state, { payload: { apiKeyId } }) {
+    return _.assign({}, state, {
+      user: _.assign({}, state.user, {
+        apiKeys: _.reject(state.user.apiKeys, { id: apiKeyId }),
       }),
     });
   },

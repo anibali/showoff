@@ -34,4 +34,10 @@ actionCreators.destroyCurrentUserApiKeys = () => (dispatch) =>
     dispatch(actionCreators.setCurrentUserApiKeys([]));
   });
 
+actionCreators.destroyApiKey = (apiKeyId) => (dispatch) =>
+  jsonApi.one('users', 'current').one('apiKeys', apiKeyId).destroy().then(() => {
+    dispatch(actionCreators.removeCurrentUserApiKey(apiKeyId));
+  });
+
+
 export default actionCreators;

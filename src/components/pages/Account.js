@@ -1,13 +1,14 @@
 import React from 'react';
 import * as ReactRedux from 'react-redux';
 import _ from 'lodash';
+import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
 import IconButton from 'material-ui/IconButton';
 import DeleteForeverIcon from 'material-ui-icons/DeleteForever';
 import ContentCopyIcon from 'material-ui-icons/ContentCopy';
-import TextField from 'material-ui/TextField';
+import AddIcon from 'material-ui-icons/Add';
 import { FormControl } from 'material-ui/Form';
 import Input, { InputAdornment, InputLabel } from 'material-ui/Input';
 import Dialog, {
@@ -21,18 +22,14 @@ import Header from '../Header';
 import authActionCreators from '../../redux/authActionCreators';
 
 
-const createApiKeyItem = apiKey => (
-  <TableRow key={apiKey.id}>
-    <TableCell>{apiKey.id}</TableCell>
-    <TableCell>{new Date(apiKey.createdAt).toUTCString()}</TableCell>
-    <TableCell>
-      {/* TODO: Implement per-key deletion */}
-      <IconButton title="Delete this API key">
-        <DeleteForeverIcon />
-      </IconButton>
-    </TableCell>
-  </TableRow>
-);
+const styles = theme => ({
+  button: {
+    margin: theme.spacing.unit * 2,
+  },
+  rightIcon: {
+    marginLeft: theme.spacing.unit,
+  },
+});
 
 class CopyField extends React.Component {
   constructor(props) {
@@ -74,6 +71,29 @@ class CopyField extends React.Component {
   }
 }
 
+class ApiKeyTableRow extends React.Component {
+  constructor(props) {
+    super(props);
+    this.fireOnDelete = () => {
+      this.props.onDelete(this.props.apiKey.id);
+    };
+  }
+  render() {
+    const { apiKey } = this.props;
+    return (
+      <TableRow key={apiKey.id}>
+        <TableCell>{apiKey.id}</TableCell>
+        <TableCell>{new Date(apiKey.createdAt).toUTCString()}</TableCell>
+        <TableCell>
+          <IconButton title="Delete this API key" onClick={this.fireOnDelete}>
+            <DeleteForeverIcon />
+          </IconButton>
+        </TableCell>
+      </TableRow>
+    );
+  }
+}
+
 class Account extends React.Component {
   constructor(props) {
     super(props);
@@ -100,6 +120,8 @@ class Account extends React.Component {
         keyCreatedDialogOpen: false,
       });
     };
+    this.createApiKeyTableRow = apiKey =>
+      <ApiKeyTableRow apiKey={apiKey} onDelete={this.props.destroyApiKey} />;
   }
 
   componentWillMount() {
@@ -109,34 +131,34 @@ class Account extends React.Component {
   }
 
   render() {
+    const { classes } = this.props;
+
     return (
       <div>
         <Header />
         <div className="container">
-          <div className="row">
-            <Typography type="headline" gutterBottom>
-              User account
-            </Typography>
-            <Typography type="subheading" gutterBottom>
-              API keys
-            </Typography>
-            <div className="btn-toolbar" style={{ marginBottom: 12 }}>
-              <Button raised onClick={this.addKey}>Add new key</Button>
-              <Button raised onClick={this.destroyKeys}>Destroy all keys</Button>
-            </div>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>API key ID</TableCell>
-                  <TableCell>Creation date</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {this.props.user.apiKeys.map(createApiKeyItem)}
-              </TableBody>
-            </Table>
-          </div>
+          <Typography type="headline" gutterBottom>
+            User account
+          </Typography>
+          <Typography type="subheading" gutterBottom>
+            API keys
+          </Typography>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>API key ID</TableCell>
+                <TableCell>Creation date</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {this.props.user.apiKeys.map(this.createApiKeyTableRow)}
+            </TableBody>
+          </Table>
+          <Button className={classes.button} raised color="primary" onClick={this.addKey}>
+            Add new key
+            <AddIcon className={classes.rightIcon} />
+          </Button>
         </div>
         <Dialog open={this.state.keyCreatedDialogOpen}>
           <DialogTitle>API key created</DialogTitle>
@@ -169,7 +191,7 @@ class Account extends React.Component {
 }
 
 
-export default ReactRedux.connect(
+export default withStyles(styles)(ReactRedux.connect(
   (state) => ({
     user: state.auth.user,
   }),
@@ -177,5 +199,6 @@ export default ReactRedux.connect(
     loadCurrentUserApiKeys: _.flow(authActionCreators.loadCurrentUserApiKeys, dispatch),
     createCurrentUserApiKey: _.flow(authActionCreators.createCurrentUserApiKey, dispatch),
     destroyCurrentUserApiKeys: _.flow(authActionCreators.destroyCurrentUserApiKeys, dispatch),
+    destroyApiKey: _.flow(authActionCreators.destroyApiKey, dispatch),
   })
-)(Account);
+)(Account));

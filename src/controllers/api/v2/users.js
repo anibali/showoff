@@ -65,6 +65,13 @@ const destroyCurrentUserApiKeys = (req, res) => {
     .catch(err => errorResponse(res, err));
 };
 
+// DELETE /api/v2/users/current/apiKeys/:id
+const destroyCurrentUserApiKey = (req, res) => {
+  models('ApiKey').where({ id: req.params.id, userId: req.user.id }).destroy({ require: true })
+    .then(() => res.status(204).send())
+    .catch(err => errorResponse(res, err));
+};
+
 const currentUserRouter = express.Router();
 
 currentUserRouter.route('/')
@@ -73,6 +80,8 @@ currentUserRouter.route('/apiKeys')
   .get(showCurrentUserApiKeys)
   .post(createCurrentUserApiKey)
   .delete(destroyCurrentUserApiKeys);
+currentUserRouter.route('/apiKeys/:id')
+  .delete(destroyCurrentUserApiKey);
 
 const router = express.Router();
 

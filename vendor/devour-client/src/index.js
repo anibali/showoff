@@ -22,7 +22,6 @@ import jsonApiGetMiddleware from './middleware/json-api/req-get'
 import jsonApiHeadersMiddleware from './middleware/json-api/req-headers'
 import sendRequestMiddleware from './middleware/request'
 import deserializeResponseMiddleware from './middleware/json-api/res-deserialize'
-import processErrors from './middleware/json-api/res-errors'
 
 let jsonApiMiddleware = [
   jsonApiHttpBasicAuthMiddleware,
@@ -32,7 +31,6 @@ let jsonApiMiddleware = [
   jsonApiGetMiddleware,
   jsonApiHeadersMiddleware,
   sendRequestMiddleware,
-  processErrors,
   deserializeResponseMiddleware
 ]
 

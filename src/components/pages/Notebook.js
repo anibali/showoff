@@ -4,22 +4,38 @@ import * as ReactRedux from 'react-redux';
 import DocumentTitle from 'react-document-title';
 import { withStyles } from 'material-ui/styles';
 import { CircularProgress } from 'material-ui/Progress';
+import ErrorIcon from 'material-ui-icons/Error';
+import Typography from 'material-ui/Typography';
 
 import notebookActionCreators from '../../redux/notebooksActionCreators';
 import Frame from '../Frame';
 import BodyClass from '../BodyClass';
 
 
-const styles = {
-  bigSpinner: {
+const styles = (theme) => ({
+  centerStatus: {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-  }
-};
+    textAlign: 'center',
+  },
+  errorIcon: {
+    width: 150,
+    height: 150,
+    color: theme.palette.error.A400,
+  },
+});
 
 class Notebook extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      error: null,
+    };
+  }
+
   // Called during server-side rendering
   static preloadData(dispatch, match) {
     return Promise.all([
@@ -29,7 +45,13 @@ class Notebook extends React.Component {
 
   componentWillMount() {
     if(!this.props.frames) {
-      this.props.loadNotebook(this.props.id);
+      this.props.loadNotebook(this.props.id).catch(err => {
+        if(err.response && err.response.status === 404) {
+          this.setState({ error: 'Not found' });
+        } else {
+          this.setState({ error: 'Something went wrong' });
+        }
+      });
     }
   }
 
@@ -54,9 +76,18 @@ class Notebook extends React.Component {
       );
 
       children = this.props.frames.map(createFrame);
+    } else if(this.state.error) {
+      children = (
+        <div className={this.props.classes.centerStatus}>
+          <ErrorIcon className={this.props.classes.errorIcon} />
+          <Typography type="headline" color="error" className={this.props.classes.statusText}>
+            {this.state.error}
+          </Typography>
+        </div>
+      );
     } else {
       children = (
-        <div className={this.props.classes.bigSpinner}>
+        <div className={this.props.classes.centerStatus}>
           <CircularProgress color="accent" size={150} />
         </div>
       );

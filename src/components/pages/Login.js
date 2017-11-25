@@ -56,9 +56,9 @@ class Login extends React.Component {
     let errorNotice = null;
     if(this.state.error) {
       errorNotice = (
-        <div className="alert alert-danger" role="alert">
+        <Typography type="body1" color="error">
           Log in failed, please try again.
-        </div>
+        </Typography>
       );
     }
 
@@ -70,7 +70,7 @@ class Login extends React.Component {
               <Typography type="headline" gutterBottom>
                 Please log in
               </Typography>
-              {errorNotice ? <p>{errorNotice}</p> : null}
+              {errorNotice}
               <form onSubmit={this.login}>
                 <TextField
                   margin="normal"

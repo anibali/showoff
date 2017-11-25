@@ -151,6 +151,14 @@ class Account extends React.Component {
       event.preventDefault();
       this.props.destroyCurrentUserApiKeys();
     };
+    this.updatePassword = (opts) =>
+      this.props.changeCurrentUserPassword(opts)
+        .catch(err => {
+          if(err.response && err.response.status === 401) {
+            err.errors = { oldPassword: 'Incorrect password' };
+          }
+          return Promise.reject(err);
+        });
     this.hideKeyCreatedDialog = () => {
       this.setState({
         keyCreatedDialogOpen: false,
@@ -200,7 +208,7 @@ class Account extends React.Component {
           <Typography type="subheading" gutterBottom>
             Change password
           </Typography>
-          <ChangePassword onSubmit={this.props.changeCurrentUserPassword} />
+          <ChangePassword updatePassword={this.updatePassword} />
         </div>
         <KeyCreatedDialog
           apiKey={this.state.newApiKey}

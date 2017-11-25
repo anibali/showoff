@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import Paper from 'material-ui/Paper';
@@ -25,33 +26,47 @@ class ChangePassword extends React.Component {
       oldPassword: '',
       newPassword: '',
       newPassword2: '',
+      errors: {},
+    };
+
+    const validate = () => {
+      const errors = {};
+      if(this.state.oldPassword === '') {
+        errors.oldPassword = 'Old password must not be blank';
+      }
+      if(this.state.newPassword === '') {
+        errors.newPassword = 'New password must not be blank';
+      }
+      if(this.state.newPassword2 !== this.state.newPassword) {
+        errors.newPassword2 = 'Confirmation must match new password';
+      }
+      this.setState({ errors });
+      return _.isEmpty(errors);
     };
 
     this.onChangeOldPassword = (event) => {
-      this.setState({ oldPassword: event.target.value });
+      this.setState({ oldPassword: event.target.value }, validate);
     };
 
     this.onChangeNewPassword = (event) => {
-      this.setState({ newPassword: event.target.value });
+      this.setState({ newPassword: event.target.value }, validate);
     };
 
     this.onChangeNewPassword2 = (event) => {
-      this.setState({ newPassword2: event.target.value });
+      this.setState({ newPassword2: event.target.value }, validate);
     };
-
-    const validate = () => (
-      this.state.newPassword === this.state.newPassword2
-        && this.state.oldPassword !== ''
-        && this.state.newPassword !== ''
-    );
 
     this.onSubmit = (event) => {
       event.preventDefault();
 
       if(validate()) {
-        this.props.onSubmit({
+        this.props.updatePassword({
           oldPassword: this.state.oldPassword,
           newPassword: this.state.newPassword,
+        }).catch(err => {
+          if(err.errors) {
+            this.setState({ errors: err.errors });
+          }
         });
       }
     };
@@ -69,6 +84,8 @@ class ChangePassword extends React.Component {
             label="Old password"
             InputLabelProps={{ shrink: true }}
             type="password"
+            error={!!this.state.errors.oldPassword}
+            helperText={this.state.errors.oldPassword}
             value={this.state.oldPassword}
             onChange={this.onChangeOldPassword}
           />
@@ -78,6 +95,8 @@ class ChangePassword extends React.Component {
             label="New password"
             InputLabelProps={{ shrink: true }}
             type="password"
+            error={!!this.state.errors.newPassword}
+            helperText={this.state.errors.newPassword}
             value={this.state.newPassword}
             onChange={this.onChangeNewPassword}
           />
@@ -87,10 +106,12 @@ class ChangePassword extends React.Component {
             label="Confirm new password"
             InputLabelProps={{ shrink: true }}
             type="password"
+            error={!!this.state.errors.newPassword2}
+            helperText={this.state.errors.newPassword2}
             value={this.state.newPassword2}
             onChange={this.onChangeNewPassword2}
           />
-          <Button className={classes.button} color="primary" type="submit">
+          <Button className={classes.button} color="primary" type="submit" disabled={!_.isEmpty(this.state.errors)}>
             Update password
           </Button>
         </form>

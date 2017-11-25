@@ -39,5 +39,10 @@ actionCreators.destroyApiKey = (apiKeyId) => (dispatch) =>
     dispatch(actionCreators.removeCurrentUserApiKey(apiKeyId));
   });
 
+actionCreators.changeCurrentUserPassword = ({ oldPassword, newPassword }) => (dispatch) =>
+  axios.patch('/api/v2/users/current/password', { oldPassword, newPassword }).then(() => {
+    dispatch(actionCreators.setAuthenticated(false));
+  });
+
 
 export default actionCreators;

@@ -24,7 +24,7 @@ export const verifyApiKey = (secretKey, expectedPublicKey) =>
     .then(() => {
       const secretKeyBuf = Buffer.from(secretKey, 'base64', 5);
       if(secretKeyBuf.byteLength !== sodium.api.crypto_sign_SECRETKEYBYTES) {
-        throw new httpErrors.BadRequest('wrong secret key length');
+        throw httpErrors.BadRequest('wrong secret key length');
       }
       const publicKeyBuf = sodium.api.crypto_sign_ed25519_sk_to_pk(secretKeyBuf);
       const actualPublicKey = publicKeyBuf.toString('base64');
@@ -50,3 +50,13 @@ export const destroyApiKeys = (userId) =>
 export const resetInternalApiKey = () =>
   models('User').where({ username: '_internal' }).fetch({ require: true })
     .then(user => destroyApiKeys(user.id).then(() => createApiKey(user.id)));
+
+export const changePassword = (user, { oldPassword, newPassword }) =>
+  verifyHash(oldPassword, user.get('passwordSalt'), user.get('passwordHash'))
+    .then(correctPassword => {
+      if(!correctPassword) {
+        throw httpErrors.Unauthorized('old password is incorrect');
+      }
+    })
+    .then(() => calculateHash(newPassword, user.get('passwordSalt')))
+    .then(passwordHash => user.save({ passwordHash }));

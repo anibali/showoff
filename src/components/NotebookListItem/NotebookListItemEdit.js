@@ -3,7 +3,6 @@ import _ from 'lodash';
 import { withStyles } from 'material-ui/styles';
 import { ListItem } from 'material-ui/List';
 import TextField from 'material-ui/TextField';
-import { InputLabel } from 'material-ui/Input';
 import { FormControl } from 'material-ui/Form';
 import Button from 'material-ui/Button';
 

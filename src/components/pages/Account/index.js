@@ -9,6 +9,7 @@ import IconButton from 'material-ui/IconButton';
 import DeleteForeverIcon from 'material-ui-icons/DeleteForever';
 import ContentCopyIcon from 'material-ui-icons/ContentCopy';
 import AddIcon from 'material-ui-icons/Add';
+import Paper from 'material-ui/Paper';
 import { FormControl } from 'material-ui/Form';
 import Input, { InputAdornment, InputLabel } from 'material-ui/Input';
 import Dialog, {
@@ -18,16 +19,23 @@ import Dialog, {
   DialogTitle,
 } from 'material-ui/Dialog';
 
-import Header from '../Header';
-import authActionCreators from '../../redux/authActionCreators';
+import Header from '../../Header';
+import authActionCreators from '../../../redux/authActionCreators';
+import ChangePassword from './ChangePassword';
 
 
 const styles = theme => ({
   button: {
-    margin: theme.spacing.unit * 2,
+    marginTop: theme.spacing.unit * 2,
+    marginBottom: theme.spacing.unit * 2,
   },
   rightIcon: {
     marginLeft: theme.spacing.unit,
+  },
+  paper: {
+    paddingLeft: theme.spacing.unit * 2,
+    paddingRight: theme.spacing.unit * 2,
+    marginBottom: theme.spacing.unit * 2,
   },
 });
 
@@ -94,6 +102,34 @@ class ApiKeyTableRow extends React.Component {
   }
 }
 
+const KeyCreatedDialog = ({ apiKey, open, onClose }) => (
+  <Dialog open={open}>
+    <DialogTitle>API key created</DialogTitle>
+    <DialogContent>
+      <DialogContentText>
+        This is the one and only time that we are going to show you the
+        secret part of this API key. If you lose it, you will need
+        to create a new key.
+      </DialogContentText>
+      <CopyField
+        id="keyIdField"
+        label="API key ID"
+        value={apiKey.id}
+      />
+      <CopyField
+        id="secretKeyField"
+        label="Secret key"
+        value={apiKey.secretKey}
+      />
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={onClose} color="primary" autoFocus>
+        I have copied the secret key
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
+
 class Account extends React.Component {
   constructor(props) {
     super(props);
@@ -143,48 +179,34 @@ class Account extends React.Component {
           <Typography type="subheading" gutterBottom>
             API keys
           </Typography>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>API key ID</TableCell>
-                <TableCell>Creation date</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {this.props.user.apiKeys.map(this.createApiKeyTableRow)}
-            </TableBody>
-          </Table>
-          <Button className={classes.button} raised color="primary" onClick={this.addKey}>
-            Add new key
-            <AddIcon className={classes.rightIcon} />
-          </Button>
-        </div>
-        <Dialog open={this.state.keyCreatedDialogOpen}>
-          <DialogTitle>API key created</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              This is the one and only time that we are going to show you the
-              secret part of this API key. If you lose it, you will need
-              to create a new key.
-            </DialogContentText>
-            <CopyField
-              id="keyIdField"
-              label="API key ID"
-              value={this.state.newApiKey.id}
-            />
-            <CopyField
-              id="secretKeyField"
-              label="Secret key"
-              value={this.state.newApiKey.secretKey}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.hideKeyCreatedDialog} color="primary" autoFocus>
-              I have copied the secret key
+          <Paper className={classes.paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>API key ID</TableCell>
+                  <TableCell>Creation date</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {this.props.user.apiKeys.map(this.createApiKeyTableRow)}
+              </TableBody>
+            </Table>
+            <Button className={classes.button} color="primary" onClick={this.addKey}>
+              Add new key
+              <AddIcon className={classes.rightIcon} />
             </Button>
-          </DialogActions>
-        </Dialog>
+          </Paper>
+          <Typography type="subheading" gutterBottom>
+            Change password
+          </Typography>
+          <ChangePassword onSubmit={this.props.changeCurrentUserPassword} />
+        </div>
+        <KeyCreatedDialog
+          apiKey={this.state.newApiKey}
+          open={this.state.keyCreatedDialogOpen}
+          onClose={this.hideKeyCreatedDialog}
+        />
       </div>
     );
   }
@@ -200,5 +222,6 @@ export default withStyles(styles)(ReactRedux.connect(
     createCurrentUserApiKey: _.flow(authActionCreators.createCurrentUserApiKey, dispatch),
     destroyCurrentUserApiKeys: _.flow(authActionCreators.destroyCurrentUserApiKeys, dispatch),
     destroyApiKey: _.flow(authActionCreators.destroyApiKey, dispatch),
+    changeCurrentUserPassword: _.flow(authActionCreators.changeCurrentUserPassword, dispatch),
   })
 )(Account));

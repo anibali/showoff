@@ -2,7 +2,7 @@ import Router from 'express-promise-router';
 import * as Mapper from 'jsonapi-mapper';
 
 import models from '../../../models';
-import { createApiKey, destroyApiKeys } from '../../../helpers/authHelpers';
+import { createApiKey, destroyApiKeys, changePassword } from '../../../helpers/authHelpers';
 
 
 const mapper = new Mapper.Bookshelf();
@@ -50,10 +50,21 @@ const destroyCurrentUserApiKey = (req, res) =>
   models('ApiKey').where({ id: req.params.id, userId: req.user.id }).destroy({ require: true })
     .then(() => res.status(204).send());
 
+// PATCH /api/v2/users/current/password
+// TODO: This should respond with the user
+// TODO: This should validate with JOI
+const changeCurrentUserPassword = (req, res) =>
+  Promise.resolve(req.user)
+    .then(user => changePassword(user, req.body))
+    .then(() => req.logOut())
+    .then(() => res.status(200).json({}));
+
 const currentUserRouter = Router();
 
 currentUserRouter.route('/')
   .get(showCurrentUser);
+currentUserRouter.route('/password')
+  .patch(changeCurrentUserPassword);
 currentUserRouter.route('/apiKeys')
   .get(showCurrentUserApiKeys)
   .post(createCurrentUserApiKey)

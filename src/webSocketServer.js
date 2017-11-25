@@ -6,6 +6,13 @@ class WebSocketServer {
    */
   constructor(wsServer) {
     this.wsServer = wsServer;
+    setInterval(this.keepAlive.bind(this), 10000);
+  }
+
+  keepAlive() {
+    this.wsServer.clients.forEach((client) => {
+      client.send('');
+    });
   }
 
   broadcast(data) {

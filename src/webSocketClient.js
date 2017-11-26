@@ -12,7 +12,7 @@ class WebSocketClient {
     this.ws = ws;
 
     ws.onopen = () => {
-      console.log('WebSocket connection opened');
+      console.log(`WebSocket connection opened to ${this.url}`);
       this.attempts = 0;
     };
 

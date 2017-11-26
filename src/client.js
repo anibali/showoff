@@ -24,7 +24,8 @@ window.main = (initialState) => {
   // Create a Redux store
   const store = createStore(initialState);
 
-  const wsc = new WebSocketClient(`ws://${window.location.host}/`, store);
+  const wsProtocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
+  const wsc = new WebSocketClient(`${wsProtocol}//${window.location.host}/`, store);
   wsc.connect();
 
   // Mount our React root component in the DOM

@@ -52,7 +52,10 @@ before(() =>
       });
     }))
     .then(() => {
-      global.wss = new WebSocketServer(new mockWs.Server('ws://localhost:3000'));
+      global.wss = new WebSocketServer(
+        new mockWs.Server('ws://localhost:3000'),
+        { keepAliveInterval: false },
+      );
     })
 );
 

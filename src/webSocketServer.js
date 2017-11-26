@@ -4,9 +4,13 @@ class WebSocketServer {
   /**
    * wsServer is expected to be a ws.Server instance.
    */
-  constructor(wsServer) {
+  constructor(wsServer, opts) {
     this.wsServer = wsServer;
-    this.keepAliveIntervalId = setInterval(this.keepAlive.bind(this), 10000);
+    const { keepAliveInterval = 10000 } = opts || {};
+    if(keepAliveInterval) {
+      this.keepAliveIntervalId =
+        setInterval(this.keepAlive.bind(this), keepAliveInterval);
+    }
   }
 
   keepAlive() {
@@ -33,7 +37,10 @@ class WebSocketServer {
   }
 
   close() {
-    clearInterval(this.keepAliveIntervalId);
+    if(this.keepAliveIntervalId) {
+      clearInterval(this.keepAliveIntervalId);
+    }
+    this.wsServer.close();
   }
 }
 

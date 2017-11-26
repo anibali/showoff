@@ -60,5 +60,6 @@ afterEach(assertDatabaseEmpty);
 
 after(() => {
   server.close();
+  global.wss.close();
   return models.knex.destroy();
 });

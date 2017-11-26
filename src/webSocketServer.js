@@ -6,7 +6,7 @@ class WebSocketServer {
    */
   constructor(wsServer) {
     this.wsServer = wsServer;
-    setInterval(this.keepAlive.bind(this), 10000);
+    this.keepAliveIntervalId = setInterval(this.keepAlive.bind(this), 10000);
   }
 
   keepAlive() {
@@ -30,6 +30,10 @@ class WebSocketServer {
   fireNotebookUpdate(notebook) {
     const action = notebookActionCreators.addNotebook(notebook);
     this.broadcast(action);
+  }
+
+  close() {
+    clearInterval(this.keepAliveIntervalId);
   }
 }
 

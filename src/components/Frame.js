@@ -56,9 +56,16 @@ class Frame extends React.Component {
     // FIXME: When all other code is updated, this should not use at frame.content at all
     const renderedContent = frame.renderedContent == null ? frame.content : frame.renderedContent;
 
+    const dragBounds = {
+      left: 0,
+      right: this.props.containerWidth - (this.state.width + 2),
+      top: 0,
+      bottom: this.props.containerHeight - (this.state.height + 2),
+    };
+
     return (
       <Draggable
-        bounds="parent"
+        bounds={dragBounds}
         cancel=".react-resizable-handle"
         defaultPosition={{ x: initialX, y: initialY }}
         handle=".frame-handle"

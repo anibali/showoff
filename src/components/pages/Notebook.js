@@ -1,10 +1,18 @@
 import _ from 'lodash';
 import React from 'react';
 import * as ReactRedux from 'react-redux';
+import { Link } from 'react-router-dom';
 import DocumentTitle from 'react-document-title';
+import { withContentRect } from 'react-measure';
 import { withStyles } from 'material-ui/styles';
 import { CircularProgress } from 'material-ui/Progress';
 import ErrorIcon from 'material-ui-icons/Error';
+import AppBar from 'material-ui/AppBar';
+import Toolbar from 'material-ui/Toolbar';
+import Button from 'material-ui/Button';
+import IconButton from 'material-ui/IconButton';
+import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
+import ExpandLessIcon from 'material-ui-icons/ExpandLess';
 import Typography from 'material-ui/Typography';
 
 import notebookActionCreators from '../../redux/notebooksActionCreators';
@@ -25,6 +33,86 @@ const styles = (theme) => ({
     height: 150,
     color: theme.palette.error.A400,
   },
+});
+
+class HideableAppBar extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      hidden: true,
+    };
+
+    this.show = () => {
+      this.setState({ hidden: false });
+    };
+
+    this.hide = () => {
+      this.setState({ hidden: true });
+    };
+  }
+
+  render() {
+    if(this.state.hidden) {
+      return (
+        <Toolbar style={{ zIndex: 9999, position: 'absolute', color: 'white', right: 0 }}>
+          <Button fab color="primary" onClick={this.show} style={{ width: 48, height: 48 }}>
+            <ExpandMoreIcon />
+          </Button>
+        </Toolbar>
+      );
+    }
+    return (
+      <AppBar position="static">
+        <Toolbar>
+          <Button color="contrast" to="/" component={Link}>Home</Button>
+          <div style={{ flex: 1 }} />
+          <IconButton color="contrast" onClick={this.hide}>
+            <ExpandLessIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+    );
+  }
+}
+
+const FrameWrapper = (props) => {
+  const { updateFrame, frame, containerWidth, containerHeight } = props;
+
+  const onDimensionChange = (x, y, width, height) => {
+    updateFrame(_.assign({}, frame, { x, y, width, height }));
+  };
+
+  return (
+    <Frame
+      frame={frame}
+      initialX={frame.x}
+      initialY={frame.y}
+      initialWidth={frame.width}
+      initialHeight={frame.height}
+      containerWidth={containerWidth}
+      containerHeight={containerHeight}
+      onDimensionChange={onDimensionChange}
+    />
+  );
+};
+
+const Frames = withContentRect('bounds')(({ measureRef, contentRect, frames, updateFrame }) => {
+  const createFrame = frame => (
+    <FrameWrapper
+      key={frame.id}
+      frame={frame}
+      containerWidth={contentRect.bounds.width}
+      containerHeight={contentRect.bounds.height}
+      updateFrame={updateFrame}
+    />
+  );
+
+  return (
+    <div style={{ flex: 1 }} ref={measureRef}>
+      {frames.map(createFrame)}
+    </div>
+  );
 });
 
 class Notebook extends React.Component {
@@ -57,47 +145,41 @@ class Notebook extends React.Component {
 
   // Describe how to render the component
   render() {
-    const onFrameDimensionChange = (frame, x, y, width, height) => {
-      this.props.updateFrame(_.assign({}, frame, { x, y, width, height }));
-    };
-
-    let children = null;
-    if(this.props.frames) {
-      const createFrame = frame => (
-        <Frame
-          key={frame.id}
-          frame={frame}
-          initialX={frame.x}
-          initialY={frame.y}
-          initialWidth={frame.width}
-          initialHeight={frame.height}
-          onDimensionChange={_.partial(onFrameDimensionChange, frame)}
-        />
+    if(this.state.error) {
+      return (
+        <DocumentTitle title={this.props.title || 'Untitled notebook'}>
+          <BodyClass className="notebook">
+            <div className={this.props.classes.centerStatus}>
+              <ErrorIcon className={this.props.classes.errorIcon} />
+              <Typography type="headline" color="error" className={this.props.classes.statusText}>
+                {this.state.error}
+              </Typography>
+            </div>
+          </BodyClass>
+        </DocumentTitle>
       );
-
-      children = this.props.frames.map(createFrame);
-    } else if(this.state.error) {
-      children = (
-        <div className={this.props.classes.centerStatus}>
-          <ErrorIcon className={this.props.classes.errorIcon} />
-          <Typography type="headline" color="error" className={this.props.classes.statusText}>
-            {this.state.error}
-          </Typography>
-        </div>
-      );
-    } else {
-      children = (
-        <div className={this.props.classes.centerStatus}>
-          <CircularProgress color="accent" size={150} />
-        </div>
+    }
+    if(!this.props.frames) {
+      return (
+        <DocumentTitle title={this.props.title || 'Untitled notebook'}>
+          <BodyClass className="notebook">
+            <div className={this.props.classes.centerStatus}>
+              <CircularProgress color="accent" size={150} />
+            </div>
+          </BodyClass>
+        </DocumentTitle>
       );
     }
 
     return (
       <DocumentTitle title={this.props.title || 'Untitled notebook'}>
         <BodyClass className="notebook">
-          <div className="fill-space">
-            {children}
+          <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+            <HideableAppBar />
+            <Frames
+              frames={this.props.frames}
+              updateFrame={this.props.updateFrame}
+            />
           </div>
         </BodyClass>
       </DocumentTitle>

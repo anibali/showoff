@@ -14,7 +14,7 @@ const {
 
 const notebooksReducer = handleActions({
   [modifyFrame](state, { payload: { frame } }) {
-    const notebookIndex = _.findIndex(state, { id: frame.notebookId });
+    const notebookIndex = _.findIndex(state, { id: frame.notebookId.toString() });
 
     // Ignore update if the frame's notebook hasn't been loaded
     if(!state[notebookIndex] || !state[notebookIndex].frames) {

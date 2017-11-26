@@ -13,15 +13,22 @@ import simpleActionCreators from './simpleActionCreators';
 
 const actionCreators = _.clone(simpleActionCreators.notebooks);
 
-actionCreators.updateFrame = (frame) => (dispatch) =>
-  jsonApi.update(
+actionCreators.updateFrame = (frame, localOnly = false) => (dispatch) => {
+  if(localOnly) {
+    dispatch(actionCreators.modifyFrame(frame));
+    return frame;
+  }
+
+  return jsonApi.update(
     'frames',
-    _.omit(frame, ['createdAt', 'updatedAt', 'notebookId', 'renderedContent', 'content']),
+    _.omit(frame, ['createdAt', 'updatedAt', 'notebookId', 'notebook',
+      'renderedContent', 'content']),
   )
     .then((res) => {
       dispatch(actionCreators.modifyFrame(res.data));
       return res.data;
     });
+};
 
 actionCreators.updateNotebook = (notebook) => (dispatch) =>
   jsonApi.update(

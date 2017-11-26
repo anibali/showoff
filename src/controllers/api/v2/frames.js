@@ -90,7 +90,8 @@ const renderFrame = (frameJson) =>
 const mapFrameToJson = (frame) => {
   const frameJson = mapper.map(frame, 'frames', {
     enableLinks: false,
-    attributes: { omit: ['id', 'notebookId'] },
+    // TODO: notebookId *should* be omitted when possible
+    // attributes: { omit: ['id', 'notebookId'] },
     relations: { included: false },
   });
   frameJson.data.relationships = _.assign({}, frameJson.data.relationships, {

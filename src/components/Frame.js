@@ -4,37 +4,21 @@ import Draggable from 'react-draggable';
 import { Resizable } from 'react-resizable';
 
 class Frame extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      x: this.props.initialX,
-      y: this.props.initialY,
-      width: this.props.initialWidth,
-      height: this.props.initialHeight
-    };
-  }
-
-  static get defaultProps() {
-    return {
-      initialX: 0,
-      initialY: 0,
-      initialWidth: 480,
-      initialHeight: 360
-    };
-  }
-
   render() {
     const onResize = (event, data) => {
-      this.setState(_.pick(data.size, ['width', 'height']));
+      this.props.onDimensionChange(
+        this.props.frame.x, this.props.frame.y, data.size.width, data.size.height, true);
     };
 
     const onDrag = (event, data) => {
-      this.setState(_.pick(data, ['x', 'y']));
+      this.props.onDimensionChange(
+        data.x, data.y, this.props.frame.width, this.props.frame.height, true);
     };
 
     const triggerDimensionChange = () => {
-      this.props.onDimensionChange(this.state.x, this.state.y, this.state.width, this.state.height);
+      this.props.onDimensionChange(
+        this.props.frame.x, this.props.frame.y,
+        this.props.frame.width, this.props.frame.height, false);
     };
 
     const onMouseDown = (event) => {
@@ -52,34 +36,34 @@ class Frame extends React.Component {
       draggableElement.style.zIndex = maxZ + 1;
     };
 
-    const { frame, initialX, initialY } = this.props;
+    const { frame } = this.props;
     // FIXME: When all other code is updated, this should not use at frame.content at all
     const renderedContent = frame.renderedContent == null ? frame.content : frame.renderedContent;
 
     const dragBounds = {
       left: 0,
-      right: this.props.containerWidth - (this.state.width + 2),
+      right: this.props.containerWidth - (this.props.frame.width + 2),
       top: 0,
-      bottom: this.props.containerHeight - (this.state.height + 2),
+      bottom: this.props.containerHeight - (this.props.frame.height + 2),
     };
 
     return (
       <Draggable
         bounds={dragBounds}
         cancel=".react-resizable-handle"
-        defaultPosition={{ x: initialX, y: initialY }}
+        position={{ x: this.props.frame.x, y: this.props.frame.y }}
         handle=".frame-handle"
         onMouseDown={onMouseDown}
         onDrag={onDrag}
         onStop={triggerDimensionChange}
       >
         <Resizable
-          width={this.state.width}
-          height={this.state.height}
+          width={this.props.frame.width}
+          height={this.props.frame.height}
           onResize={onResize}
           onResizeStop={triggerDimensionChange}
         >
-          <div className="frame" style={{ width: this.state.width, height: this.state.height }}>
+          <div className="frame" style={{ width: this.props.frame.width, height: this.props.frame.height }}>
             <div className="frame-handle">{frame.title || '<untitled frame>'}</div>
             <div className="frame-content" dangerouslySetInnerHTML={{ __html: renderedContent }} />
           </div>

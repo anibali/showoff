@@ -13,6 +13,7 @@ import Button from 'material-ui/Button';
 import IconButton from 'material-ui/IconButton';
 import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
 import ExpandLessIcon from 'material-ui-icons/ExpandLess';
+import GridIcon from 'material-ui-icons/ViewModule';
 import Typography from 'material-ui/Typography';
 
 import notebookActionCreators from '../../redux/notebooksActionCreators';
@@ -66,6 +67,9 @@ class HideableAppBar extends React.Component {
       <AppBar position="static">
         <Toolbar>
           <Button color="contrast" to="/" component={Link}>Home</Button>
+          <IconButton color="contrast" onClick={this.props.onClickGrid}>
+            <GridIcon />
+          </IconButton>
           <div style={{ flex: 1 }} />
           <IconButton color="contrast" onClick={this.hide}>
             <ExpandLessIcon />
@@ -79,17 +83,13 @@ class HideableAppBar extends React.Component {
 const FrameWrapper = (props) => {
   const { updateFrame, frame, containerWidth, containerHeight } = props;
 
-  const onDimensionChange = (x, y, width, height) => {
-    updateFrame(_.assign({}, frame, { x, y, width, height }));
+  const onDimensionChange = (x, y, width, height, localOnly) => {
+    updateFrame(_.assign({}, frame, { x, y, width, height }), localOnly);
   };
 
   return (
     <Frame
       frame={frame}
-      initialX={frame.x}
-      initialY={frame.y}
-      initialWidth={frame.width}
-      initialHeight={frame.height}
       containerWidth={containerWidth}
       containerHeight={containerHeight}
       onDimensionChange={onDimensionChange}
@@ -121,6 +121,17 @@ class Notebook extends React.Component {
 
     this.state = {
       error: null,
+    };
+
+    this.arrangeFramesInGrid = () => {
+      const frames = _.sortBy(this.props.frames, 'createdAt');
+      const width = 460;
+      const height = 320;
+      frames.forEach((frame, i) => {
+        const x = (i % 4) * width;
+        const y = Math.floor(i / 4) * height;
+        this.props.updateFrame(_.assign({}, frame, { x, y, width, height }), false);
+      });
     };
   }
 
@@ -175,7 +186,9 @@ class Notebook extends React.Component {
       <DocumentTitle title={this.props.title || 'Untitled notebook'}>
         <BodyClass className="notebook">
           <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
-            <HideableAppBar />
+            <HideableAppBar
+              onClickGrid={this.arrangeFramesInGrid}
+            />
             <Frames
               frames={this.props.frames}
               updateFrame={this.props.updateFrame}

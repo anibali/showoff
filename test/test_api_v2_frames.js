@@ -207,6 +207,7 @@ describe('API V2 Frames', () => {
               renderedContent: '<pre>Lorem ipsum</pre>',
               createdAt: '1970-01-01T00:00:00.000Z',
               updatedAt: '1970-01-01T00:00:00.000Z',
+              notebookId: 1,
             },
             relationships: {
               notebook: {
@@ -388,6 +389,7 @@ describe('API V2 Frames', () => {
               y: 0,
               createdAt: '1970-01-01T00:00:00.000Z',
               updatedAt: '1970-01-01T00:00:00.000Z',
+              notebookId: 1,
             },
             relationships: {
               notebook: {

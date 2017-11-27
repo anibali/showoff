@@ -139,6 +139,32 @@ const frames = [
       }
     }
   },
+  {
+    notebookId: 2,
+    title: 'Plotly',
+    type: 'plotly',
+    content: {
+      data: [
+        {
+          type: 'scatter',
+          mode: 'lines+points',
+          x: [1, 2, 3],
+          y: [2, 6, 3],
+          marker: { color: 'red' }
+        },
+        {
+          type: 'bar',
+          x: [1, 2, 3],
+          y: [2, 5, 3]
+        }
+      ],
+      layout: {
+        width: 400,
+        height: 280,
+        title: 'A Fancy Plot'
+      }
+    }
+  },
 ];
 
 exports.seed = function(knex, Promise) {

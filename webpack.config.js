@@ -53,7 +53,9 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: '[name].js'
+    filename: '[name].js',
+    chunkFilename: '[name].js',
+    publicPath: '/assets/bundle/'
   },
   plugins: plugins.any.concat(plugins[process.env.NODE_ENV] || []),
   module: {

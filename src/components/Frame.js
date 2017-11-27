@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import Draggable from 'react-draggable';
 import { Resizable } from 'react-resizable';
+import renderFrameView from './frameViews/renderFrameView';
 
 class Frame extends React.Component {
   render() {
@@ -63,7 +64,9 @@ class Frame extends React.Component {
         >
           <div className="frame" style={{ width: this.props.frame.width, height: this.props.frame.height }}>
             <div className="frame-handle">{frame.title || '<untitled frame>'}</div>
-            <div className="frame-content" dangerouslySetInnerHTML={{ __html: frame.renderedContent }} />
+            <div className="frame-content">
+              {renderFrameView(frame)}
+            </div>
           </div>
         </Resizable>
       </Draggable>

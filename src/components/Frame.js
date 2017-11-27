@@ -37,8 +37,6 @@ class Frame extends React.Component {
     };
 
     const { frame } = this.props;
-    // FIXME: When all other code is updated, this should not use at frame.content at all
-    const renderedContent = frame.renderedContent == null ? frame.content : frame.renderedContent;
 
     const dragBounds = {
       left: 0,
@@ -65,7 +63,7 @@ class Frame extends React.Component {
         >
           <div className="frame" style={{ width: this.props.frame.width, height: this.props.frame.height }}>
             <div className="frame-handle">{frame.title || '<untitled frame>'}</div>
-            <div className="frame-content" dangerouslySetInnerHTML={{ __html: renderedContent }} />
+            <div className="frame-content" dangerouslySetInnerHTML={{ __html: frame.renderedContent }} />
           </div>
         </Resizable>
       </Draggable>

@@ -5,23 +5,22 @@ const NodemonPlugin = require('nodemon-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
+const AssetsManifestPlugin = require('webpack-assets-manifest');
+const CleanObsoleteChunksPlugin = require('webpack-clean-obsolete-chunks');
 
 // Plugins to use for each environment
 const plugins = {
   any: [
     new webpack.EnvironmentPlugin(['NODE_ENV']),
-    new ExtractTextPlugin('[name].css'),
-    new CompressionPlugin({
-      asset: '[path].gz[query]',
-      algorithm: 'gzip',
-      test: /\.js$|\.css$|\.html$|\.svg$|\.eot$|\.ttf$/,
-      threshold: 10240,
-      minRatio: 0.8
-    }),
+    new ExtractTextPlugin('[name]-[contenthash].css'),
     new webpack.DefinePlugin({
       'process.env': {
         IN_BROWSER: 'true',
       },
+    }),
+    new webpack.HashedModuleIdsPlugin(),
+    new AssetsManifestPlugin({
+      publicPath: true,
     }),
   ],
   production: [
@@ -34,12 +33,20 @@ const plugins = {
       assetNameRegExp: /\.css$/,
       cssProcessorOptions: { discardComments: { removeAll: true } }
     }),
+    new CompressionPlugin({
+      asset: '[path].gz[query]',
+      algorithm: 'gzip',
+      test: /\.js$|\.css$|\.html$|\.svg$|\.eot$|\.ttf$/,
+      threshold: 10240,
+      minRatio: 0.8
+    }),
   ],
   development: [
     new NodemonPlugin({
       script: 'src/server.js',
       watch: [path.resolve('src')],
     }),
+    new CleanObsoleteChunksPlugin({ deep: true }),
   ],
   test: []
 };
@@ -53,8 +60,8 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: '[name].js',
-    chunkFilename: '[name].js',
+    filename: '[name]-[chunkhash].js',
+    chunkFilename: '[name]-[chunkhash].js',
     publicPath: '/assets/bundle/'
   },
   plugins: plugins.any.concat(plugins[process.env.NODE_ENV] || []),

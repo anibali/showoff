@@ -25,20 +25,18 @@ import ServerRoot from './components/ServerRoot';
  * The HTML is pretty barebones, it just provides a mount point
  * for React and links to our styles and scripts.
  */
-const renderHtmlPage = (title, bodyClassName, reactHtml, storeState, css) => (`
+const renderHtmlPage = (title, bodyClassName, reactHtml, storeState, css, assetManifest) => (`
   <!DOCTYPE html>
   <html>
     <head>
       <title>${title}</title>
-      <link rel="stylesheet" type="text/css" href="/assets/bundle/app.css">
+      <link rel="stylesheet" type="text/css" href="${assetManifest['app.css']}">
     </head>
     <body class="${bodyClassName}">
       <div class="fill-space" id="root">${reactHtml}</div>
       <style id="jss-server-side">${css}</style>
-      <script src="/assets/bundle/app.js"></script>
-      <script>
-        main(${storeState})
-      </script>
+      <script src="${assetManifest['app.js']}"></script>
+      <script>main(${storeState})</script>
     </body>
   </html>
 `);
@@ -90,6 +88,9 @@ export default () => Promise.resolve()
 
     controllerRoutes.connect(app);
 
+    const assetManifest = JSON.parse(
+      fs.readFileSync(path.join(distDir, 'manifest.json'), 'utf8'));
+
     // Sanitise a JSON string so that it can be safely inserted inside
     // <script> tags
     const sanitiseJson = (jsonString) =>
@@ -140,7 +141,7 @@ export default () => Promise.resolve()
         const css = sheetsRegistry.toString();
 
         // Respond with the HTML
-        const htmlContent = renderHtmlPage(title, bodyClassName, reactHtml, storeState, css);
+        const htmlContent = renderHtmlPage(title, bodyClassName, reactHtml, storeState, css, assetManifest);
         res.status(context.status).send(htmlContent);
       }).catch((error) => {
         console.error(error);

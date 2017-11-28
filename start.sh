@@ -12,5 +12,6 @@ if [ "$NODE_ENV" == "production" ]
 then
   node src/server.js
 else
+  rm dist/*
   webpack -w
 fi

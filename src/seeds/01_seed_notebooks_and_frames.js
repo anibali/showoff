@@ -159,8 +159,6 @@ const frames = [
         }
       ],
       layout: {
-        width: 400,
-        height: 280,
         title: 'A Fancy Plot'
       }
     }

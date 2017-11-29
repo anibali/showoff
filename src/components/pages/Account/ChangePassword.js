@@ -111,7 +111,12 @@ class ChangePassword extends React.Component {
             value={this.state.newPassword2}
             onChange={this.onChangeNewPassword2}
           />
-          <Button className={classes.button} color="primary" type="submit" disabled={!_.isEmpty(this.state.errors)}>
+          <Button
+            className={classes.button}
+            color="primary"
+            type="submit"
+            disabled={!_.isEmpty(this.state.errors)}
+          >
             Update password
           </Button>
         </form>

@@ -141,7 +141,8 @@ export default () => Promise.resolve()
         const css = sheetsRegistry.toString();
 
         // Respond with the HTML
-        const htmlContent = renderHtmlPage(title, bodyClassName, reactHtml, storeState, css, assetManifest);
+        const htmlContent = renderHtmlPage(
+          title, bodyClassName, reactHtml, storeState, css, assetManifest);
         res.status(context.status).send(htmlContent);
       }).catch((error) => {
         console.error(error);

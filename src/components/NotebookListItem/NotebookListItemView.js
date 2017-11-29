@@ -78,7 +78,10 @@ class NotebookListItemView extends React.Component {
     return (
       <ListItem dense button component={Link} to={`/notebooks/${notebook.id}`}>
         <Progress classes={classes} value={notebook.progress * 100} />
-        <ListItemText primary={notebook.title} secondary={new Date(notebook.createdAt).toUTCString()} />
+        <ListItemText
+          primary={notebook.title}
+          secondary={new Date(notebook.createdAt).toUTCString()}
+        />
         <TagList tags={tags} />
         <IconButton onClick={onChangePinned} onKeyDown={this.onPinnedKeyDown}>
           {notebook.pinned ? <LockIcon /> : <LockOpenIcon />}

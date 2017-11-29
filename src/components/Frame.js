@@ -40,31 +40,32 @@ class Frame extends React.Component {
     };
 
     const { frame } = this.props;
+    const { x, y, width, height } = frame;
 
     const dragBounds = {
       left: 0,
-      right: this.props.containerWidth - (this.props.frame.width + 2),
+      right: this.props.containerWidth - (width + 2),
       top: 0,
-      bottom: this.props.containerHeight - (this.props.frame.height + 2),
+      bottom: this.props.containerHeight - (height + 2),
     };
 
     return (
       <Draggable
         bounds={dragBounds}
         cancel=".react-resizable-handle"
-        position={{ x: this.props.frame.x, y: this.props.frame.y }}
+        position={{ x, y }}
         handle=".frame-handle"
         onMouseDown={onMouseDown}
         onDrag={onDrag}
         onStop={triggerDimensionChange}
       >
         <Resizable
-          width={this.props.frame.width}
-          height={this.props.frame.height}
+          width={width}
+          height={height}
           onResize={onResize}
           onResizeStop={triggerDimensionChange}
         >
-          <div className="frame" style={{ width: this.props.frame.width, height: this.props.frame.height }}>
+          <div className="frame" style={{ width, height }}>
             <div className="frame-handle">{frame.title || '<untitled frame>'}</div>
             <div className="frame-content">
               {renderFrameView(frame)}

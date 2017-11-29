@@ -7,11 +7,13 @@ import renderFrameView from './frameViews/renderFrameView';
 class Frame extends React.Component {
   render() {
     const onResize = (event, data) => {
+      event.preventDefault();
       this.props.onDimensionChange(
         this.props.frame.x, this.props.frame.y, data.size.width, data.size.height, true);
     };
 
     const onDrag = (event, data) => {
+      event.preventDefault();
       this.props.onDimensionChange(
         data.x, data.y, this.props.frame.width, this.props.frame.height, true);
     };

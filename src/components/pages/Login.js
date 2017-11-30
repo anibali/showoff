@@ -16,6 +16,9 @@ const styles = theme => ({
   paper: {
     padding: theme.spacing.unit * 4,
   },
+  container: {
+    padding: 16,
+  }
 });
 
 class Login extends React.Component {
@@ -63,7 +66,7 @@ class Login extends React.Component {
     }
 
     return (
-      <div className="container" style={{ padding: 16 }}>
+      <div className={`container ${classes.container}`} >
         <Grid container justify="center" spacing={24}>
           <Grid item xs={12} sm={6} md={4}>
             <Paper className={classes.paper}>

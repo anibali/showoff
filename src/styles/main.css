@@ -41,6 +41,15 @@ body {
   white-space: nowrap;
 }
 
+.size100 {
+  width: 100%;
+  height: 100%;
+}
+
+.flex1 {
+  flex: 1;
+}
+
 .fill-space {
   position: absolute;
   top: 0;

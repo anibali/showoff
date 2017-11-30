@@ -27,7 +27,7 @@ class PlotlyPlot extends React.PureComponent {
     const { PlotlyComponent } = this;
 
     return (
-      <div ref={this.props.measureRef} style={{ width: '100%', height: '100%' }}>
+      <div ref={this.props.measureRef} className="size100">
         <PlotlyComponent
           onInitialized={this.onInitialized}
           {..._.pick(this.props, ['data', 'layout'])}

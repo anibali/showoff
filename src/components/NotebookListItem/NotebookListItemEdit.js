@@ -51,7 +51,7 @@ class NotebookListItemEdit extends React.Component {
 
     return (
       <ListItem dense>
-        <form onSubmit={onSubmitForm} style={{ width: '100%' }}>
+        <form className="size100" onSubmit={onSubmitForm}>
           <TextField
             fullWidth
             label="Title"

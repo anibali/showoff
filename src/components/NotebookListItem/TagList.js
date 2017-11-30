@@ -28,11 +28,8 @@ const TagList = ({ tags }) => {
     };
     return <span key={tag.id} className="label" style={style}>{tag.name}</span>;
   });
-  return (
-    <span style={{ paddingLeft: 6 }}>
-      {children}
-    </span>
-  );
+  return <span>{children}</span>;
 };
+
 
 export default TagList;

@@ -14,7 +14,7 @@ const {
 
 const notebooksReducer = handleActions({
   [modifyFrame](state, { payload: { frame } }) {
-    const notebookIndex = _.findIndex(state, { id: frame.notebookId.toString() });
+    const notebookIndex = _.findIndex(state, { id: frame.notebook.id });
 
     // Ignore update if the frame's notebook hasn't been loaded
     if(!state[notebookIndex] || !state[notebookIndex].frames) {
@@ -42,6 +42,11 @@ const notebooksReducer = handleActions({
     notebooks.forEach((notebook) => {
       notebook = _.pick(notebook, 'id', 'title', 'pinned', 'progress',
         'createdAt', 'updatedAt', 'frames');
+      if(notebook.frames) {
+        notebook.frames.forEach((frame) => {
+          frame.notebook = { type: 'notebooks', id: notebook.id };
+        });
+      }
       const notebookIndex = _.findIndex(state, { id: notebook.id });
 
       if(notebookIndex < 0) {

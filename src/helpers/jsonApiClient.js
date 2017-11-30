@@ -27,7 +27,6 @@ jsonApi.define('frames', {
   type: '',
   content: {},
   renderedContent: '',
-  notebookId: '0',
   x: 0,
   y: 0,
   width: 800,

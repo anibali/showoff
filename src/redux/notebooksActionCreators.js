@@ -23,6 +23,7 @@ actionCreators.updateFrame = (frame, localOnly = false) => (dispatch) => {
     'frames',
     _.omit(frame, ['createdAt', 'updatedAt', 'notebookId', 'notebook',
       'renderedContent', 'content']),
+    { include: 'notebook' },
   )
     .then((res) => {
       dispatch(actionCreators.modifyFrame(res.data));

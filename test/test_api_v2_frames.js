@@ -207,7 +207,6 @@ describe('API V2 Frames', () => {
               renderedContent: '<pre>Lorem ipsum</pre>',
               createdAt: '1970-01-01T00:00:00.000Z',
               updatedAt: '1970-01-01T00:00:00.000Z',
-              notebookId: 1,
             },
             relationships: {
               notebook: {
@@ -218,6 +217,12 @@ describe('API V2 Frames', () => {
               }
             },
           },
+          included: {
+            notebook: {
+              id: '1',
+              type: 'notebooks',
+            }
+          }
         };
 
         return sendRequest(reqBody)
@@ -236,13 +241,16 @@ describe('API V2 Frames', () => {
                 id: '1',
                 title: 'New frame',
                 type: 'text',
-                content: '<pre>Lorem ipsum</pre>',
+                content: { body: 'Lorem ipsum' },
                 x: 0,
                 y: 0,
                 width: 800,
                 height: 600,
                 renderedContent: '<pre>Lorem ipsum</pre>',
-                notebookId: '1',
+                notebook: {
+                  id: '1',
+                  type: 'notebooks',
+                },
                 createdAt: new Date('1970-01-01T00:00:00.000Z'),
                 updatedAt: new Date('1970-01-01T00:00:00.000Z'),
               }
@@ -389,7 +397,6 @@ describe('API V2 Frames', () => {
               y: 0,
               createdAt: '1970-01-01T00:00:00.000Z',
               updatedAt: '1970-01-01T00:00:00.000Z',
-              notebookId: 1,
             },
             relationships: {
               notebook: {
@@ -399,6 +406,12 @@ describe('API V2 Frames', () => {
                 }
               }
             },
+          },
+          included: {
+            notebook: {
+              id: '1',
+              type: 'notebooks',
+            }
           }
         };
 
@@ -418,13 +431,16 @@ describe('API V2 Frames', () => {
                 id: '1',
                 title: 'Updated frame',
                 type: 'text',
-                content: '<pre>Lorem ipsum</pre>',
+                content: { body: 'Lorem ipsum' },
                 x: 0,
                 y: 0,
                 width: 800,
                 height: 600,
                 renderedContent: '<pre>Lorem ipsum</pre>',
-                notebookId: '1',
+                notebook: {
+                  id: '1',
+                  type: 'notebooks',
+                },
                 createdAt: new Date('1970-01-01T00:00:00.000Z'),
                 updatedAt: new Date('1970-01-01T00:00:00.000Z'),
               }

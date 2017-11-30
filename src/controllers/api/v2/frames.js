@@ -90,21 +90,23 @@ const renderFrame = (frameJson) =>
 const mapFrameToJson = (frame) => {
   const frameJson = mapper.map(frame, 'frames', {
     enableLinks: false,
-    // TODO: notebookId *should* be omitted when possible
-    // attributes: { omit: ['id', 'notebookId'] },
+    attributes: { omit: ['id', 'notebookId'] },
     relations: { included: false },
   });
   frameJson.data.relationships = _.assign({}, frameJson.data.relationships, {
     notebook: { data: { type: 'notebooks', id: String(frame.attributes.notebookId) } }
   });
+  frameJson.included = _.assign({}, frameJson.included, {
+    notebook: { type: 'notebooks', id: String(frame.attributes.notebookId) }
+  });
   return frameJson;
 };
 
 const broadcastFrame = (frame) => {
+  // TODO: Use Devour's serialization
   const flatFrame = _.assign({}, frame.data.attributes, {
     id: frame.data.id,
-    notebookId: frame.data.relationships.notebook.data.id,
-    content: frame.data.attributes.renderedContent,
+    notebook: frame.data.relationships.notebook.data,
   });
   global.wss.fireFrameUpdate(flatFrame);
   return frame;

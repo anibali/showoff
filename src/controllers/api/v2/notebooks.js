@@ -106,7 +106,14 @@ const showNotebook = (req, res) =>
       renderFrames(_.filter(notebookJson.included, { type: 'frames' }))
         .then(framesJson => _.assign({}, notebookJson, {
           included: _.reject(notebookJson.included, { type: 'frames' }).concat(framesJson)
-        })))
+        }))
+        .then((framesJson) => {
+          framesJson.included.forEach((frame) => {
+            delete frame.attributes.notebookId;
+          });
+          return framesJson;
+        })
+    )
     .then(notebookJson => res.json(notebookJson));
 
 // PATCH /api/v2/notebooks/104

@@ -32,14 +32,26 @@ class Home extends React.Component {
 
   componentWillMount() {
     // TODO: Skip doing this if it has already been done (probably
-    // requires a boolean flag in the store or something)
+    //       requires a boolean flag in the store or something)
+    // TODO: Make a single request (just include tags with notebooks)
     this.props.loadNotebooksShallow();
     this.props.loadTagsShallow();
   }
 
   render() {
-    let notebooks = _.reverse(_.sortBy(this.props.notebooks, (notebook) => notebook.createdAt));
-    notebooks = _.filter(notebooks, notebook => {
+    const tags = _.values(this.props.tags)
+      .map(entity => _.assign({}, entity.attributes, _.pick(entity, ['id', 'relationships'])));
+
+    // FIXME: Since this code creates new objects for each notebook, a change
+    //        to _one_ will cause _all_ to rerender
+    const unsortedNotebooks = _.values(this.props.notebooks)
+      .map(entity => _.assign({}, entity.attributes, { id: entity.id }))
+      .map(notebook => {
+        const notebookTags =
+          _.filter(tags, tag => tag.relationships.notebook.data.id === notebook.id);
+        return _.assign({ tags: notebookTags }, notebook);
+      });
+    const filteredNotebooks = _.filter(unsortedNotebooks, notebook => {
       let show = true;
       this.state.filterTags.forEach(tag => {
         if(!_.find(notebook.tags, { name: tag.name })) {
@@ -48,8 +60,9 @@ class Home extends React.Component {
       });
       return show;
     });
+    const notebooks = _.reverse(_.sortBy(filteredNotebooks, 'createdAt'));
 
-    const tagOptions = _.uniqBy(this.props.tags, 'name');
+    const tagOptions = _.uniqBy(tags, 'name');
 
     const createListItem = (notebook) => (
       <NotebookListItem
@@ -84,18 +97,11 @@ class Home extends React.Component {
   }
 }
 
-const getNotebooksWithTags = ({ notebooks, tags }) =>
-  notebooks.map(notebook => {
-    const notebookTags = _.filter(tags, { notebookId: notebook.id });
-    return _.assign({ tags: notebookTags }, notebook);
-  });
 
 export default ReactRedux.connect(
-  // Map store state to props
   (state) => ({
-    tags: state.tags,
-    // FIXME: This creates new notebooks, so every item in the list always re-renders
-    notebooks: getNotebooksWithTags(state),
+    tags: state.entities.tags,
+    notebooks: state.entities.notebooks,
   }),
   (dispatch) => ({
     loadNotebooksShallow: _.flow(notebookActionCreators.loadNotebooksShallow, dispatch),

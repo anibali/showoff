@@ -9,15 +9,9 @@ import { createActions } from 'redux-actions';
 
 
 const simpleActionCreators = createActions({
-  notebooks: {
-    MODIFY_FRAME: frame => ({ frame }),
-    ADD_NOTEBOOK: notebook => ({ notebooks: [notebook] }),
-    ADD_NOTEBOOKS: notebooks => ({ notebooks }),
-    REMOVE_NOTEBOOK: notebookId => ({ notebookId }),
-  },
-  tags: {
-    ADD_TAG: tag => ({ tags: [tag] }),
-    ADD_TAGS: tags => ({ tags }),
+  entities: {
+    MERGE_ENTITIES: normalizedData => ({ normalizedData }),
+    REMOVE_ENTITY: (type, id) => ({ type, id }),
     REMOVE_TAGS_FROM_NOTEBOOK: notebookId => ({ notebookId }),
   },
   auth: {

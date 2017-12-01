@@ -1,12 +1,10 @@
 import * as Redux from 'redux';
-import notebooks from './notebooksReducer';
-import tags from './tagsReducer';
+import entities from './entitiesReducer';
 import auth from './authReducer';
 
 
 const combinedReducers = Redux.combineReducers({
-  notebooks,
-  tags,
+  entities,
   auth,
 });
 

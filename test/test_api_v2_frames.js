@@ -235,24 +235,36 @@ describe('API V2 Frames', () => {
       it('should broadcast the new notebook with WebSockets', () =>
         sendRequest(reqBody).then(() => {
           expect(broadcastStub.getCall(0).args[0]).to.be.eql({
-            type: 'notebooks/MODIFY_FRAME',
+            type: 'entities/MERGE_ENTITIES',
             payload: {
-              frame: {
-                id: '1',
-                title: 'New frame',
-                type: 'text',
-                content: { body: 'Lorem ipsum' },
-                x: 0,
-                y: 0,
-                width: 800,
-                height: 600,
-                renderedContent: '<pre>Lorem ipsum</pre>',
-                notebook: {
-                  id: '1',
-                  type: 'notebooks',
-                },
-                createdAt: new Date('1970-01-01T00:00:00.000Z'),
-                updatedAt: new Date('1970-01-01T00:00:00.000Z'),
+              normalizedData: {
+                frames: {
+                  '1': {
+                    attributes: {
+                      content: {
+                        body: 'Lorem ipsum'
+                      },
+                      height: 600,
+                      renderedContent: '<pre>Lorem ipsum</pre>',
+                      title: 'New frame',
+                      type: 'text',
+                      width: 800,
+                      x: 0,
+                      y: 0,
+                      createdAt: new Date('1970-01-01T00:00:00.000Z'),
+                      updatedAt: new Date('1970-01-01T00:00:00.000Z'),
+                    },
+                    id: '1',
+                    relationships: {
+                      notebook: {
+                        data: {
+                          id: '1',
+                          type: 'notebooks'
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           });
@@ -425,24 +437,36 @@ describe('API V2 Frames', () => {
       it('should broadcast the updated notebook with WebSockets', () =>
         sendRequest(reqBody).then(() => {
           expect(broadcastStub.getCall(0).args[0]).to.be.eql({
-            type: 'notebooks/MODIFY_FRAME',
+            type: 'entities/MERGE_ENTITIES',
             payload: {
-              frame: {
-                id: '1',
-                title: 'Updated frame',
-                type: 'text',
-                content: { body: 'Lorem ipsum' },
-                x: 0,
-                y: 0,
-                width: 800,
-                height: 600,
-                renderedContent: '<pre>Lorem ipsum</pre>',
-                notebook: {
-                  id: '1',
-                  type: 'notebooks',
-                },
-                createdAt: new Date('1970-01-01T00:00:00.000Z'),
-                updatedAt: new Date('1970-01-01T00:00:00.000Z'),
+              normalizedData: {
+                frames: {
+                  '1': {
+                    attributes: {
+                      content: {
+                        body: 'Lorem ipsum'
+                      },
+                      height: 600,
+                      renderedContent: '<pre>Lorem ipsum</pre>',
+                      title: 'Updated frame',
+                      type: 'text',
+                      width: 800,
+                      x: 0,
+                      y: 0,
+                      createdAt: new Date('1970-01-01T00:00:00.000Z'),
+                      updatedAt: new Date('1970-01-01T00:00:00.000Z'),
+                    },
+                    id: '1',
+                    relationships: {
+                      notebook: {
+                        data: {
+                          id: '1',
+                          type: 'notebooks'
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           });

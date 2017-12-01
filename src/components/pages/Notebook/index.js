@@ -75,6 +75,7 @@ class Notebook extends React.Component {
     super(props);
 
     this.state = {
+      loading: false,
       error: null,
     };
 
@@ -98,24 +99,31 @@ class Notebook extends React.Component {
   }
 
   componentWillMount() {
-    if(!this.props.frames) {
-      this.props.loadNotebook(this.props.id).catch(err => {
-        if(err.response && err.response.status === 404) {
-          this.setState({ error: 'Not found' });
-        } else {
-          this.setState({ error: 'Something went wrong' });
-        }
-      });
+    if(this.props.frames.length === 0) {
+      this.setState({ loading: true });
+      this.props.loadNotebook(this.props.id)
+        .catch(err => {
+          if(err.response && err.response.status === 404) {
+            this.setState({ error: 'Not found' });
+          } else {
+            this.setState({ error: 'Something went wrong' });
+          }
+        })
+        .then(() => this.setState({ loading: false }));
     }
   }
 
   // Describe how to render the component
   render() {
-    const { classes } = this.props;
+    const { classes, notebook } = this.props;
+    const title = notebook ? notebook.attributes.title : 'Untitled notebook';
+
+    const frames = _.values(this.props.frames)
+      .map(entity => _.assign({}, entity.attributes, { id: entity.id }));
 
     if(this.state.error) {
       return (
-        <DocumentTitle title={this.props.title || 'Untitled notebook'}>
+        <DocumentTitle title={title}>
           <BodyClass className="notebook">
             <div className={classes.centerStatus}>
               <ErrorIcon className={classes.errorIcon} />
@@ -127,9 +135,9 @@ class Notebook extends React.Component {
         </DocumentTitle>
       );
     }
-    if(!this.props.frames) {
+    if(this.state.loading) {
       return (
-        <DocumentTitle title={this.props.title || 'Untitled notebook'}>
+        <DocumentTitle title={title}>
           <BodyClass className="notebook">
             <div className={classes.centerStatus}>
               <CircularProgress color="accent" size={150} />
@@ -140,14 +148,14 @@ class Notebook extends React.Component {
     }
 
     return (
-      <DocumentTitle title={this.props.title || 'Untitled notebook'}>
+      <DocumentTitle title={title}>
         <BodyClass className="notebook">
           <div className={classes.notebookContainer}>
             <NotebookToolbar
               onClickGrid={this.arrangeFramesInGrid}
             />
             <Frames
-              frames={this.props.frames}
+              frames={frames}
               updateFrame={this.props.updateFrame}
             />
           </div>
@@ -161,8 +169,10 @@ export default withStyles(styles)(ReactRedux.connect(
   // Map store state to props
   (state, ownProps) => {
     const { id } = ownProps.match.params;
-    const notebook = _.find(state.notebooks, { id }) || {};
-    return { id, title: notebook.title, frames: notebook.frames };
+    const notebook = state.entities.notebooks[id];
+    const frames = _.filter(state.entities.frames,
+      frame => frame.relationships.notebook.data.id === notebook.id);
+    return { id, notebook, frames };
   },
   (dispatch) => ({
     loadNotebook: _.flow(notebookActionCreators.loadNotebook, dispatch),

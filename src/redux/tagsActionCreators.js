@@ -5,22 +5,20 @@
  *   - Calls one or more other action creators
  */
 
-import _ from 'lodash';
+import normalize from 'json-api-normalizer';
 
-import jsonApi from '../helpers/jsonApiClient';
+import apiClient from '../helpers/apiClient';
 import simpleActionCreators from './simpleActionCreators';
 
 
-const actionCreators = _.clone(simpleActionCreators.tags);
+const actionCreators = {};
 
 actionCreators.loadTagsShallow = () => (dispatch) =>
-  jsonApi.findAll('tags', { include: 'notebook' })
-    .then(res => {
-      const tags = res.data;
-      tags.forEach(tag => { tag.notebookId = tag.notebook.id; });
-      dispatch(actionCreators.addTags(tags));
-      return tags;
-    });
+  apiClient.get('tags?include=notebook')
+    .then(res => res.data)
+    .then(normalize)
+    .then(simpleActionCreators.entities.mergeEntities)
+    .then(dispatch);
 
 
 export default actionCreators;

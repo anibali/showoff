@@ -4,7 +4,6 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { BasicStrategy } from 'passport-http';
 import KnexSessionStoreFactory from 'connect-session-knex';
 
-import jsonApi from '../helpers/jsonApiClient';
 import apiClient from '../helpers/apiClient';
 import { resetInternalApiKey, verifyHash, verifyApiKey } from '../helpers/authHelpers';
 import models from '../models';
@@ -77,7 +76,6 @@ export default (app) => {
       password: secretKey,
     };
     apiClient.updateConfig({ auth });
-    jsonApi.auth = auth;
 
     app.auth = auth;
     return app;

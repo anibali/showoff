@@ -8,6 +8,7 @@ const defaultState = {
   user: {
     apiKeys: [],
   },
+  apiKeys: {},
 };
 
 const {
@@ -22,25 +23,16 @@ export default handleActions({
     return _.assign({}, state, {
       authenticated,
       user: authenticated ? state.user : defaultState.user,
+      apiKeys: authenticated ? state.apiKeys : defaultState.apiKeys,
     });
   },
   [setCurrentUserApiKeys](state, { payload: { apiKeys } }) {
-    return _.assign({}, state, {
-      user: _.assign({}, state.user, { apiKeys }),
-    });
+    return _.assign({}, state, { apiKeys });
   },
   [addCurrentUserApiKeys](state, { payload: { apiKeys } }) {
-    return _.assign({}, state, {
-      user: _.assign({}, state.user, {
-        apiKeys: state.user.apiKeys.concat(apiKeys),
-      }),
-    });
+    return _.merge({}, state, { apiKeys });
   },
   [removeCurrentUserApiKey](state, { payload: { apiKeyId } }) {
-    return _.assign({}, state, {
-      user: _.assign({}, state.user, {
-        apiKeys: _.reject(state.user.apiKeys, { id: apiKeyId }),
-      }),
-    });
+    return _.assign({}, state, { apiKeys: _.omit(state.apiKeys, apiKeyId) });
   },
 }, defaultState);

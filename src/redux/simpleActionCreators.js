@@ -13,6 +13,7 @@ const simpleActionCreators = createActions({
     MERGE_ENTITIES: normalizedData => ({ normalizedData }),
     REMOVE_ENTITY: (type, id) => ({ type, id }),
     REMOVE_TAGS_FROM_NOTEBOOK: notebookId => ({ notebookId }),
+    ARRANGE_FRAMES_IN_GRID: notebookId => ({ notebookId }),
   },
   auth: {
     SET_AUTHENTICATED: authenticated => ({ authenticated }),

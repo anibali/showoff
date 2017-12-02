@@ -9,6 +9,7 @@ import ErrorIcon from 'material-ui-icons/Error';
 import Typography from 'material-ui/Typography';
 
 import notebookActionCreators from '../../../redux/notebooksActionCreators';
+import simpleActionCreators from '../../../redux/simpleActionCreators';
 import Frame from '../../Frame';
 import BodyClass from '../../BodyClass';
 import NotebookToolbar from './NotebookToolbar';
@@ -96,16 +97,7 @@ class Notebook extends React.Component {
     };
 
     this.arrangeFramesInGrid = () => {
-      console.log('TODO: Arrange frames in grid pattern');
-      // const frames = _.sortBy(this.props.frames, 'createdAt');
-      // const width = 460;
-      // const height = 320;
-      // frames.forEach((frame, i) => {
-      //   const x = (i % 4) * width;
-      //   const y = Math.floor(i / 4) * height;
-      //   this.props.updateFrame(
-      //     _.assign({}, frame.attributes, { id: frame.id }, { x, y, width, height }));
-      // });
+      this.props.arrangeFramesInGrid(this.props.notebook.id);
     };
   }
 
@@ -188,5 +180,6 @@ export default withStyles(styles)(ReactRedux.connect(
   },
   (dispatch) => ({
     loadNotebook: _.flow(notebookActionCreators.loadNotebook, dispatch),
+    arrangeFramesInGrid: _.flow(simpleActionCreators.entities.arrangeFramesInGrid, dispatch),
   })
 )(Notebook));

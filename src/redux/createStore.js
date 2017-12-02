@@ -1,9 +1,20 @@
 import * as Redux from 'redux';
 import ReduxThunk from 'redux-thunk';
-import combinedReducers from './reducers';
+import createSagaMiddleware from 'redux-saga';
 
-export default (initialState) =>
-  Redux.createStore(
+import combinedReducers from './reducers';
+import rootSaga from './sagas/rootSaga';
+
+
+export default (initialState) => {
+  const sagaMiddleware = createSagaMiddleware();
+
+  const store = Redux.createStore(
     combinedReducers,
     initialState,
-    Redux.applyMiddleware(ReduxThunk));
+    Redux.applyMiddleware(ReduxThunk, sagaMiddleware));
+
+  sagaMiddleware.run(rootSaga);
+
+  return store;
+};

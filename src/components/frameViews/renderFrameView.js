@@ -60,5 +60,5 @@ export default (frame) => {
   }
 
   // eslint-disable-next-line react/no-danger
-  return <div dangerouslySetInnerHTML={{ __html: frame.renderedContent }} />;
+  return <div className="size100" dangerouslySetInnerHTML={{ __html: frame.renderedContent }} />;
 };

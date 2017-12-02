@@ -15,6 +15,7 @@ const {
   mergeEntities,
   removeEntity,
   removeTagsFromNotebook,
+  arrangeFramesInGrid,
 } = simpleActionCreators.entities;
 
 const entitiesReducer = handleActions({
@@ -30,6 +31,24 @@ const entitiesReducer = handleActions({
       tag => tag.relationships.notebook.data.id === notebookId
     ).map(tag => tag.id);
     return _.assign({}, state, { tags: _.omit(state.tags, tagIds) });
+  },
+  [arrangeFramesInGrid](state, { payload: { notebookId } }) {
+    const unsortedFrames = _.filter(
+      _.values(state.frames),
+      frame => frame.relationships.notebook.data.id === notebookId
+    );
+    const frames = _.sortBy(unsortedFrames, 'createdAt');
+
+    const width = 460;
+    const height = 320;
+
+    const updatedFrames = frames.map((frame, i) => {
+      const x = (i % 4) * width;
+      const y = Math.floor(i / 4) * height;
+      return merge({}, frame, { attributes: { x, y, width, height } });
+    });
+
+    return merge({}, state, { frames: _.keyBy(updatedFrames, 'id') });
   },
 }, defaultState);
 

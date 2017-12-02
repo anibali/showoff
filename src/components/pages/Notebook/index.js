@@ -13,15 +13,9 @@ import simpleActionCreators from '../../../redux/simpleActionCreators';
 import Frame from '../../Frame';
 import BodyClass from '../../BodyClass';
 import NotebookToolbar from './NotebookToolbar';
-import { createSelector } from '../../../helpers/select';
+import { getNotebook } from '../../../redux/selectors/notebookSelectors';
+import { getFrame } from '../../../redux/selectors/frameSelectors';
 
-
-const getFrame = createSelector(
-  [
-    ({ state, id }) => state.entities.frames[id],
-  ],
-  (frame) => _.assign({}, frame.attributes, { id: frame.id })
-);
 
 const styles = (theme) => ({
   centerStatus: {
@@ -48,7 +42,8 @@ const FrameWrapperPlain = (props) => {
   const { updateFrame, frame, containerWidth, containerHeight } = props;
 
   const onDimensionChange = (x, y, width, height, localOnly) => {
-    updateFrame(_.assign({}, frame, { x, y, width, height }), localOnly);
+    const flatFrame = Object.assign({}, frame.attributes, { id: frame.id });
+    updateFrame(_.assign({}, flatFrame, { x, y, width, height }), localOnly);
   };
 
   return (
@@ -63,7 +58,7 @@ const FrameWrapperPlain = (props) => {
 
 const FrameWrapper = ReactRedux.connect(
   (state, ownProps) => ({
-    frame: getFrame({ state, id: ownProps.frameId }),
+    frame: getFrame(state, ownProps.frameId),
   }),
   (dispatch) => ({
     updateFrame: _.flow(notebookActionCreators.updateFrame, dispatch),
@@ -172,11 +167,11 @@ class Notebook extends React.Component {
   }
 }
 
+
 export default withStyles(styles)(ReactRedux.connect(
   (state, ownProps) => {
     const { id } = ownProps.match.params;
-    const notebook = state.entities.notebooks[id];
-    return { id, notebook };
+    return { id, notebook: getNotebook(state, id) };
   },
   (dispatch) => ({
     loadNotebook: _.flow(notebookActionCreators.loadNotebook, dispatch),

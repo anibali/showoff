@@ -4,24 +4,26 @@ import Draggable from 'react-draggable';
 import { Resizable } from 'react-resizable';
 import renderFrameView from './frameViews/renderFrameView';
 
+
 class Frame extends React.Component {
   render() {
     const onResize = (event, data) => {
       event.preventDefault();
-      this.props.onDimensionChange(
-        this.props.frame.x, this.props.frame.y, data.size.width, data.size.height, true);
+      const { x, y } = this.props.frame.attributes;
+      const { width, height } = data.size;
+      this.props.onDimensionChange(x, y, width, height, true);
     };
 
     const onDrag = (event, data) => {
       event.preventDefault();
-      this.props.onDimensionChange(
-        data.x, data.y, this.props.frame.width, this.props.frame.height, true);
+      const { x, y } = data;
+      const { width, height } = this.props.frame.attributes;
+      this.props.onDimensionChange(x, y, width, height, true);
     };
 
     const triggerDimensionChange = () => {
-      this.props.onDimensionChange(
-        this.props.frame.x, this.props.frame.y,
-        this.props.frame.width, this.props.frame.height, false);
+      const { x, y, width, height } = this.props.frame.attributes;
+      this.props.onDimensionChange(x, y, width, height, false);
     };
 
     const onMouseDown = (event) => {
@@ -40,7 +42,7 @@ class Frame extends React.Component {
     };
 
     const { frame } = this.props;
-    const { x, y, width, height } = frame;
+    const { x, y, width, height, title } = frame.attributes;
 
     const dragBounds = {
       left: 0,
@@ -66,7 +68,7 @@ class Frame extends React.Component {
           onResizeStop={triggerDimensionChange}
         >
           <div className="frame" style={{ width, height }}>
-            <div className="frame-handle">{frame.title || '<untitled frame>'}</div>
+            <div className="frame-handle">{title || '<untitled frame>'}</div>
             <div className="frame-content">
               {renderFrameView(frame)}
             </div>
@@ -76,5 +78,6 @@ class Frame extends React.Component {
     );
   }
 }
+
 
 export default Frame;

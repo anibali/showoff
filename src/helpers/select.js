@@ -1,9 +1,5 @@
-// import { HybridMap } from 'hybrid-map';
+import { HybridMap } from 'hybrid-map';
 
-
-// NOTE: Currently, if we use HybridMap then non-object keys can cause cached
-// values to stick around forever
-const MapImpl = WeakMap;
 
 const recursiveCacheSet = (cache, keys, value) => {
   if(keys.length < 1) {
@@ -19,7 +15,7 @@ const recursiveCacheSet = (cache, keys, value) => {
   if(cache.has(head)) {
     subCache = cache.get(head);
   } else {
-    subCache = new MapImpl();
+    subCache = new HybridMap();
     cache.set(head, subCache);
   }
   recursiveCacheSet(subCache, tail, value);
@@ -34,7 +30,11 @@ export const createSelector = (inputSelectors, resultFunc) => {
     inputSelectors = [firstArg => firstArg];
   }
 
-  const cache = new MapImpl();
+  // The "root" of the cache is a WeakMap. This is significant for two reasons:
+  // 1. Values stored in the cache can be freed automatically when all
+  //    references to the key are garbage collected.
+  // 2. The first argument to all selectors must be an object.
+  const cache = new WeakMap();
 
   return (...args) => {
     const resultFuncArgs = inputSelectors.map(fn => fn(...args));

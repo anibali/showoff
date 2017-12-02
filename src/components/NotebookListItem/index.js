@@ -1,10 +1,14 @@
 import React from 'react';
 import _ from 'lodash';
+import { connect } from 'react-redux';
+
 import NotebookListItemView from './NotebookListItemView';
 import NotebookListItemEdit from './NotebookListItemEdit';
+import notebookActionCreators from '../../redux/notebooksActionCreators';
+import { getFlatNotebookWithTags } from '../../redux/selectors/notebookSelectors';
 
 
-class NotebookListItem extends React.Component {
+class NotebookListItem extends React.PureComponent {
   constructor(...args) {
     super(...args);
     this.state = { editing: false };
@@ -39,9 +43,8 @@ class NotebookListItem extends React.Component {
       this.setState({ editing: !this.state.editing });
     };
 
-    this.editModeChildProps = ({ notebook, tagOptions }) => ({
+    this.editModeChildProps = ({ notebook }) => ({
       notebook,
-      tagOptions,
       onConfirmEdit,
       onCancelEdit,
     });
@@ -56,4 +59,13 @@ class NotebookListItem extends React.Component {
   }
 }
 
-export default NotebookListItem;
+
+export default connect(
+  (state, ownProps) => ({
+    notebook: getFlatNotebookWithTags(state, ownProps.notebookId),
+  }),
+  (dispatch) => ({
+    deleteNotebook: _.flow(notebookActionCreators.deleteNotebook, dispatch),
+    updateNotebook: _.flow(notebookActionCreators.updateNotebook, dispatch),
+  })
+)(NotebookListItem);

@@ -24,8 +24,12 @@ const recursiveCacheSet = (cache, keys, value) => {
 const recursiveCacheGet = (cache, keys) =>
   keys.reduce((subCache, arg) => subCache && subCache.get(arg), cache);
 
+/**
+ * Warning: argsToKeys must be used very carefully, otherwise invalid results
+ * may be returned from the cache.
+ */
 // eslint-disable-next-line import/prefer-default-export
-export const createSelector = (inputSelectors, resultFunc) => {
+export const createSelector = (inputSelectors, resultFunc, argsToKeys) => {
   if(inputSelectors.length === 0) {
     inputSelectors = [firstArg => firstArg];
   }
@@ -39,8 +43,9 @@ export const createSelector = (inputSelectors, resultFunc) => {
   return (...args) => {
     const resultFuncArgs = inputSelectors.map(fn => fn(...args));
 
-    const firstKeys = resultFuncArgs.slice(0, -1);
-    const lastKey = resultFuncArgs[resultFuncArgs.length - 1];
+    const keys = argsToKeys ? argsToKeys(...resultFuncArgs) : resultFuncArgs;
+    const firstKeys = keys.slice(0, -1);
+    const lastKey = keys[keys.length - 1];
 
     const leafCache = recursiveCacheGet(cache, firstKeys);
 
@@ -53,7 +58,7 @@ export const createSelector = (inputSelectors, resultFunc) => {
     if(leafCache) {
       leafCache.set(lastKey, result);
     } else {
-      recursiveCacheSet(cache, resultFuncArgs, result);
+      recursiveCacheSet(cache, keys, result);
     }
 
     return result;

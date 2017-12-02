@@ -10,6 +10,8 @@ import TagInput from '../TagInput';
 import Header from '../Header';
 import notebookActionCreators from '../../redux/notebooksActionCreators';
 import tagActionCreators from '../../redux/tagsActionCreators';
+import { getNotebooks } from '../../redux/selectors/notebookSelectors';
+import { getTags, getTagNames } from '../../redux/selectors/tagSelectors';
 
 
 class Home extends React.Component {
@@ -42,8 +44,6 @@ class Home extends React.Component {
     const tags = _.values(this.props.tags)
       .map(entity => _.assign({}, entity.attributes, _.pick(entity, ['id', 'relationships'])));
 
-    // FIXME: Since this code creates new objects for each notebook, a change
-    //        to _one_ will cause _all_ to rerender
     const unsortedNotebooks = _.values(this.props.notebooks)
       .map(entity => _.assign({}, entity.attributes, { id: entity.id }))
       .map(notebook => {
@@ -62,15 +62,10 @@ class Home extends React.Component {
     });
     const notebooks = _.reverse(_.sortBy(filteredNotebooks, 'createdAt'));
 
-    const tagOptions = _.uniqBy(tags, 'name');
-
     const createListItem = (notebook) => (
       <NotebookListItem
         key={notebook.id}
-        notebook={notebook}
-        deleteNotebook={this.props.deleteNotebook}
-        updateNotebook={this.props.updateNotebook}
-        tagOptions={tagOptions}
+        notebookId={notebook.id}
       />
     );
 
@@ -82,7 +77,7 @@ class Home extends React.Component {
             Notebooks
           </Typography>
           <TagInput
-            suggestions={tagOptions}
+            suggestions={this.props.tagOptions}
             onChange={this.onChangeFilterTags}
             placeholder="Add filter tag"
           />
@@ -100,13 +95,12 @@ class Home extends React.Component {
 
 export default ReactRedux.connect(
   (state) => ({
-    tags: state.entities.tags,
-    notebooks: state.entities.notebooks,
+    tags: getTags(state),
+    tagOptions: getTagNames(state),
+    notebooks: getNotebooks(state),
   }),
   (dispatch) => ({
     loadNotebooksShallow: _.flow(notebookActionCreators.loadNotebooksShallow, dispatch),
     loadTagsShallow: _.flow(tagActionCreators.loadTagsShallow, dispatch),
-    deleteNotebook: _.flow(notebookActionCreators.deleteNotebook, dispatch),
-    updateNotebook: _.flow(notebookActionCreators.updateNotebook, dispatch)
   })
 )(Home);

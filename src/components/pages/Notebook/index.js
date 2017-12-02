@@ -12,7 +12,15 @@ import notebookActionCreators from '../../../redux/notebooksActionCreators';
 import Frame from '../../Frame';
 import BodyClass from '../../BodyClass';
 import NotebookToolbar from './NotebookToolbar';
+import { createSelector } from '../../../helpers/select';
 
+
+const getFrame = createSelector(
+  [
+    ({ state, id }) => state.entities.frames[id],
+  ],
+  (frame) => _.assign({}, frame.attributes, { id: frame.id })
+);
 
 const styles = (theme) => ({
   centerStatus: {
@@ -35,7 +43,7 @@ const styles = (theme) => ({
   },
 });
 
-const FrameWrapper = (props) => {
+const FrameWrapperPlain = (props) => {
   const { updateFrame, frame, containerWidth, containerHeight } = props;
 
   const onDimensionChange = (x, y, width, height, localOnly) => {
@@ -52,20 +60,28 @@ const FrameWrapper = (props) => {
   );
 };
 
-const Frames = withContentRect('bounds')(({ measureRef, contentRect, frames, updateFrame }) => {
-  const createFrame = frame => (
+const FrameWrapper = ReactRedux.connect(
+  (state, ownProps) => ({
+    frame: getFrame({ state, id: ownProps.frameId }),
+  }),
+  (dispatch) => ({
+    updateFrame: _.flow(notebookActionCreators.updateFrame, dispatch),
+  })
+)(FrameWrapperPlain);
+
+const Frames = withContentRect('bounds')(({ measureRef, contentRect, frameIds }) => {
+  const createFrame = frameId => (
     <FrameWrapper
-      key={frame.id}
-      frame={frame}
+      key={frameId}
+      frameId={frameId}
       containerWidth={contentRect.bounds.width}
       containerHeight={contentRect.bounds.height}
-      updateFrame={updateFrame}
     />
   );
 
   return (
     <div className="flex1" ref={measureRef}>
-      {frames.map(createFrame)}
+      {frameIds.map(createFrame)}
     </div>
   );
 });
@@ -80,14 +96,16 @@ class Notebook extends React.Component {
     };
 
     this.arrangeFramesInGrid = () => {
-      const frames = _.sortBy(this.props.frames, 'createdAt');
-      const width = 460;
-      const height = 320;
-      frames.forEach((frame, i) => {
-        const x = (i % 4) * width;
-        const y = Math.floor(i / 4) * height;
-        this.props.updateFrame(_.assign({}, frame, { x, y, width, height }), false);
-      });
+      console.log('TODO: Arrange frames in grid pattern');
+      // const frames = _.sortBy(this.props.frames, 'createdAt');
+      // const width = 460;
+      // const height = 320;
+      // frames.forEach((frame, i) => {
+      //   const x = (i % 4) * width;
+      //   const y = Math.floor(i / 4) * height;
+      //   this.props.updateFrame(
+      //     _.assign({}, frame.attributes, { id: frame.id }, { x, y, width, height }));
+      // });
     };
   }
 
@@ -99,7 +117,8 @@ class Notebook extends React.Component {
   }
 
   componentWillMount() {
-    if(this.props.frames.length === 0) {
+    const relFrames = _.get(this.props.notebook, ['relationships', 'frames', 'data'], []);
+    if(relFrames.length === 0) {
       this.setState({ loading: true });
       this.props.loadNotebook(this.props.id)
         .catch(err => {
@@ -117,9 +136,6 @@ class Notebook extends React.Component {
   render() {
     const { classes, notebook } = this.props;
     const title = notebook ? notebook.attributes.title : 'Untitled notebook';
-
-    const frames = _.values(this.props.frames)
-      .map(entity => _.assign({}, entity.attributes, { id: entity.id }));
 
     if(this.state.error) {
       return (
@@ -147,6 +163,8 @@ class Notebook extends React.Component {
       );
     }
 
+    const frameIds = notebook.relationships.frames.data.map(frame => frame.id);
+
     return (
       <DocumentTitle title={title}>
         <BodyClass className="notebook">
@@ -154,10 +172,7 @@ class Notebook extends React.Component {
             <NotebookToolbar
               onClickGrid={this.arrangeFramesInGrid}
             />
-            <Frames
-              frames={frames}
-              updateFrame={this.props.updateFrame}
-            />
+            <Frames frameIds={frameIds} />
           </div>
         </BodyClass>
       </DocumentTitle>
@@ -166,16 +181,12 @@ class Notebook extends React.Component {
 }
 
 export default withStyles(styles)(ReactRedux.connect(
-  // Map store state to props
   (state, ownProps) => {
     const { id } = ownProps.match.params;
     const notebook = state.entities.notebooks[id];
-    const frames = _.filter(state.entities.frames,
-      frame => frame.relationships.notebook.data.id === notebook.id);
-    return { id, notebook, frames };
+    return { id, notebook };
   },
   (dispatch) => ({
     loadNotebook: _.flow(notebookActionCreators.loadNotebook, dispatch),
-    updateFrame: _.flow(notebookActionCreators.updateFrame, dispatch)
   })
 )(Notebook));

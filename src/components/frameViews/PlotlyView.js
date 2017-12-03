@@ -1,5 +1,5 @@
 import React from 'react';
-import _ from 'lodash';
+import { thaw } from 'icepick';
 import { withContentRect } from 'react-measure';
 import createPlotlyComponent from 'react-plotly.js/factory';
 import Plotly from 'plotly.js/dist/plotly-cartesian';
@@ -30,7 +30,8 @@ class PlotlyPlot extends React.PureComponent {
       <div ref={this.props.measureRef} className="size100">
         <PlotlyComponent
           onInitialized={this.onInitialized}
-          {..._.pick(this.props, ['data', 'layout'])}
+          data={thaw(this.props.data)}
+          layout={this.props.layout}
           fit={false}
         />
       </div>

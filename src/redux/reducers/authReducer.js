@@ -1,17 +1,16 @@
 import { handleActions } from 'redux-actions';
-import _ from 'lodash';
+import { freeze, merge, assign, dissoc } from 'icepick';
 
 import simpleActionCreators from '../simpleActionCreators';
-import merge from '../../helpers/immutableMerge';
 
 
-const defaultState = {
+const defaultState = freeze({
   authenticated: false,
   user: {
     apiKeys: [],
   },
   apiKeys: {},
-};
+});
 
 const {
   setAuthenticated,
@@ -22,20 +21,20 @@ const {
 
 const authReducer = handleActions({
   [setAuthenticated](state, { payload: { authenticated } }) {
-    return _.assign({}, state, {
+    return assign(state, {
       authenticated,
       user: authenticated ? state.user : defaultState.user,
       apiKeys: authenticated ? state.apiKeys : defaultState.apiKeys,
     });
   },
   [setCurrentUserApiKeys](state, { payload: { apiKeys } }) {
-    return _.assign({}, state, { apiKeys });
+    return assign(state, { apiKeys });
   },
   [addCurrentUserApiKeys](state, { payload: { apiKeys } }) {
-    return merge({}, state, { apiKeys });
+    return merge(state, { apiKeys });
   },
   [removeCurrentUserApiKey](state, { payload: { apiKeyId } }) {
-    return _.assign({}, state, { apiKeys: _.omit(state.apiKeys, apiKeyId) });
+    return assign(state, { apiKeys: dissoc(state.apiKeys, apiKeyId) });
   },
 }, defaultState);
 

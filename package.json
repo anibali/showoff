@@ -31,6 +31,7 @@
     "fs-extra": "^4.0.2",
     "http-errors": "^1.6.2",
     "hybrid-map": "^0.1.0",
+    "icepick": "^2.2.1",
     "joi": "^12.0.0",
     "json-api-normalizer": "^0.4.6",
     "jsonapi-mapper": "^1.0.0-beta.14",

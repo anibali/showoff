@@ -12,6 +12,7 @@ const simpleActionCreators = createActions({
   entities: {
     MERGE_ENTITIES: normalizedData => ({ normalizedData }),
     REMOVE_ENTITY: (type, id) => ({ type, id }),
+    REMOVE_NOTEBOOK: notebookId => ({ notebookId }),
     REMOVE_TAGS_FROM_NOTEBOOK: notebookId => ({ notebookId }),
     ARRANGE_FRAMES_IN_GRID: notebookId => ({ notebookId }),
   },

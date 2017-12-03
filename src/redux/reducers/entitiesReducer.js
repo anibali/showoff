@@ -14,6 +14,7 @@ const defaultState = freeze({
 const {
   mergeEntities,
   removeEntity,
+  removeNotebook,
   removeTagsFromNotebook,
   arrangeFramesInGrid,
 } = simpleActionCreators.entities;
@@ -24,6 +25,18 @@ const entitiesReducer = handleActions({
   },
   [removeEntity](state, { payload: { type, id } }) {
     return assign(state, { [type]: dissoc(state[type], id) });
+  },
+  [removeNotebook](state, { payload: { notebookId } }) {
+    const notebooks = dissoc(state.notebooks, notebookId);
+    const tags = _.keyBy(
+      _.filter(state.tags, tag => tag.relationships.notebook.data.id !== notebookId),
+      'id'
+    );
+    const frames = _.keyBy(
+      _.filter(state.frames, frame => frame.relationships.notebook.data.id !== notebookId),
+      'id'
+    );
+    return assign(state, { notebooks, tags, frames });
   },
   [removeTagsFromNotebook](state, { payload: { notebookId } }) {
     const tagIds = _.filter(

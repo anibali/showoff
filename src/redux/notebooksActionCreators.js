@@ -90,8 +90,7 @@ actionCreators.loadNotebooksShallow = () => (dispatch) =>
 actionCreators.deleteNotebook = (notebookId) => (dispatch) =>
   apiClient.delete(`notebooks/${notebookId}`)
     .then(() => {
-      dispatch(simpleActionCreators.entities.removeEntity('notebooks', notebookId));
-      // TODO: Remove associated frames & tags
+      dispatch(simpleActionCreators.entities.removeNotebook(notebookId));
     });
 
 

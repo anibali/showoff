@@ -6,67 +6,91 @@
  */
 
 import _ from 'lodash';
+import normalize from 'json-api-normalizer';
 
-import jsonApi from '../helpers/jsonApiClient';
+import apiClient from '../helpers/apiClient';
 import simpleActionCreators from './simpleActionCreators';
 
 
-const actionCreators = _.clone(simpleActionCreators.notebooks);
+const serializeEntity = (type, entity, opts) => {
+  const { pick } = opts || {};
+  let { attributes } = entity;
+  if(pick !== undefined) {
+    attributes = _.pick(attributes, pick);
+  }
+  return {
+    type,
+    id: entity.id,
+    attributes,
+  };
+};
 
+const actionCreators = {};
+
+// TODO: Change this function and callers so that `frame` is already in
+//       normalized form
 actionCreators.updateFrame = (frame, localOnly = false) => (dispatch) => {
+  const entity = {
+    id: frame.id,
+    attributes: _.pick(frame, ['x', 'y', 'width', 'height']),
+  };
+
   if(localOnly) {
-    dispatch(actionCreators.modifyFrame(frame));
-    return frame;
+    dispatch(simpleActionCreators.entities.mergeEntities({
+      frames: { [entity.id]: entity }
+    }));
+    return Promise.resolve();
   }
 
-  return jsonApi.update(
-    'frames',
-    _.omit(frame, ['createdAt', 'updatedAt', 'notebookId', 'notebook',
-      'renderedContent', 'content']),
-    { include: 'notebook' },
-  )
-    .then((res) => {
-      dispatch(actionCreators.modifyFrame(res.data));
-      return res.data;
+  const reqBody = { data: serializeEntity('frames', entity) };
+  return apiClient.patch(`frames/${frame.id}?include=notebook`, reqBody)
+    .then(res => res.data)
+    .then(normalize)
+    .then(simpleActionCreators.entities.mergeEntities)
+    .then(dispatch);
+};
+
+// TODO: Change this function and callers so that `frame` is already in
+//       normalized form
+actionCreators.updateNotebook = (notebook) => (dispatch) => {
+  const reqBody = {
+    data: {
+      id: notebook.id,
+      type: 'notebooks',
+      attributes: _.pick(notebook, ['pinned', 'title']),
+    },
+    meta: {
+      included: notebook.tags.map(tag =>
+        ({ id: tag.id, type: 'tags', attributes: _.pick(tag, ['name']) }))
+    }
+  };
+  return apiClient.patch(`notebooks/${notebook.id}?include=tags`, reqBody)
+    .then(res => res.data)
+    .then((resData) => {
+      dispatch(simpleActionCreators.entities.removeTagsFromNotebook(resData.data.id));
+      dispatch(simpleActionCreators.entities.mergeEntities(normalize(resData)));
     });
 };
 
-actionCreators.updateNotebook = (notebook) => (dispatch) =>
-  jsonApi.update(
-    'notebooks',
-    _.omit(notebook, ['createdAt', 'updatedAt']),
-    { include: 'tags' },
-    { included: jsonApi.serialize.collection.call(jsonApi, 'tags', notebook.tags) }
-  )
-    .then((res) => {
-      const updatedNotebook = res.data;
-      dispatch(actionCreators.addNotebook(updatedNotebook));
-      dispatch(simpleActionCreators.tags.removeTagsFromNotebook(updatedNotebook.id));
-      const tags = updatedNotebook.tags.map(tag =>
-        _.assign({}, tag, { notebookId: updatedNotebook.id }));
-      dispatch(simpleActionCreators.tags.addTags(tags));
-      return updatedNotebook;
-    });
-
+// FIXME: Should have to use ?include=frames
 actionCreators.loadNotebook = (notebookId) => (dispatch) =>
-  jsonApi.find('notebooks', notebookId)
-    .then(res => {
-      dispatch(actionCreators.addNotebook(res.data));
-      return res.data;
-    });
+  apiClient.get(`notebooks/${notebookId}`)
+    .then(res => res.data)
+    .then(normalize)
+    .then(simpleActionCreators.entities.mergeEntities)
+    .then(dispatch);
 
 actionCreators.loadNotebooksShallow = () => (dispatch) =>
-  jsonApi.findAll('notebooks')
-    .then(res => {
-      dispatch(actionCreators.addNotebooks(res.data));
-      return res.data;
-    });
+  apiClient.get('notebooks')
+    .then(res => res.data)
+    .then(normalize)
+    .then(simpleActionCreators.entities.mergeEntities)
+    .then(dispatch);
 
 actionCreators.deleteNotebook = (notebookId) => (dispatch) =>
-  jsonApi.destroy('notebooks', notebookId)
+  apiClient.delete(`notebooks/${notebookId}`)
     .then(() => {
-      dispatch(simpleActionCreators.tags.removeTagsFromNotebook(notebookId));
-      dispatch(actionCreators.removeNotebook(notebookId));
+      dispatch(simpleActionCreators.entities.removeNotebook(notebookId));
     });
 
 

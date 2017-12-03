@@ -4,7 +4,7 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { BasicStrategy } from 'passport-http';
 import KnexSessionStoreFactory from 'connect-session-knex';
 
-import jsonApi from '../helpers/jsonApiClient';
+import apiClient from '../helpers/apiClient';
 import { resetInternalApiKey, verifyHash, verifyApiKey } from '../helpers/authHelpers';
 import models from '../models';
 
@@ -71,12 +71,13 @@ export default (app) => {
   // Generate an API key pair for internal use on server start up.
   return resetInternalApiKey().then(({ apiKey, secretKey }) => {
     // These credentials should never leave server RAM.
-    jsonApi.auth = {
+    const auth = {
       username: apiKey.id,
       password: secretKey,
     };
+    apiClient.updateConfig({ auth });
 
-    app.auth = jsonApi.auth;
+    app.auth = auth;
     return app;
   });
 };

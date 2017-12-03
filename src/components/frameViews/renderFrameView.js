@@ -50,15 +50,17 @@ const loadPlotlyViewComponent = () => new Promise((resolve, reject) => {
 
 
 export default (frame) => {
-  if(frame.type === 'plotly') {
+  const { type, content, renderedContent } = frame.attributes;
+
+  if(type === 'plotly') {
     return (
       <ReactView
-        componentProps={frame.content}
+        componentProps={content}
         loadComponent={loadPlotlyViewComponent}
       />
     );
   }
 
   // eslint-disable-next-line react/no-danger
-  return <div dangerouslySetInnerHTML={{ __html: frame.renderedContent }} />;
+  return <div className="size100" dangerouslySetInnerHTML={{ __html: renderedContent }} />;
 };

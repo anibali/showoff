@@ -23,11 +23,11 @@ describe('tagsActionCreators', () => {
   });
 
   describe('loadTagsShallow', () => {
-    it('should dispatch a "tags/ADD_TAGS" action', () => {
+    it('should dispatch an "entities/MERGE_ENTITIES" action', () => {
       const store = mockStore({});
       return store.dispatch(tagsActionCreators.loadTagsShallow()).then(() => {
         expect(store.getActions()).to.eql([
-          { type: 'tags/ADD_TAGS', payload: { tags: [] } }
+          { type: 'entities/MERGE_ENTITIES', payload: { normalizedData: {} } }
         ]);
       });
     });

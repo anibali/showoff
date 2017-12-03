@@ -103,12 +103,7 @@ const mapFrameToJson = (frame) => {
 };
 
 const broadcastFrame = (frame) => {
-  // TODO: Use Devour's serialization
-  const flatFrame = _.assign({}, frame.data.attributes, {
-    id: frame.data.id,
-    notebook: frame.data.relationships.notebook.data,
-  });
-  global.wss.fireFrameUpdate(flatFrame);
+  global.wss.fireFrameUpdate(_.omit(frame, ['included']));
   return frame;
 };
 

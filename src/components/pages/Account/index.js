@@ -91,7 +91,7 @@ class ApiKeyTableRow extends React.Component {
     return (
       <TableRow>
         <TableCell>{apiKey.id}</TableCell>
-        <TableCell>{new Date(apiKey.createdAt).toUTCString()}</TableCell>
+        <TableCell>{new Date(apiKey.attributes.createdAt).toUTCString()}</TableCell>
         <TableCell>
           <IconButton title="Delete this API key" onClick={this.fireOnDelete}>
             <DeleteForeverIcon />
@@ -119,7 +119,7 @@ const KeyCreatedDialog = ({ apiKey, open, onClose }) => (
       <CopyField
         id="secretKeyField"
         label="Secret key"
-        value={apiKey.secretKey}
+        value={apiKey.attributes.secretKey}
       />
     </DialogContent>
     <DialogActions>
@@ -135,21 +135,17 @@ class Account extends React.Component {
     super(props);
     this.state = {
       keyCreatedDialogOpen: false,
-      newApiKey: { id: '', secretKey: '' }
+      newApiKey: { id: '', attributes: {} }
     };
     this.addKey = (event) => {
       event.preventDefault();
       this.props.createCurrentUserApiKey()
-        .then((apiKey) => {
+        .then((newApiKey) => {
           this.setState({
             keyCreatedDialogOpen: true,
-            newApiKey: apiKey.data,
+            newApiKey,
           });
         });
-    };
-    this.destroyKeys = (event) => {
-      event.preventDefault();
-      this.props.destroyCurrentUserApiKeys();
     };
     this.updatePassword = (opts) =>
       this.props.changeCurrentUserPassword(opts)
@@ -176,6 +172,7 @@ class Account extends React.Component {
 
   render() {
     const { classes } = this.props;
+    const apiKeys = _.values(this.props.apiKeys);
 
     return (
       <div>
@@ -197,7 +194,7 @@ class Account extends React.Component {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {this.props.user.apiKeys.map(this.createApiKeyTableRow)}
+                {apiKeys.map(this.createApiKeyTableRow)}
               </TableBody>
             </Table>
             <Button className={classes.button} color="primary" onClick={this.addKey}>
@@ -224,11 +221,11 @@ class Account extends React.Component {
 export default withStyles(styles)(ReactRedux.connect(
   (state) => ({
     user: state.auth.user,
+    apiKeys: state.auth.apiKeys,
   }),
   (dispatch) => ({
     loadCurrentUserApiKeys: _.flow(authActionCreators.loadCurrentUserApiKeys, dispatch),
     createCurrentUserApiKey: _.flow(authActionCreators.createCurrentUserApiKey, dispatch),
-    destroyCurrentUserApiKeys: _.flow(authActionCreators.destroyCurrentUserApiKeys, dispatch),
     destroyApiKey: _.flow(authActionCreators.destroyApiKey, dispatch),
     changeCurrentUserPassword: _.flow(authActionCreators.changeCurrentUserPassword, dispatch),
   })

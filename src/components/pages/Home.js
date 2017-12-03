@@ -10,6 +10,8 @@ import TagInput from '../TagInput';
 import Header from '../Header';
 import notebookActionCreators from '../../redux/notebooksActionCreators';
 import tagActionCreators from '../../redux/tagsActionCreators';
+import { getNotebooks } from '../../redux/selectors/notebookSelectors';
+import { getTags, getTagNames } from '../../redux/selectors/tagSelectors';
 
 
 class Home extends React.Component {
@@ -32,14 +34,24 @@ class Home extends React.Component {
 
   componentWillMount() {
     // TODO: Skip doing this if it has already been done (probably
-    // requires a boolean flag in the store or something)
+    //       requires a boolean flag in the store or something)
+    // TODO: Make a single request (just include tags with notebooks)
     this.props.loadNotebooksShallow();
     this.props.loadTagsShallow();
   }
 
   render() {
-    let notebooks = _.reverse(_.sortBy(this.props.notebooks, (notebook) => notebook.createdAt));
-    notebooks = _.filter(notebooks, notebook => {
+    const tags = _.values(this.props.tags)
+      .map(entity => _.assign({}, entity.attributes, _.pick(entity, ['id', 'relationships'])));
+
+    const unsortedNotebooks = _.values(this.props.notebooks)
+      .map(entity => _.assign({}, entity.attributes, { id: entity.id }))
+      .map(notebook => {
+        const notebookTags =
+          _.filter(tags, tag => tag.relationships.notebook.data.id === notebook.id);
+        return _.assign({ tags: notebookTags }, notebook);
+      });
+    const filteredNotebooks = _.filter(unsortedNotebooks, notebook => {
       let show = true;
       this.state.filterTags.forEach(tag => {
         if(!_.find(notebook.tags, { name: tag.name })) {
@@ -48,16 +60,12 @@ class Home extends React.Component {
       });
       return show;
     });
-
-    const tagOptions = _.uniqBy(this.props.tags, 'name');
+    const notebooks = _.reverse(_.sortBy(filteredNotebooks, 'createdAt'));
 
     const createListItem = (notebook) => (
       <NotebookListItem
         key={notebook.id}
-        notebook={notebook}
-        deleteNotebook={this.props.deleteNotebook}
-        updateNotebook={this.props.updateNotebook}
-        tagOptions={tagOptions}
+        notebookId={notebook.id}
       />
     );
 
@@ -69,7 +77,7 @@ class Home extends React.Component {
             Notebooks
           </Typography>
           <TagInput
-            suggestions={tagOptions}
+            suggestions={this.props.tagOptions}
             onChange={this.onChangeFilterTags}
             placeholder="Add filter tag"
           />
@@ -84,23 +92,15 @@ class Home extends React.Component {
   }
 }
 
-const getNotebooksWithTags = ({ notebooks, tags }) =>
-  notebooks.map(notebook => {
-    const notebookTags = _.filter(tags, { notebookId: notebook.id });
-    return _.assign({ tags: notebookTags }, notebook);
-  });
 
 export default ReactRedux.connect(
-  // Map store state to props
   (state) => ({
-    tags: state.tags,
-    // FIXME: This creates new notebooks, so every item in the list always re-renders
-    notebooks: getNotebooksWithTags(state),
+    tags: getTags(state),
+    tagOptions: getTagNames(state),
+    notebooks: getNotebooks(state),
   }),
   (dispatch) => ({
     loadNotebooksShallow: _.flow(notebookActionCreators.loadNotebooksShallow, dispatch),
     loadTagsShallow: _.flow(tagActionCreators.loadTagsShallow, dispatch),
-    deleteNotebook: _.flow(notebookActionCreators.deleteNotebook, dispatch),
-    updateNotebook: _.flow(notebookActionCreators.updateNotebook, dispatch)
   })
 )(Home);

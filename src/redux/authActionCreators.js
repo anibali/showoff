@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import axios from 'axios';
+import normalize from 'json-api-normalizer';
 
-import jsonApi from '../helpers/jsonApiClient';
+import apiClient from '../helpers/apiClient';
 import simpleActionCreators from './simpleActionCreators';
 
 
@@ -18,24 +19,24 @@ actionCreators.signOut = () => (dispatch) =>
   });
 
 actionCreators.loadCurrentUserApiKeys = () => (dispatch) =>
-  jsonApi.one('users', 'current').all('apiKeys').get().then((apiKeys) => {
-    dispatch(actionCreators.setCurrentUserApiKeys(apiKeys.data));
-    return apiKeys;
-  });
+  apiClient.get('users/current/apiKeys')
+    .then(res => res.data)
+    .then(normalize)
+    .then(normalized => normalized.apiKeys)
+    .then(actionCreators.setCurrentUserApiKeys)
+    .then(dispatch);
 
 actionCreators.createCurrentUserApiKey = () => (dispatch) =>
-  jsonApi.one('users', 'current').all('apiKeys').post({}).then((apiKey) => {
-    dispatch(actionCreators.addCurrentUserApiKeys([apiKey.data]));
-    return apiKey;
-  });
-
-actionCreators.destroyCurrentUserApiKeys = () => (dispatch) =>
-  jsonApi.one('users', 'current').all('apiKeys').destroy().then(() => {
-    dispatch(actionCreators.setCurrentUserApiKeys([]));
-  });
+  apiClient.post('users/current/apiKeys')
+    .then(res => res.data)
+    .then(normalize)
+    .then(normalized => {
+      dispatch(actionCreators.addCurrentUserApiKeys(normalized.apiKeys));
+      return _.values(normalized.apiKeys)[0];
+    });
 
 actionCreators.destroyApiKey = (apiKeyId) => (dispatch) =>
-  jsonApi.one('users', 'current').one('apiKeys', apiKeyId).destroy().then(() => {
+  apiClient.delete(`users/current/apiKeys/${apiKeyId}`).then(() => {
     dispatch(actionCreators.removeCurrentUserApiKey(apiKeyId));
   });
 

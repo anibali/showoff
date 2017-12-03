@@ -72,10 +72,7 @@ const patchNotebookSchema = Joi.object().keys({
 });
 
 const broadcastNotebook = (notebook) => {
-  const flatNotebook = _.assign({}, notebook.data.attributes, {
-    id: notebook.data.id,
-  });
-  global.wss.fireNotebookUpdate(flatNotebook);
+  global.wss.fireNotebookUpdate(notebook);
   return notebook;
 };
 
@@ -110,6 +107,14 @@ const showNotebook = (req, res) =>
         .then((framesJson) => {
           framesJson.included.forEach((frame) => {
             delete frame.attributes.notebookId;
+            frame.relationships = {
+              notebook: {
+                data: {
+                  type: notebookJson.data.type,
+                  id: notebookJson.data.id,
+                }
+              }
+            };
           });
           return framesJson;
         })
@@ -148,6 +153,15 @@ const updateNotebook = (req, res) =>
           if(notebook.included) {
             notebook.included.forEach(inc => {
               delete inc.attributes.notebookId;
+
+              inc.relationships = {
+                notebook: {
+                  data: {
+                    type: notebook.data.type,
+                    id: notebook.data.id,
+                  }
+                }
+              };
             });
           }
           return notebook;

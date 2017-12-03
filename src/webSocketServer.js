@@ -1,4 +1,7 @@
-import notebookActionCreators from './redux/notebooksActionCreators';
+import normalize from 'json-api-normalizer';
+
+import simpleActionCreators from './redux/simpleActionCreators';
+
 
 class WebSocketServer {
   /**
@@ -27,12 +30,12 @@ class WebSocketServer {
   }
 
   fireFrameUpdate(frame) {
-    const action = notebookActionCreators.modifyFrame(frame);
+    const action = simpleActionCreators.entities.mergeEntities(normalize(frame));
     this.broadcast(action);
   }
 
   fireNotebookUpdate(notebook) {
-    const action = notebookActionCreators.addNotebook(notebook);
+    const action = simpleActionCreators.entities.mergeEntities(normalize(notebook));
     this.broadcast(action);
   }
 

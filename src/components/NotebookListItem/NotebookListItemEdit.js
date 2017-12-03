@@ -1,5 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
+import { connect } from 'react-redux';
 import { withStyles } from 'material-ui/styles';
 import { ListItem } from 'material-ui/List';
 import TextField from 'material-ui/TextField';
@@ -7,6 +8,7 @@ import { FormControl } from 'material-ui/Form';
 import Button from 'material-ui/Button';
 
 import TagInput from '../TagInput';
+import { getTagNames } from '../../redux/selectors/tagSelectors';
 
 
 const styles = theme => ({
@@ -84,4 +86,8 @@ class NotebookListItemEdit extends React.Component {
   }
 }
 
-export default withStyles(styles)(NotebookListItemEdit);
+export default withStyles(styles)(connect(
+  (state) => ({
+    tagOptions: getTagNames(state),
+  }),
+)(NotebookListItemEdit));

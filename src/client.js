@@ -8,21 +8,16 @@ import 'babel-polyfill';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { freeze } from 'icepick';
 
 import createStore from './redux/createStore';
 import WebSocketClient from './webSocketClient';
 import ClientRoot from './components/ClientRoot';
 
-import jsonApi from './helpers/jsonApiClient';
-
-if(process.env.NODE_ENV === 'development') {
-  // Expose globally for debugging purposes
-  window.jsonApi = jsonApi;
-}
 
 window.main = (initialState) => {
   // Create a Redux store
-  const store = createStore(initialState);
+  const store = createStore(freeze(initialState));
 
   const wsProtocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
   const wsc = new WebSocketClient(`${wsProtocol}//${window.location.host}/`, store);

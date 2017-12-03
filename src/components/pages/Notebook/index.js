@@ -9,9 +9,12 @@ import ErrorIcon from 'material-ui-icons/Error';
 import Typography from 'material-ui/Typography';
 
 import notebookActionCreators from '../../../redux/notebooksActionCreators';
+import simpleActionCreators from '../../../redux/simpleActionCreators';
 import Frame from '../../Frame';
 import BodyClass from '../../BodyClass';
 import NotebookToolbar from './NotebookToolbar';
+import { getNotebook } from '../../../redux/selectors/notebookSelectors';
+import { getFrame } from '../../../redux/selectors/frameSelectors';
 
 
 const styles = (theme) => ({
@@ -35,11 +38,12 @@ const styles = (theme) => ({
   },
 });
 
-const FrameWrapper = (props) => {
+const FrameWrapperPlain = (props) => {
   const { updateFrame, frame, containerWidth, containerHeight } = props;
 
   const onDimensionChange = (x, y, width, height, localOnly) => {
-    updateFrame(_.assign({}, frame, { x, y, width, height }), localOnly);
+    const flatFrame = Object.assign({}, frame.attributes, { id: frame.id });
+    updateFrame(_.assign({}, flatFrame, { x, y, width, height }), localOnly);
   };
 
   return (
@@ -52,20 +56,28 @@ const FrameWrapper = (props) => {
   );
 };
 
-const Frames = withContentRect('bounds')(({ measureRef, contentRect, frames, updateFrame }) => {
-  const createFrame = frame => (
+const FrameWrapper = ReactRedux.connect(
+  (state, ownProps) => ({
+    frame: getFrame(state, ownProps.frameId),
+  }),
+  (dispatch) => ({
+    updateFrame: _.flow(notebookActionCreators.updateFrame, dispatch),
+  })
+)(FrameWrapperPlain);
+
+const Frames = withContentRect('bounds')(({ measureRef, contentRect, frameIds }) => {
+  const createFrame = frameId => (
     <FrameWrapper
-      key={frame.id}
-      frame={frame}
+      key={frameId}
+      frameId={frameId}
       containerWidth={contentRect.bounds.width}
       containerHeight={contentRect.bounds.height}
-      updateFrame={updateFrame}
     />
   );
 
   return (
     <div className="flex1" ref={measureRef}>
-      {frames.map(createFrame)}
+      {frameIds.map(createFrame)}
     </div>
   );
 });
@@ -75,18 +87,12 @@ class Notebook extends React.Component {
     super(props);
 
     this.state = {
+      loading: false,
       error: null,
     };
 
     this.arrangeFramesInGrid = () => {
-      const frames = _.sortBy(this.props.frames, 'createdAt');
-      const width = 460;
-      const height = 320;
-      frames.forEach((frame, i) => {
-        const x = (i % 4) * width;
-        const y = Math.floor(i / 4) * height;
-        this.props.updateFrame(_.assign({}, frame, { x, y, width, height }), false);
-      });
+      this.props.arrangeFramesInGrid(this.props.notebook.id);
     };
   }
 
@@ -98,24 +104,29 @@ class Notebook extends React.Component {
   }
 
   componentWillMount() {
-    if(!this.props.frames) {
-      this.props.loadNotebook(this.props.id).catch(err => {
-        if(err.response && err.response.status === 404) {
-          this.setState({ error: 'Not found' });
-        } else {
-          this.setState({ error: 'Something went wrong' });
-        }
-      });
+    const relFrames = _.get(this.props.notebook, ['relationships', 'frames', 'data'], []);
+    if(relFrames.length === 0) {
+      this.setState({ loading: true });
+      this.props.loadNotebook(this.props.id)
+        .catch(err => {
+          if(err.response && err.response.status === 404) {
+            this.setState({ error: 'Not found' });
+          } else {
+            this.setState({ error: 'Something went wrong' });
+          }
+        })
+        .then(() => this.setState({ loading: false }));
     }
   }
 
   // Describe how to render the component
   render() {
-    const { classes } = this.props;
+    const { classes, notebook } = this.props;
+    const title = notebook ? notebook.attributes.title : 'Untitled notebook';
 
     if(this.state.error) {
       return (
-        <DocumentTitle title={this.props.title || 'Untitled notebook'}>
+        <DocumentTitle title={title}>
           <BodyClass className="notebook">
             <div className={classes.centerStatus}>
               <ErrorIcon className={classes.errorIcon} />
@@ -127,9 +138,9 @@ class Notebook extends React.Component {
         </DocumentTitle>
       );
     }
-    if(!this.props.frames) {
+    if(this.state.loading) {
       return (
-        <DocumentTitle title={this.props.title || 'Untitled notebook'}>
+        <DocumentTitle title={title}>
           <BodyClass className="notebook">
             <div className={classes.centerStatus}>
               <CircularProgress color="accent" size={150} />
@@ -139,17 +150,16 @@ class Notebook extends React.Component {
       );
     }
 
+    const frameIds = notebook.relationships.frames.data.map(frame => frame.id);
+
     return (
-      <DocumentTitle title={this.props.title || 'Untitled notebook'}>
+      <DocumentTitle title={title}>
         <BodyClass className="notebook">
           <div className={classes.notebookContainer}>
             <NotebookToolbar
               onClickGrid={this.arrangeFramesInGrid}
             />
-            <Frames
-              frames={this.props.frames}
-              updateFrame={this.props.updateFrame}
-            />
+            <Frames frameIds={frameIds} />
           </div>
         </BodyClass>
       </DocumentTitle>
@@ -157,15 +167,14 @@ class Notebook extends React.Component {
   }
 }
 
+
 export default withStyles(styles)(ReactRedux.connect(
-  // Map store state to props
   (state, ownProps) => {
     const { id } = ownProps.match.params;
-    const notebook = _.find(state.notebooks, { id }) || {};
-    return { id, title: notebook.title, frames: notebook.frames };
+    return { id, notebook: getNotebook(state, id) };
   },
   (dispatch) => ({
     loadNotebook: _.flow(notebookActionCreators.loadNotebook, dispatch),
-    updateFrame: _.flow(notebookActionCreators.updateFrame, dispatch)
+    arrangeFramesInGrid: _.flow(simpleActionCreators.entities.arrangeFramesInGrid, dispatch),
   })
 )(Notebook));

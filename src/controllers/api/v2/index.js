@@ -18,6 +18,15 @@ const controllers = [
   ['/users', usersController],
 ];
 
+// Middleware for parsing JSON API query parameters
+const parseJsonApiQuery = (req, res, next) => {
+  req.jsonApi = {
+    include: req.query.include ? req.query.include.split(',') : [],
+  };
+
+  next();
+};
+
 const handleErrors = (err, req, res, next) => {
   if(res.headersSent) {
     next(err);
@@ -33,6 +42,7 @@ const handleErrors = (err, req, res, next) => {
 
 const router = express.Router();
 
+router.use(parseJsonApiQuery);
 controllers.forEach(([path, controller]) => {
   router.use(path, controller);
 });

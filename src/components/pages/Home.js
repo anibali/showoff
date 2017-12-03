@@ -8,8 +8,7 @@ import Typography from 'material-ui/Typography';
 import NotebookListItem from '../NotebookListItem';
 import TagInput from '../TagInput';
 import Header from '../Header';
-import notebookActionCreators from '../../redux/notebooksActionCreators';
-import tagActionCreators from '../../redux/tagsActionCreators';
+import complexActionCreators from '../../redux/complexActionCreators';
 import { getNotebooks } from '../../redux/selectors/notebookSelectors';
 import { getTags, getTagNames } from '../../redux/selectors/tagSelectors';
 
@@ -27,17 +26,14 @@ class Home extends React.Component {
   // Called during server-side rendering
   static preloadData(dispatch) {
     return Promise.all([
-      notebookActionCreators.loadNotebooksShallow()(dispatch),
-      tagActionCreators.loadTagsShallow()(dispatch),
+      complexActionCreators.loadNotebooksWithTags()(dispatch),
     ]);
   }
 
   componentWillMount() {
     // TODO: Skip doing this if it has already been done (probably
     //       requires a boolean flag in the store or something)
-    // TODO: Make a single request (just include tags with notebooks)
-    this.props.loadNotebooksShallow();
-    this.props.loadTagsShallow();
+    this.props.loadNotebooksWithTags();
   }
 
   render() {
@@ -100,7 +96,6 @@ export default ReactRedux.connect(
     notebooks: getNotebooks(state),
   }),
   (dispatch) => ({
-    loadNotebooksShallow: _.flow(notebookActionCreators.loadNotebooksShallow, dispatch),
-    loadTagsShallow: _.flow(tagActionCreators.loadTagsShallow, dispatch),
+    loadNotebooksWithTags: _.flow(complexActionCreators.loadNotebooksWithTags, dispatch),
   })
 )(Home);

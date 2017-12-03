@@ -78,7 +78,11 @@ const broadcastNotebook = (notebook) => {
 
 // GET /api/v2/notebooks
 const indexNotebooks = (req, res) =>
-  models('Notebook').fetchAll()
+  Promise.resolve(models('Notebook'))
+    .then(notebooks => notebooks.fetchJsonApi({
+      include: req.jsonApi.include,
+      require: true,
+    }))
     .then(notebooks => mapper.map(notebooks, 'notebooks', { enableLinks: false }))
     .then(notebooks => res.json(notebooks));
 
@@ -96,11 +100,19 @@ const createNotebook = (req, res) =>
 // GET /api/v2/notebooks/104
 const showNotebook = (req, res) =>
   new Promise(resolve => resolve(parseInt(req.params.id, 10)))
-    .then(id => models('Notebook').where({ id }).fetchJsonApi({ include: ['frames'], require: true }, false))
+    .then(id => models('Notebook').where({ id }))
+    .then(notebook => notebook.fetchJsonApi({
+      include: req.jsonApi.include,
+      require: true,
+    }, false))
     .catch(wrapBookshelfErrors)
     .then(notebook => mapper.map(notebook, 'notebooks', { enableLinks: false }))
-    .then(notebookJson =>
-      renderFrames(_.filter(notebookJson.included, { type: 'frames' }))
+    .then(notebookJson => {
+      if(!notebookJson.data.relationships) {
+        return notebookJson;
+      }
+
+      return renderFrames(_.filter(notebookJson.included, { type: 'frames' }))
         .then(framesJson => _.assign({}, notebookJson, {
           included: _.reject(notebookJson.included, { type: 'frames' }).concat(framesJson)
         }))
@@ -117,8 +129,8 @@ const showNotebook = (req, res) =>
             };
           });
           return framesJson;
-        })
-    )
+        });
+    })
     .then(notebookJson => res.json(notebookJson));
 
 // PATCH /api/v2/notebooks/104
@@ -141,7 +153,7 @@ const updateNotebook = (req, res) =>
         })
         .then(() => {
           const withRelated = [];
-          if(req.query.include === 'tags') {
+          if(req.jsonApi.include.includes('tags')) {
             withRelated.push('tags');
           }
           return models('Notebook')

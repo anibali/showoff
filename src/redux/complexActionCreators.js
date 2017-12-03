@@ -6,24 +6,11 @@
  */
 
 import _ from 'lodash';
-import normalize from 'json-api-normalizer';
 
 import apiClient from '../helpers/apiClient';
+import { serializeOne, deserialize } from '../helpers/entitySerDe';
 import simpleActionCreators from './simpleActionCreators';
 
-
-const serializeEntity = (type, entity, opts) => {
-  const { pick } = opts || {};
-  let { attributes } = entity;
-  if(pick !== undefined) {
-    attributes = _.pick(attributes, pick);
-  }
-  return {
-    type,
-    id: entity.id,
-    attributes,
-  };
-};
 
 const actionCreators = {};
 
@@ -42,10 +29,9 @@ actionCreators.updateFrame = (frame, localOnly = false) => (dispatch) => {
     return Promise.resolve();
   }
 
-  const reqBody = { data: serializeEntity('frames', entity) };
+  const reqBody = { data: serializeOne('frames', entity) };
   return apiClient.patch(`frames/${frame.id}?include=notebook`, reqBody)
-    .then(res => res.data)
-    .then(normalize)
+    .then(res => deserialize(res.data))
     .then(simpleActionCreators.entities.mergeEntities)
     .then(dispatch);
 };
@@ -68,22 +54,19 @@ actionCreators.updateNotebook = (notebook) => (dispatch) => {
     .then(res => res.data)
     .then((resData) => {
       dispatch(simpleActionCreators.entities.removeTagsFromNotebook(resData.data.id));
-      dispatch(simpleActionCreators.entities.mergeEntities(normalize(resData)));
+      dispatch(simpleActionCreators.entities.mergeEntities(deserialize(resData)));
     });
 };
 
-// FIXME: Should have to use ?include=frames
 actionCreators.loadNotebook = (notebookId) => (dispatch) =>
-  apiClient.get(`notebooks/${notebookId}`)
-    .then(res => res.data)
-    .then(normalize)
+  apiClient.get(`notebooks/${notebookId}?include=frames`)
+    .then(res => deserialize(res.data))
     .then(simpleActionCreators.entities.mergeEntities)
     .then(dispatch);
 
-actionCreators.loadNotebooksShallow = () => (dispatch) =>
-  apiClient.get('notebooks')
-    .then(res => res.data)
-    .then(normalize)
+actionCreators.loadNotebooksWithTags = () => (dispatch) =>
+  apiClient.get('notebooks?include=tags')
+    .then(res => deserialize(res.data))
     .then(simpleActionCreators.entities.mergeEntities)
     .then(dispatch);
 

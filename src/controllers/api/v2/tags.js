@@ -47,7 +47,7 @@ const indexTags = (req, res) =>
     .then(tags => mapper.map(tags, 'tags', {
       enableLinks: false,
       attributes: { omit: ['id', 'notebookId'] },
-      relations: { included: req.query.include === 'notebook' },
+      relations: { included: req.jsonApi.include },
     }))
     .then(tags => res.json(tags));
 

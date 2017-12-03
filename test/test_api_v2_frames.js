@@ -216,12 +216,6 @@ describe('API V2 Frames', () => {
                 }
               }
             },
-          },
-          included: {
-            notebook: {
-              id: '1',
-              type: 'notebooks',
-            }
           }
         };
 
@@ -232,7 +226,7 @@ describe('API V2 Frames', () => {
           });
       });
 
-      it('should broadcast the new notebook with WebSockets', () =>
+      it('should broadcast the new frame with WebSockets', () =>
         sendRequest(reqBody).then(() => {
           expect(broadcastStub.getCall(0).args[0]).to.be.eql({
             type: 'entities/MERGE_ENTITIES',
@@ -393,7 +387,7 @@ describe('API V2 Frames', () => {
         expect(sendRequest(reqBody)).to.eventually.have.jsonContent()
       );
 
-      it('should return the updated notebook', () => {
+      it('should return the updated frame', () => {
         const expected = {
           data: {
             type: 'frames',
@@ -418,12 +412,6 @@ describe('API V2 Frames', () => {
                 }
               }
             },
-          },
-          included: {
-            notebook: {
-              id: '1',
-              type: 'notebooks',
-            }
           }
         };
 
@@ -434,7 +422,7 @@ describe('API V2 Frames', () => {
           });
       });
 
-      it('should broadcast the updated notebook with WebSockets', () =>
+      it('should broadcast the updated frame with WebSockets', () =>
         sendRequest(reqBody).then(() => {
           expect(broadcastStub.getCall(0).args[0]).to.be.eql({
             type: 'entities/MERGE_ENTITIES',

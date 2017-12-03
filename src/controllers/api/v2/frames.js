@@ -96,9 +96,6 @@ const mapFrameToJson = (frame) => {
   frameJson.data.relationships = _.assign({}, frameJson.data.relationships, {
     notebook: { data: { type: 'notebooks', id: String(frame.attributes.notebookId) } }
   });
-  frameJson.included = _.assign({}, frameJson.included, {
-    notebook: { type: 'notebooks', id: String(frame.attributes.notebookId) }
-  });
   return frameJson;
 };
 
@@ -110,11 +107,12 @@ const broadcastFrame = (frame) => {
 // GET /api/v2/frames
 const indexFrames = (req, res) =>
   models('Frame').fetchJsonApi({ include: ['notebook'] })
-    .then(frames => res.json(mapper.map(frames, 'frames', {
+    .then(frames => mapper.map(frames, 'frames', {
       enableLinks: false,
       attributes: { omit: ['id', 'notebookId'] },
-      relations: { included: false },
-    })));
+      relations: { included: req.jsonApi.include },
+    }))
+    .then(frames => res.json(frames));
 
 // POST /api/v2/frames
 const createFrame = (req, res) =>

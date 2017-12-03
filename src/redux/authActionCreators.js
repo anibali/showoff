@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import axios from 'axios';
-import normalize from 'json-api-normalizer';
 
 import apiClient from '../helpers/apiClient';
 import simpleActionCreators from './simpleActionCreators';
+import { deserialize } from '../helpers/entitySerDe';
 
 
 const actionCreators = _.clone(simpleActionCreators.auth);
@@ -20,19 +20,16 @@ actionCreators.signOut = () => (dispatch) =>
 
 actionCreators.loadCurrentUserApiKeys = () => (dispatch) =>
   apiClient.get('users/current/apiKeys')
-    .then(res => res.data)
-    .then(normalize)
-    .then(normalized => normalized.apiKeys)
+    .then(res => deserialize(res.data).apiKeys)
     .then(actionCreators.setCurrentUserApiKeys)
     .then(dispatch);
 
 actionCreators.createCurrentUserApiKey = () => (dispatch) =>
   apiClient.post('users/current/apiKeys')
-    .then(res => res.data)
-    .then(normalize)
-    .then(normalized => {
-      dispatch(actionCreators.addCurrentUserApiKeys(normalized.apiKeys));
-      return _.values(normalized.apiKeys)[0];
+    .then(res => deserialize(res.data).apiKeys)
+    .then(apiKeys => {
+      dispatch(actionCreators.addCurrentUserApiKeys(apiKeys));
+      return _.values(apiKeys)[0];
     });
 
 actionCreators.destroyApiKey = (apiKeyId) => (dispatch) =>

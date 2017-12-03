@@ -180,14 +180,8 @@ describe('API V2 Notebooks', () => {
               title: 'Test notebook 1',
               createdAt: '1970-01-01T00:00:00.000Z',
               updatedAt: '1970-01-01T00:00:00.000Z',
-            },
-            relationships: {
-              frames: {
-                data: []
-              }
             }
-          },
-          included: [],
+          }
         };
 
         return sendRequest()

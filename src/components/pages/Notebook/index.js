@@ -8,7 +8,7 @@ import { CircularProgress } from 'material-ui/Progress';
 import ErrorIcon from 'material-ui-icons/Error';
 import Typography from 'material-ui/Typography';
 
-import notebookActionCreators from '../../../redux/notebooksActionCreators';
+import complexActionCreators from '../../../redux/complexActionCreators';
 import simpleActionCreators from '../../../redux/simpleActionCreators';
 import Frame from '../../Frame';
 import BodyClass from '../../BodyClass';
@@ -61,7 +61,7 @@ const FrameWrapper = ReactRedux.connect(
     frame: getFrame(state, ownProps.frameId),
   }),
   (dispatch) => ({
-    updateFrame: _.flow(notebookActionCreators.updateFrame, dispatch),
+    updateFrame: _.flow(complexActionCreators.updateFrame, dispatch),
   })
 )(FrameWrapperPlain);
 
@@ -99,7 +99,7 @@ class Notebook extends React.Component {
   // Called during server-side rendering
   static preloadData(dispatch, match) {
     return Promise.all([
-      notebookActionCreators.loadNotebook(match.params.id)(dispatch),
+      complexActionCreators.loadNotebook(match.params.id)(dispatch),
     ]);
   }
 
@@ -174,7 +174,7 @@ export default withStyles(styles)(ReactRedux.connect(
     return { id, notebook: getNotebook(state, id) };
   },
   (dispatch) => ({
-    loadNotebook: _.flow(notebookActionCreators.loadNotebook, dispatch),
+    loadNotebook: _.flow(complexActionCreators.loadNotebook, dispatch),
     arrangeFramesInGrid: _.flow(simpleActionCreators.entities.arrangeFramesInGrid, dispatch),
   })
 )(Notebook));

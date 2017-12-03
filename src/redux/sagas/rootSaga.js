@@ -3,29 +3,17 @@ import { select, takeEvery, all, call } from 'redux-saga/effects';
 
 import simpleActionCreators from '../simpleActionCreators';
 import apiClient from '../../helpers/apiClient';
+import { serializeOne } from '../../helpers/entitySerDe';
 
 
 const { arrangeFramesInGrid } = simpleActionCreators.entities;
-
-const serializeEntity = (type, entity, opts) => {
-  const { pick } = opts || {};
-  let { attributes } = entity;
-  if(pick !== undefined) {
-    attributes = _.pick(attributes, pick);
-  }
-  return {
-    type,
-    id: entity.id,
-    attributes,
-  };
-};
 
 const updateFrames = (frames) =>
   Promise.all(frames.map(frame =>
     apiClient.patch(
       `frames/${frame.id}`,
       {
-        data: serializeEntity('frames', frame, { pick: ['x', 'y', 'width', 'height'] })
+        data: serializeOne('frames', frame, { pick: ['x', 'y', 'width', 'height'] })
       }
     )
   ));

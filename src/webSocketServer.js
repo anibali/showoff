@@ -1,5 +1,4 @@
-import normalize from 'json-api-normalizer';
-
+import { deserialize } from './helpers/entitySerDe';
 import simpleActionCreators from './redux/simpleActionCreators';
 
 
@@ -30,12 +29,12 @@ class WebSocketServer {
   }
 
   fireFrameUpdate(frame) {
-    const action = simpleActionCreators.entities.mergeEntities(normalize(frame));
+    const action = simpleActionCreators.entities.mergeEntities(deserialize(frame));
     this.broadcast(action);
   }
 
   fireNotebookUpdate(notebook) {
-    const action = simpleActionCreators.entities.mergeEntities(normalize(notebook));
+    const action = simpleActionCreators.entities.mergeEntities(deserialize(notebook));
     this.broadcast(action);
   }
 

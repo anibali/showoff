@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import NotebookListItemView from './NotebookListItemView';
 import NotebookListItemEdit from './NotebookListItemEdit';
-import notebookActionCreators from '../../redux/notebooksActionCreators';
+import complexActionCreators from '../../redux/complexActionCreators';
 import { getFlatNotebookWithTags } from '../../redux/selectors/notebookSelectors';
 
 
@@ -65,7 +65,7 @@ export default connect(
     notebook: getFlatNotebookWithTags(state, ownProps.notebookId),
   }),
   (dispatch) => ({
-    deleteNotebook: _.flow(notebookActionCreators.deleteNotebook, dispatch),
-    updateNotebook: _.flow(notebookActionCreators.updateNotebook, dispatch),
+    deleteNotebook: _.flow(complexActionCreators.deleteNotebook, dispatch),
+    updateNotebook: _.flow(complexActionCreators.updateNotebook, dispatch),
   })
 )(NotebookListItem);

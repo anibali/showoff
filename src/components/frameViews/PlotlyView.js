@@ -31,7 +31,7 @@ class PlotlyPlot extends React.PureComponent {
         <PlotlyComponent
           onInitialized={this.onInitialized}
           data={thaw(this.props.data)}
-          layout={this.props.layout}
+          layout={thaw(this.props.layout)}
           fit={false}
         />
       </div>

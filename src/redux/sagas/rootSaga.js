@@ -14,11 +14,9 @@ const serializeEntity = (type, entity, opts) => {
     attributes = _.pick(attributes, pick);
   }
   return {
-    data: {
-      type,
-      id: entity.id,
-      attributes,
-    }
+    type,
+    id: entity.id,
+    attributes,
   };
 };
 
@@ -26,7 +24,9 @@ const updateFrames = (frames) =>
   Promise.all(frames.map(frame =>
     apiClient.patch(
       `frames/${frame.id}`,
-      serializeEntity('frames', frame, { pick: ['x', 'y', 'width', 'height'] })
+      {
+        data: serializeEntity('frames', frame, { pick: ['x', 'y', 'width', 'height'] })
+      }
     )
   ));
 

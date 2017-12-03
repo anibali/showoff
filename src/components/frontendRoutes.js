@@ -1,4 +1,4 @@
-import { Home, Notebook, Login, NotFound, Account } from './pages';
+import { Home, NotebookList, Notebook, Login, NotFound, Account } from './pages';
 
 export default [
   {
@@ -16,6 +16,12 @@ export default [
   {
     path: '/',
     component: Home,
+    exact: true,
+    requiresAuth: false,
+  },
+  {
+    path: '/notebooks',
+    component: NotebookList,
     exact: true,
     requiresAuth: true,
   },

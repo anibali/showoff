@@ -12,7 +12,7 @@ import authActionCreators from '../redux/authActionCreators';
 const Header = ({ signOut }) => (
   <AppBar position="static">
     <Toolbar>
-      <Button color="contrast" to="/" component={Link}>Home</Button>
+      <Button color="contrast" to="/notebooks" component={Link}>Notebooks</Button>
       <Button color="contrast" to="/account" component={Link}>Account</Button>
       <Button color="contrast" onClick={signOut}>Sign out</Button>
     </Toolbar>

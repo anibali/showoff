@@ -55,7 +55,7 @@ class NotebookToolbar extends React.Component {
     return (
       <AppBar position="static">
         <Toolbar>
-          <Button color="contrast" to="/" component={Link}>Home</Button>
+          <Button color="contrast" to="/notebooks" component={Link}>Notebooks</Button>
           <IconButton color="contrast" onClick={this.props.onClickGrid}>
             <GridIcon />
           </IconButton>

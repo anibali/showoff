@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { withStyles } from 'material-ui/styles';
 import red from 'material-ui/colors/red';
 import orange from 'material-ui/colors/orange';
+import teal from 'material-ui/colors/teal';
 import { ListItem, ListItemText } from 'material-ui/List';
 import IconButton from 'material-ui/IconButton';
 import LockIcon from 'material-ui-icons/Lock';
@@ -12,11 +13,13 @@ import DeleteForeverIcon from 'material-ui-icons/DeleteForever';
 import Avatar from 'material-ui/Avatar';
 import { CircularProgress } from 'material-ui/Progress';
 import DoneIcon from 'material-ui-icons/Done';
+import ErrorIcon from 'material-ui-icons/Error';
+import PendingIcon from 'material-ui-icons/Timer';
 
 import TagList from './TagList';
 
 
-const styles = (theme) => ({
+const styles = {
   disabled: {
     opacity: 0.3,
     filter: 'grayscale(100%)',
@@ -32,30 +35,46 @@ const styles = (theme) => ({
     position: 'relative',
   },
   progressStackedInner: {
-    color: theme.palette.primary[500],
     position: 'absolute',
     top: 8,
     left: 8,
+  },
+  errorStatus: {
+    color: red[500],
+  },
+  doneStatus: {
+    color: teal[500],
+  },
+  pendingStatus: {
+    color: orange[500],
   }
-});
+};
 
 const absorbClick = (event) => {
   event.preventDefault();
 };
 
-const Progress = ({ value, classes }) => {
-  if(value < 0) {
-    return <CircularProgress />;
+const ProgressStatus = ({ value, error, classes }) => {
+  let statusClass;
+  let IconComponent;
+
+  if(error) {
+    statusClass = classes.errorStatus;
+    IconComponent = ErrorIcon;
+  } else if(value >= 100) {
+    statusClass = classes.doneStatus;
+    IconComponent = DoneIcon;
+  } else {
+    statusClass = classes.pendingStatus;
+    IconComponent = PendingIcon;
   }
-  if(value >= 100) {
-    return (
-      <div className={classes.progressStackedOuter}>
-        <DoneIcon className={classes.progressStackedInner} />
-        <CircularProgress mode="determinate" value={100} />
-      </div>
-    );
-  }
-  return <CircularProgress mode="determinate" value={value} />;
+
+  return (
+    <div className={[classes.progressStackedOuter, statusClass].join(' ')}>
+      <IconComponent className={classes.progressStackedInner} />
+      <CircularProgress color="inherit" mode="determinate" value={value} />
+    </div>
+  );
 };
 
 class NotebookListItemView extends React.Component {
@@ -77,7 +96,7 @@ class NotebookListItemView extends React.Component {
 
     return (
       <ListItem dense button component={Link} to={`/notebooks/${notebook.id}`}>
-        <Progress classes={classes} value={notebook.progress * 100} />
+        <ProgressStatus classes={classes} value={notebook.progress * 100} />
         <ListItemText
           primary={notebook.title}
           secondary={new Date(notebook.createdAt).toUTCString()}

@@ -4,7 +4,7 @@ import * as ReactRedux from 'react-redux';
 import DocumentTitle from 'react-document-title';
 import { withContentRect } from 'react-measure';
 import { withStyles } from 'material-ui/styles';
-import { CircularProgress } from 'material-ui/Progress';
+import { CircularProgress, LinearProgress } from 'material-ui/Progress';
 import ErrorIcon from 'material-ui-icons/Error';
 import Typography from 'material-ui/Typography';
 
@@ -160,6 +160,7 @@ class Notebook extends React.Component {
               onClickGrid={this.arrangeFramesInGrid}
             />
             <Frames frameIds={frameIds} />
+            <LinearProgress mode="determinate" value={notebook.attributes.progress * 100} />
           </div>
         </BodyClass>
       </DocumentTitle>

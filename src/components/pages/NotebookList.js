@@ -9,17 +9,43 @@ import NotebookListItem from '../NotebookListItem';
 import TagInput from '../TagInput';
 import Header from '../Header';
 import complexActionCreators from '../../redux/complexActionCreators';
-import { getNotebooks } from '../../redux/selectors/notebookSelectors';
-import { getTags, getTagNames } from '../../redux/selectors/tagSelectors';
+import { getFilteredNotebooks } from '../../redux/selectors/notebookSelectors';
+import { getTagNames } from '../../redux/selectors/tagSelectors';
 
+
+const createListItem = (notebook) => (
+  <NotebookListItem
+    key={notebook.id}
+    notebookId={notebook.id}
+  />
+);
+
+const NotebookListContent = ({ notebooks }) => {
+  const sortedNotebooks = _.reverse(
+    _.sortBy(notebooks, notebook => notebook.attributes.createdAt));
+
+  return (
+    <Paper>
+      <List>
+        {sortedNotebooks.map(createListItem)}
+      </List>
+    </Paper>
+  );
+};
+
+const ConnectedNotebookListContent = ReactRedux.connect(
+  (state, ownProps) => ({
+    notebooks: getFilteredNotebooks(state, ownProps.tagNames),
+  })
+)(NotebookListContent);
 
 class NotebookList extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { filterTags: [] };
+    this.state = { tagNames: [] };
 
-    this.onChangeFilterTags = (filterTags) => {
-      this.setState({ filterTags });
+    this.onChangeFilterTags = (tags) => {
+      this.setState({ tagNames: tags.map(tag => tag.name) });
     };
   }
 
@@ -37,34 +63,6 @@ class NotebookList extends React.Component {
   }
 
   render() {
-    const tags = _.values(this.props.tags)
-      .map(entity => _.assign({}, entity.attributes, _.pick(entity, ['id', 'relationships'])));
-
-    const unsortedNotebooks = _.values(this.props.notebooks)
-      .map(entity => _.assign({}, entity.attributes, { id: entity.id }))
-      .map(notebook => {
-        const notebookTags =
-          _.filter(tags, tag => tag.relationships.notebook.data.id === notebook.id);
-        return _.assign({ tags: notebookTags }, notebook);
-      });
-    const filteredNotebooks = _.filter(unsortedNotebooks, notebook => {
-      let show = true;
-      this.state.filterTags.forEach(tag => {
-        if(!_.find(notebook.tags, { name: tag.name })) {
-          show = false;
-        }
-      });
-      return show;
-    });
-    const notebooks = _.reverse(_.sortBy(filteredNotebooks, 'createdAt'));
-
-    const createListItem = (notebook) => (
-      <NotebookListItem
-        key={notebook.id}
-        notebookId={notebook.id}
-      />
-    );
-
     return (
       <div>
         <Header />
@@ -77,11 +75,7 @@ class NotebookList extends React.Component {
             onChange={this.onChangeFilterTags}
             placeholder="Add filter tag"
           />
-          <Paper>
-            <List>
-              {notebooks.map(createListItem)}
-            </List>
-          </Paper>
+          <ConnectedNotebookListContent tagNames={this.state.tagNames} />
         </div>
       </div>
     );
@@ -91,9 +85,7 @@ class NotebookList extends React.Component {
 
 export default ReactRedux.connect(
   (state) => ({
-    tags: getTags(state),
     tagOptions: getTagNames(state),
-    notebooks: getNotebooks(state),
   }),
   (dispatch) => ({
     loadNotebooksWithTags: _.flow(complexActionCreators.loadNotebooksWithTags, dispatch),

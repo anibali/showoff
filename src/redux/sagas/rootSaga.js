@@ -4,6 +4,7 @@ import { select, takeEvery, all, call } from 'redux-saga/effects';
 import simpleActionCreators from '../simpleActionCreators';
 import apiClient from '../../helpers/apiClient';
 import { serializeOne } from '../../helpers/entitySerDe';
+import { getNotebookFrames } from '../../redux/selectors/frameSelectors';
 
 
 const { arrangeFramesInGrid } = simpleActionCreators.entities;
@@ -22,8 +23,7 @@ function* saveNotebookFrames(action) {
   const state = yield select();
 
   const { notebookId } = action.payload;
-  const relFrames = state.entities.notebooks[notebookId].relationships.frames.data;
-  const frames = _.pick(state.entities.frames, relFrames.map(relFrame => relFrame.id));
+  const frames = getNotebookFrames(state, notebookId);
 
   yield call(updateFrames, _.values(frames));
 }

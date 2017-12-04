@@ -14,7 +14,7 @@ import Frame from '../../Frame';
 import BodyClass from '../../BodyClass';
 import NotebookToolbar from './NotebookToolbar';
 import { getNotebook } from '../../../redux/selectors/notebookSelectors';
-import { getFrame } from '../../../redux/selectors/frameSelectors';
+import { getFrame, getNotebookFrames } from '../../../redux/selectors/frameSelectors';
 
 
 const styles = (theme) => ({
@@ -57,19 +57,17 @@ const FrameWrapperPlain = (props) => {
 };
 
 const FrameWrapper = ReactRedux.connect(
-  (state, ownProps) => ({
-    frame: getFrame(state, ownProps.frameId),
-  }),
+  null,
   (dispatch) => ({
     updateFrame: _.flow(complexActionCreators.updateFrame, dispatch),
   })
 )(FrameWrapperPlain);
 
-const Frames = withContentRect('bounds')(({ measureRef, contentRect, frameIds }) => {
-  const createFrame = frameId => (
+const Frames = withContentRect('bounds')(({ measureRef, contentRect, frames }) => {
+  const createFrame = frame => (
     <FrameWrapper
-      key={frameId}
-      frameId={frameId}
+      key={frame.id}
+      frame={frame}
       containerWidth={contentRect.bounds.width}
       containerHeight={contentRect.bounds.height}
     />
@@ -77,7 +75,7 @@ const Frames = withContentRect('bounds')(({ measureRef, contentRect, frameIds })
 
   return (
     <div className="flex1" ref={measureRef}>
-      {frameIds.map(createFrame)}
+      {frames.map(createFrame)}
     </div>
   );
 });
@@ -121,7 +119,7 @@ class Notebook extends React.Component {
 
   // Describe how to render the component
   render() {
-    const { classes, notebook } = this.props;
+    const { classes, notebook, frames } = this.props;
     const title = notebook ? notebook.attributes.title : 'Untitled notebook';
 
     if(this.state.error) {
@@ -150,8 +148,6 @@ class Notebook extends React.Component {
       );
     }
 
-    const frameIds = notebook.relationships.frames.data.map(frame => frame.id);
-
     return (
       <DocumentTitle title={title}>
         <BodyClass className="notebook">
@@ -159,7 +155,7 @@ class Notebook extends React.Component {
             <NotebookToolbar
               onClickGrid={this.arrangeFramesInGrid}
             />
-            <Frames frameIds={frameIds} />
+            <Frames frames={frames} />
             <LinearProgress mode="determinate" value={notebook.attributes.progress * 100} />
           </div>
         </BodyClass>
@@ -172,7 +168,7 @@ class Notebook extends React.Component {
 export default withStyles(styles)(ReactRedux.connect(
   (state, ownProps) => {
     const { id } = ownProps.match.params;
-    return { id, notebook: getNotebook(state, id) };
+    return { id, notebook: getNotebook(state, id), frames: getNotebookFrames(state, id) };
   },
   (dispatch) => ({
     loadNotebook: _.flow(complexActionCreators.loadNotebook, dispatch),

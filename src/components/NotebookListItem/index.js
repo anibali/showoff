@@ -5,7 +5,8 @@ import { connect } from 'react-redux';
 import NotebookListItemView from './NotebookListItemView';
 import NotebookListItemEdit from './NotebookListItemEdit';
 import complexActionCreators from '../../redux/complexActionCreators';
-import { getFlatNotebookWithTags } from '../../redux/selectors/notebookSelectors';
+import { getNotebook } from '../../redux/selectors/notebookSelectors';
+import { getNotebookTags } from '../../redux/selectors/tagSelectors';
 
 
 class NotebookListItem extends React.PureComponent {
@@ -28,8 +29,9 @@ class NotebookListItem extends React.PureComponent {
       this.props.updateNotebook(updatedNotebook);
     };
 
-    this.viewModeChildProps = ({ notebook }) => ({
+    this.viewModeChildProps = ({ notebook, tags }) => ({
       notebook,
+      tags,
       onClickDelete,
       onClickEdit,
       onChangePinned,
@@ -43,8 +45,9 @@ class NotebookListItem extends React.PureComponent {
       this.setState({ editing: !this.state.editing });
     };
 
-    this.editModeChildProps = ({ notebook }) => ({
+    this.editModeChildProps = ({ notebook, tags }) => ({
       notebook,
+      tags,
       onConfirmEdit,
       onCancelEdit,
     });
@@ -62,7 +65,8 @@ class NotebookListItem extends React.PureComponent {
 
 export default connect(
   (state, ownProps) => ({
-    notebook: getFlatNotebookWithTags(state, ownProps.notebookId),
+    notebook: getNotebook(state, ownProps.notebookId),
+    tags: getNotebookTags(state, ownProps.notebookId),
   }),
   (dispatch) => ({
     deleteNotebook: _.flow(complexActionCreators.deleteNotebook, dispatch),

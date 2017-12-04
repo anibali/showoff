@@ -20,12 +20,16 @@ const styles = theme => ({
 class NotebookListItemEdit extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { title: this.props.notebook.title, tags: this.props.notebook.tags };
+    this.state = {
+      title: this.props.notebook.attributes.title,
+      tags: this.props.tags.map(tag => ({ name: tag.attributes.name })),
+    };
   }
 
   // Describe how to render the component
   render() {
     const { notebook, onConfirmEdit, onCancelEdit, classes } = this.props;
+    const initialTags = this.props.tags.map(tag => ({ name: tag.attributes.name }));
 
     const onChangeTitle = (event) => {
       event.preventDefault();
@@ -46,7 +50,6 @@ class NotebookListItemEdit extends React.Component {
       this.setState({ tags: tags.map(item => _.pick(item, 'name')) });
     };
 
-    const tags = notebook.tags || [];
     const tagOptions = this.props.tagOptions || [];
 
     const tagFieldId = `notebook-tags-field-${notebook.id}`;
@@ -66,7 +69,7 @@ class NotebookListItemEdit extends React.Component {
             <TagInput
               id={tagFieldId}
               suggestions={tagOptions}
-              initialTags={tags}
+              initialTags={initialTags}
               onChange={onTagsChange}
               placeholder="Add tag"
               allowNew

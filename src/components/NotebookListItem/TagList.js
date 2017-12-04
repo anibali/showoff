@@ -21,12 +21,12 @@ const textToColour = (text) => {
 
 const TagList = ({ tags }) => {
   const children = tags.map(tag => {
-    const backgroundColor = textToColour(tag.name);
+    const backgroundColor = textToColour(tag.attributes.name);
     const style = {
       backgroundColor,
       color: contrastBW(backgroundColor)
     };
-    return <span key={tag.id} className="label" style={style}>{tag.name}</span>;
+    return <span key={tag.id} className="label" style={style}>{tag.attributes.name}</span>;
   });
   return <span>{children}</span>;
 };

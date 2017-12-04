@@ -86,24 +86,21 @@ class NotebookListItemView extends React.Component {
         this.props.onChangePinned(event);
       }
     };
-
-    this.defaultTags = [];
   }
 
   render() {
-    const { notebook, onChangePinned, onClickEdit, onClickDelete, classes } = this.props;
-    const tags = notebook.tags || this.defaultTags;
+    const { notebook, tags, onChangePinned, onClickEdit, onClickDelete, classes } = this.props;
 
     return (
       <ListItem dense button component={Link} to={`/notebooks/${notebook.id}`}>
-        <ProgressStatus classes={classes} value={notebook.progress * 100} />
+        <ProgressStatus classes={classes} value={notebook.attributes.progress * 100} />
         <ListItemText
-          primary={notebook.title}
-          secondary={new Date(notebook.createdAt).toUTCString()}
+          primary={notebook.attributes.title}
+          secondary={new Date(notebook.attributes.createdAt).toUTCString()}
         />
         <TagList tags={tags} />
         <IconButton onClick={onChangePinned} onKeyDown={this.onPinnedKeyDown}>
-          {notebook.pinned ? <LockIcon /> : <LockOpenIcon />}
+          {notebook.attributes.pinned ? <LockIcon /> : <LockOpenIcon />}
         </IconButton>
         <IconButton title="Edit notebook title" onClick={onClickEdit}>
           <Avatar className={classes.orangeAvatar}>
@@ -112,8 +109,8 @@ class NotebookListItemView extends React.Component {
         </IconButton>
         <IconButton
           title="Delete notebook"
-          onClick={notebook.pinned ? absorbClick : onClickDelete}
-          className={notebook.pinned ? classes.disabled : null}
+          onClick={notebook.attributes.pinned ? absorbClick : onClickDelete}
+          className={notebook.attributes.pinned ? classes.disabled : null}
         >
           <Avatar className={classes.redAvatar}>
             <DeleteForeverIcon />

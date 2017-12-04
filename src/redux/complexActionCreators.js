@@ -14,22 +14,17 @@ import simpleActionCreators from './simpleActionCreators';
 
 const actionCreators = {};
 
-// TODO: Change this function and callers so that `frame` is already in
-//       normalized form
 actionCreators.updateFrame = (frame, localOnly = false) => (dispatch) => {
-  const entity = {
-    id: frame.id,
-    attributes: _.pick(frame, ['x', 'y', 'width', 'height']),
-  };
-
   if(localOnly) {
     dispatch(simpleActionCreators.entities.mergeEntities({
-      frames: { [entity.id]: entity }
+      frames: { [frame.id]: frame }
     }));
     return Promise.resolve();
   }
 
-  const reqBody = { data: serializeOne('frames', entity) };
+  const reqBody = {
+    data: serializeOne('frames', frame, { pick: ['x', 'y', 'width', 'height'] })
+  };
   return apiClient.patch(`frames/${frame.id}?include=notebook`, reqBody)
     .then(res => deserialize(res.data))
     .then(simpleActionCreators.entities.mergeEntities)

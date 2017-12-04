@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { merge } from 'icepick';
 import React from 'react';
 import * as ReactRedux from 'react-redux';
 import DocumentTitle from 'react-document-title';
@@ -14,7 +15,7 @@ import Frame from '../../Frame';
 import BodyClass from '../../BodyClass';
 import NotebookToolbar from './NotebookToolbar';
 import { getNotebook } from '../../../redux/selectors/notebookSelectors';
-import { getFrame, getNotebookFrames } from '../../../redux/selectors/frameSelectors';
+import { getNotebookFrames } from '../../../redux/selectors/frameSelectors';
 
 
 const styles = (theme) => ({
@@ -42,8 +43,7 @@ const FrameWrapperPlain = (props) => {
   const { updateFrame, frame, containerWidth, containerHeight } = props;
 
   const onDimensionChange = (x, y, width, height, localOnly) => {
-    const flatFrame = Object.assign({}, frame.attributes, { id: frame.id });
-    updateFrame(_.assign({}, flatFrame, { x, y, width, height }), localOnly);
+    updateFrame(merge(frame, { attributes: { x, y, width, height } }), localOnly);
   };
 
   return (

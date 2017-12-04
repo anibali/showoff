@@ -1,5 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
+import { assocIn, merge } from 'icepick';
 import { connect } from 'react-redux';
 
 import NotebookListItemView from './NotebookListItemView';
@@ -24,9 +25,10 @@ class NotebookListItem extends React.PureComponent {
     };
     const onChangePinned = (event) => {
       event.preventDefault();
-      const updatedNotebook =
-        _.assign({}, this.props.notebook, { pinned: !this.props.notebook.pinned });
-      this.props.updateNotebook(updatedNotebook);
+      const { notebook, updateNotebook } = this.props;
+      updateNotebook(
+        assocIn(notebook, ['attributes', 'pinned'], !notebook.attributes.pinned)
+      );
     };
 
     this.viewModeChildProps = ({ notebook, tags }) => ({
@@ -37,9 +39,13 @@ class NotebookListItem extends React.PureComponent {
       onChangePinned,
     });
 
-    const onConfirmEdit = (updatedNotebook) => {
+    const onConfirmEdit = ({ title, tags }) => {
       this.setState({ editing: !this.state.editing });
-      this.props.updateNotebook(_.assign({}, this.props.notebook, updatedNotebook));
+      const { notebook, updateNotebook } = this.props;
+      updateNotebook(
+        merge(notebook, { attributes: { title } }),
+        tags.map(({ name }) => ({ attributes: { name } }))
+      );
     };
     const onCancelEdit = () => {
       this.setState({ editing: !this.state.editing });

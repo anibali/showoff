@@ -36,20 +36,15 @@ actionCreators.updateFrame = (frame, localOnly = false) => (dispatch) => {
     .then(dispatch);
 };
 
-// TODO: Change this function and callers so that `frame` is already in
-//       normalized form
-actionCreators.updateNotebook = (notebook) => (dispatch) => {
+actionCreators.updateNotebook = (notebook, tags) => (dispatch) => {
   const reqBody = {
-    data: {
-      id: notebook.id,
-      type: 'notebooks',
-      attributes: _.pick(notebook, ['pinned', 'title']),
-    },
-    meta: {
-      included: notebook.tags.map(tag =>
-        ({ id: tag.id, type: 'tags', attributes: _.pick(tag, ['name']) }))
-    }
+    data: serializeOne('notebooks', notebook, { pick: ['pinned', 'title'] }),
   };
+  if(tags) {
+    _.set(reqBody, ['meta', 'included'],
+      tags.map(tag => serializeOne('tags', tag, { pick: ['name'] }))
+    );
+  }
   return apiClient.patch(`notebooks/${notebook.id}?include=tags`, reqBody)
     .then(res => res.data)
     .then((resData) => {

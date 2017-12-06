@@ -11,12 +11,20 @@ const ws = require('ws');
 
 const createApp = require('./createApp').default;
 const WebSocketServer = require('./webSocketServer').default;
+const sessionParser = require('./config/sessionParser').default;
 
 
 createApp().then((app) => {
   const server = http.createServer(app);
   server.listen(3000, () => {
     console.log('Server started.');
-    global.wss = new WebSocketServer(new ws.Server({ server }));
+    global.wss = new WebSocketServer(new ws.Server({
+      verifyClient: (info, done) => {
+        sessionParser(info.req, {}, () => {
+          done(info.req.session.passport.user);
+        });
+      },
+      server
+    }));
   });
 });

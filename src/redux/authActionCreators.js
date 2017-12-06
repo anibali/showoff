@@ -11,11 +11,13 @@ const actionCreators = _.clone(simpleActionCreators.auth);
 actionCreators.signIn = (username, password) => (dispatch) =>
   axios.post('/auth/signin', { username, password }).then(() => {
     dispatch(actionCreators.setAuthenticated(true));
+    window.wsc.connect();
   });
 
 actionCreators.signOut = () => (dispatch) =>
   axios.post('/auth/signout').then(() => {
     dispatch(actionCreators.setAuthenticated(false));
+    window.wsc.disconnect();
   });
 
 actionCreators.loadCurrentUserApiKeys = () => (dispatch) =>

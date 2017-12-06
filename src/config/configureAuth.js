@@ -1,15 +1,12 @@
-import session from 'express-session';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { BasicStrategy } from 'passport-http';
-import KnexSessionStoreFactory from 'connect-session-knex';
 
 import apiClient from '../helpers/apiClient';
 import { resetInternalApiKey, verifyHash, verifyApiKey } from '../helpers/authHelpers';
 import models from '../models';
+import sessionParser from './sessionParser';
 
-
-const KnexSessionStore = KnexSessionStoreFactory(session);
 
 // The "local" strategy is for user log in using the web form.
 passport.use(new LocalStrategy(
@@ -51,20 +48,7 @@ passport.deserializeUser((id, done) => {
 
 
 export default (app) => {
-  app.use(session({
-    secret: process.env.COOKIE_SECRET,
-    saveUninitialized: false,
-    resave: false,
-    cookie: {
-      maxAge: 31 * 24 * 60 * 60 * 1000,
-    },
-    store: new KnexSessionStore({
-      knex: models.knex,
-      tablename: 'sessions',
-      createtable: false,
-    }),
-  }));
-
+  app.use(sessionParser);
   app.use(passport.initialize());
   app.use(passport.session());
 

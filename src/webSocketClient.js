@@ -34,6 +34,13 @@ class WebSocketClient {
       this.store.dispatch(action);
     };
   }
+
+  disconnect() {
+    this.attempts = this.maxAttempts;
+    if(this.ws) {
+      this.ws.close();
+    }
+  }
 }
 
 

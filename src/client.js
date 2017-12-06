@@ -20,8 +20,10 @@ window.main = (initialState) => {
   const store = createStore(freeze(initialState));
 
   const wsProtocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
-  const wsc = new WebSocketClient(`${wsProtocol}//${window.location.host}/`, store);
-  wsc.connect();
+  window.wsc = new WebSocketClient(`${wsProtocol}//${window.location.host}/`, store);
+  if(store.getState().auth.authenticated) {
+    window.wsc.connect();
+  }
 
   // Mount our React root component in the DOM
   const mountPoint = document.getElementById('root');

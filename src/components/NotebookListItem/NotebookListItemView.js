@@ -17,6 +17,7 @@ import ErrorIcon from 'material-ui-icons/Error';
 import PendingIcon from 'material-ui-icons/Timer';
 
 import TagList from './TagList';
+import Time from '../Time';
 
 
 const styles = {
@@ -96,7 +97,7 @@ class NotebookListItemView extends React.Component {
         <ProgressStatus classes={classes} value={notebook.attributes.progress * 100} />
         <ListItemText
           primary={notebook.attributes.title}
-          secondary={new Date(notebook.attributes.createdAt).toUTCString()}
+          secondary={<Time dateTime={notebook.attributes.createdAt} />}
         />
         <TagList tags={tags} />
         <IconButton onClick={onChangePinned} onKeyDown={this.onPinnedKeyDown}>

@@ -24,6 +24,7 @@
     "canvas": "^1.6.7",
     "compression": "^1.7.1",
     "connect-session-knex": "^1.4.0",
+    "date-fns": "^1.29.0",
     "escape-html": "^1.0.3",
     "express": "^4.16.2",
     "express-promise-router": "^3.0.0-rc.1",

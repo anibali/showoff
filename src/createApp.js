@@ -17,7 +17,6 @@ import frontendRoutes from './components/frontendRoutes';
 import controllerRoutes from './config/routes';
 import createStore from './redux/createStore';
 import simpleActionCreators from './redux/simpleActionCreators';
-import showoffConfig from './config/showoff';
 import ServerRoot from './components/ServerRoot';
 
 
@@ -68,15 +67,10 @@ export default () => Promise.resolve()
   .then(() => express())
   .then(configureAuth)
   .then((app) => {
-    const { uploadDir } = showoffConfig;
-
     const distDir = path.resolve(__dirname, '..', 'dist');
 
     // Serve up our static assets from 'dist'
     app.use('/assets/bundle', preferGzippedAssets, express.static(distDir));
-
-    // Serve uploaded static files for notebooks
-    app.use('/notebooks', express.static(path.join(uploadDir, 'notebooks')));
 
     const shouldCompress = (req, res) =>
       (req.headers['x-no-compression'] ? false : compression.filter(req, res));

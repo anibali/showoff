@@ -126,6 +126,13 @@ body {
   background-origin: content-box;
   box-sizing: border-box;
   cursor: se-resize;
+  /* Disable text selection */
+  -webkit-touch-callout: none; /* iOS Safari */
+  user-select: none;
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* IE/Edge */
 }
 
 .container {

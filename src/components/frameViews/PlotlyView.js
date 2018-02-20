@@ -2,7 +2,7 @@ import React from 'react';
 import { thaw } from 'icepick';
 import { withContentRect } from 'react-measure';
 import createPlotlyComponent from 'react-plotly.js/factory';
-import Plotly from 'plotly.js/dist/plotly-cartesian';
+import Plotly from '../../helpers/plotlyCustom';
 
 
 class PlotlyPlot extends React.PureComponent {
@@ -27,7 +27,7 @@ class PlotlyPlot extends React.PureComponent {
     const { PlotlyComponent } = this;
 
     return (
-      <div ref={this.props.measureRef} className="size100">
+      <div ref={this.props.measureRef} className="plotly-frame">
         <PlotlyComponent
           onInitialized={this.onInitialized}
           data={thaw(this.props.data)}

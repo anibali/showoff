@@ -103,6 +103,10 @@ module.exports = {
           { loader: 'url-loader', options: { limit: 10000 } },
         ]
       },
+      {
+        test: /\.js$/,
+        loader: 'ify-loader'
+      },
     ],
   },
   resolveLoader: {

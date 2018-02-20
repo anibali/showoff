@@ -22,7 +22,7 @@ services:
       - ./env/postgres.env
       - ./env/showoff.env
     links:
-      - devdb
+      - devdb:db
       - testdb
   devdb:
     image: postgres:9.5.7-alpine

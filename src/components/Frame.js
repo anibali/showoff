@@ -5,12 +5,29 @@ import { Resizable } from 'react-resizable';
 import renderFrameView from './frameViews/renderFrameView';
 
 
+const FrameContent = ({ frame, showContent }) => {
+  const content = showContent ? renderFrameView(frame) : null;
+  return (
+    <div className="frame-content">
+      {content}
+    </div>
+  );
+};
+
+
 class Frame extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = { showContent: true };
+  }
+
   render() {
     const onResize = (event, data) => {
       event.preventDefault();
       const { x, y } = this.props.frame.attributes;
       const { width, height } = data.size;
+      this.setState({ showContent: false });
       this.props.onDimensionChange(x, y, width, height, true);
     };
 
@@ -24,6 +41,7 @@ class Frame extends React.Component {
     const triggerDimensionChange = () => {
       const { x, y, width, height } = this.props.frame.attributes;
       this.props.onDimensionChange(x, y, width, height, false);
+      this.setState({ showContent: true });
     };
 
     const onMouseDown = (event) => {
@@ -69,9 +87,7 @@ class Frame extends React.Component {
         >
           <div className="frame" style={{ width, height }}>
             <div className="frame-handle">{title || '<untitled frame>'}</div>
-            <div className="frame-content">
-              {renderFrameView(frame)}
-            </div>
+            <FrameContent frame={frame} showContent={this.state.showContent} />
           </div>
         </Resizable>
       </Draggable>

@@ -17,7 +17,7 @@ Requires Docker Engine (17.09+) and Docker Compose (1.17.0+).
     ```
 3.  [Optional] Seed the database with some dummy data.
     ```sh
-    $ docker-compose run --rm web knex seed:run
+    $ docker-compose run --rm app knex seed:run
     ```
 
 ## Upgrading

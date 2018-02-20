@@ -2,6 +2,7 @@ build/
 node_modules/
 dist/
 .idea/
+.vscode/
 uploads/
 
 /env/*

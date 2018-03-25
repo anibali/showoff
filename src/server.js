@@ -21,6 +21,10 @@ createApp().then((app) => {
     global.wss = new WebSocketServer(new ws.Server({
       verifyClient: (info, done) => {
         sessionParser(info.req, {}, () => {
+          if(!info.req.session.passport) {
+            done(null);
+            return;
+          }
           done(info.req.session.passport.user);
         });
       },
